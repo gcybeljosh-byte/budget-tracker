@@ -104,7 +104,7 @@ Budget Tracker is a capstone-grade personal finance management system developed 
 Developer: Cybel Josh A. Gamido 
 Institution: University of Southern Mindanao (USM) 
 Contact: gcybeljosh@gmail.com 
-Version: v2.5.0 
+Version: v2.5.1 
 Stack: PHP, MySQL, Gemini AI, Bootstrap 5 
 
 ### System Highlights
@@ -113,5 +113,7 @@ Stack: PHP, MySQL, Gemini AI, Bootstrap 5
 3. Premium UI: Unified design system with stagger animations and page fades.
 4. Multi-Currency: Global support for PHP, USD, EUR, and custom symbols.
 5. Spending Intelligence: Real-time risk assessment and daily spending limits.
+6. AI Robustness: Fixed simulation mode response handling and hardened financial stats logic.
+7. Clean Architecture: Streamlined repository structure by removing redundant debug and utility scripts.
 
 Designed & Engineered by Cybel Josh A. Gamido — University of Southern Mindanao (USM).
