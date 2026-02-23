@@ -30,21 +30,24 @@ class AiHelper
             $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ?");
             $stmt->bind_param("iss", $this->user_id, $startDate, $endDate);
             $stmt->execute();
-            $expenses = $stmt->get_result()->fetch_row()[0];
+            $row = $stmt->get_result()->fetch_row();
+            $expenses = $row ? $row[0] : 0;
             $stmt->close();
 
             // Allowances
             $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date BETWEEN ? AND ?");
             $stmt->bind_param("iss", $this->user_id, $startDate, $endDate);
             $stmt->execute();
-            $allowance = $stmt->get_result()->fetch_row()[0];
+            $row = $stmt->get_result()->fetch_row();
+            $allowance = $row ? $row[0] : 0;
             $stmt->close();
 
             // Savings
             $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND date BETWEEN ? AND ?");
             $stmt->bind_param("iss", $this->user_id, $startDate, $endDate);
             $stmt->execute();
-            $savings = $stmt->get_result()->fetch_row()[0];
+            $row = $stmt->get_result()->fetch_row();
+            $savings = $row ? $row[0] : 0;
             $stmt->close();
         }
 
@@ -355,7 +358,8 @@ class AiHelper
         $prompt = $this->generateSystemPrompt();
 
         if (defined('AI_PROVIDER') && AI_PROVIDER === 'simulation') {
-            return $this->getSimulationResponse($userMessage);
+            $simResponse = $this->getSimulationResponse($userMessage);
+            return $this->processAiJsonOutput($simResponse, $userMessage);
         }
 
         $messages = [
@@ -515,11 +519,12 @@ class AiHelper
     {
         if (!isset($data['amount']) || $data['amount'] <= 0) return ['success' => false, 'message' => "Amount needed."];
 
-        $stmt = $this->conn->prepare("INSERT INTO savings (user_id, date, description, amount) VALUES (?, ?, ?, ?)");
+        $stmt = $this->conn->prepare("INSERT INTO savings (user_id, date, description, amount, source_type) VALUES (?, ?, ?, ?, ?)");
         $desc = $data['description'] ?? 'Savings';
         $date = $data['date'] ?? date('Y-m-d');
+        $source_type = $data['source_type'] ?? 'Cash';
 
-        $stmt->bind_param("isss", $this->user_id, $date, $desc, $data['amount']);
+        $stmt->bind_param("issds", $this->user_id, $date, $desc, $data['amount'], $source_type);
         $stmt->execute();
         $stmt->close();
         return ['success' => true];
