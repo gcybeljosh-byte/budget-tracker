@@ -104,7 +104,7 @@ Budget Tracker is a capstone-grade personal finance management system developed 
 Developer: Cybel Josh A. Gamido 
 Institution: University of Southern Mindanao (USM) 
 Contact: gcybeljosh@gmail.com 
-Version: v2.5.1 
+Version: v2.5.0
 Stack: PHP, MySQL, Gemini AI, Bootstrap 5 
 
 ### System Highlights

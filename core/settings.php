@@ -314,49 +314,54 @@ include '../includes/header.php';
                                     <h5 class="fw-bold mb-0 text-dark">General Objectives</h5>
                                 </div>
                                 <div class="p-4 bg-light rounded-4 border-start border-primary border-4 shadow-sm">
-                                    <p class="text-secondary mb-0 lh-lg" style="font-size: 0.95rem;">
-                                        To empower individuals with an <span class="text-primary fw-semibold">AI-driven financial intelligence ecosystem</span> that transforms complex data into proactive wealth-building strategies — focusing on automated bill management, precision goal tracking, and predictive spending insights.
-                                    </p>
+                                    <ul class="text-secondary mb-0 lh-lg list-unstyled" style="font-size: 0.95rem;">
+                                        <li>1. Provide a unified platform for managing allowances, expenses, savings, and historical statements.</li>
+                                        <li>2. Empower users with real-time monthly tracking through automated dashboard resets.</li>
+                                        <li>3. Proactively manage recurring costs with the Bills and Subscriptions Hub.</li>
+                                        <li>4. Deliver real-time daily spending intelligence via the Safe-to-Spend Calculator.</li>
+                                        <li>5. Ensure multi-level security with a 3-tier role system and session guards.</li>
+                                        <li>6. Deliver a premium, mobile-responsive experience with desktop-class animations.</li>
+                                    </ul>
                                 </div>
                             </div>
 
                             <!-- 2. Specific Objectives -->
                             <div class="mb-5">
-                                <h6 class="fw-bold text-uppercase text-muted mb-4 px-2" style="font-size: 0.75rem; letter-spacing: 1.5px;">Specific Objectives</h6>
+                                <h6 class="fw-bold text-uppercase text-muted mb-4 px-2" style="font-size: 0.75rem; letter-spacing: 1.5px;">Specific Outcomes</h6>
                                 <div class="row g-4">
                                     <div class="col-md-6">
                                         <div class="d-flex gap-3 p-2">
-                                            <div class="text-success fs-4 mt-1"><i class="fas fa-bullseye"></i></div>
+                                            <div class="text-success fs-4 mt-1"><i class="fas fa-check-circle"></i></div>
                                             <div>
-                                                <h6 class="fw-bold mb-1">Financial Goals</h6>
-                                                <p class="text-muted small mb-0">Set and achieve long-term targets through progress tracking, daily saving requirements, and intelligent balance monitoring.</p>
+                                                <h6 class="fw-bold mb-1">Financial Tracking</h6>
+                                                <p class="text-muted small mb-0">Full CRUD support for allowances, expenses, and savings with decimal-precise tracking.</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex gap-3 p-2">
-                                            <div class="text-primary fs-4 mt-1"><i class="fas fa-file-invoice-dollar"></i></div>
+                                            <div class="text-primary fs-4 mt-1"><i class="fas fa-tachometer-alt"></i></div>
                                             <div>
-                                                <h6 class="fw-bold mb-1">Bills & Subscriptions</h6>
-                                                <p class="text-muted small mb-0">Automated tracking for recurring payments with proactive due-date alerts and seamless expense synchronization.</p>
+                                                <h6 class="fw-bold mb-1">Real-time Dashboard</h6>
+                                                <p class="text-muted small mb-0">Monthly Resets for focused financial monitoring and immediate visibility of net performance.</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex gap-3 p-2">
-                                            <div class="text-info fs-4 mt-1"><i class="fas fa-chart-line"></i></div>
+                                            <div class="text-info fs-4 mt-1"><i class="fas fa-chart-pie"></i></div>
                                             <div>
-                                                <h6 class="fw-bold mb-1">Analytics & Insights</h6>
-                                                <p class="text-muted small mb-0">Deep-dive financial analysis featuring predictive spending forecasts, categorization trends, and interactive heatmaps.</p>
+                                                <h6 class="fw-bold mb-1">Budget Limits</h6>
+                                                <p class="text-muted small mb-0">Category-level caps with interactive progress tracking and AI-suggested limit plans.</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex gap-3 p-2">
-                                            <div class="text-warning fs-4 mt-1"><i class="fas fa-bell"></i></div>
+                                            <div class="text-warning fs-4 mt-1"><i class="fas fa-shield-alt"></i></div>
                                             <div>
-                                                <h6 class="fw-bold mb-1">Intelligent Notifications</h6>
-                                                <p class="text-muted small mb-0">Real-time alerts for upcoming bill deadlines, budget limit exceedances, and critical balance status.</p>
+                                                <h6 class="fw-bold mb-1">Hardened Security</h6>
+                                                <p class="text-muted small mb-0">Multi-tier role system, Google OAuth integration, and proactive session guards for data privacy.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -364,17 +369,17 @@ include '../includes/header.php';
                                         <div class="d-flex gap-3 p-2">
                                             <div class="fs-4 mt-1" style="color: #8b5cf6;"><i class="fas fa-robot"></i></div>
                                             <div>
-                                                <h6 class="fw-bold mb-1">AI Help Desk</h6>
-                                                <p class="text-muted small mb-0">Context-aware assistant grounded in your real financial data — offering advice on limits, expenses, and savings.</p>
+                                                <h6 class="fw-bold mb-1">Contextual AI</h6>
+                                                <p class="text-muted small mb-0">AI Help Desk with grounded data access for personalized financial guidance and reflections.</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex gap-3 p-2">
-                                            <div class="text-success fs-4 mt-1"><i class="fas fa-wallet"></i></div>
+                                            <div class="text-danger fs-4 mt-1"><i class="fas fa-calculator"></i></div>
                                             <div>
-                                                <h6 class="fw-bold mb-1">Financial Visibility</h6>
-                                                <p class="text-muted small mb-0">Unified real-time tracking of allowances, expenses, and balances across Cash, Bank, and Digital accounts.</p>
+                                                <h6 class="fw-bold mb-1">Spending Insight</h6>
+                                                <p class="text-muted small mb-0">Safe-to-Spend Calculator and automated bill tracking for smart daily spending intelligence.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -387,18 +392,22 @@ include '../includes/header.php';
                                 <div class="row g-3">
                                     <?php
                                     $features = [
-                                        ['bullseye',            'name' => 'Financial Goals'],
-                                        ['file-invoice-dollar', 'name' => 'Bills & Subscriptions'],
-                                        ['chart-line',          'name' => 'Analytics & Insights'],
-                                        ['robot',               'name' => 'AI Help Desk'],
-                                        ['shield-halved',       'name' => 'Safe-to-Spend'],
-                                        ['tachometer-alt',      'name' => 'Interactive Dashboard'],
-                                        ['receipt',             'name' => 'Expense Engine'],
-                                        ['hand-holding-dollar', 'name' => 'Allowance Tracking'],
-                                        ['piggy-bank',          'name' => 'Savings Allocation'],
-                                        ['book',                'name' => 'Smart Ledger'],
-                                        ['sliders-h',          'name' => 'Budget Limits'],
+                                        ['tachometer-alt',      'name' => 'Monthly Dashboard'],
+                                        ['layer-group',         'name' => 'Quick Access Hub'],
                                         ['file-invoice',        'name' => 'Monthly Statements'],
+                                        ['receipt',             'name' => 'Precision Expenses'],
+                                        ['magic',               'name' => 'AI Budget Planner'],
+                                        ['sliders-h',           'name' => 'Budget Limits'],
+                                        ['hand-holding-dollar', 'name' => 'Allowance Tracker'],
+                                        ['sync',                'name' => 'Savings Sync'],
+                                        ['file-invoice-dollar', 'name' => 'Bills Hub'],
+                                        ['shield-halved',       'name' => 'Safe-to-Spend'],
+                                        ['bullseye',            'name' => 'Goal Deep Dive'],
+                                        ['book',                'name' => 'Financial Journal'],
+                                        ['chart-line',          'name' => 'Expense Trends'],
+                                        ['calendar-alt',        'name' => 'Spending Heatmap'],
+                                        ['robot',               'name' => 'AI Assistant'],
+                                        ['lock',                'name' => 'Hardened Security'],
                                     ];
                                     foreach ($features as $f): ?>
                                         <div class="col-6 col-md-3">
