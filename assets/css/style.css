@@ -1037,3 +1037,144 @@ table.dataTable thead .sorting_desc:after {
     border-radius: 12px;
     padding: 16px;
 }
+
+/* ──────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN (BREAKPOINTS)
+   ────────────────────────────────────────────────────────── */
+
+/* ─── Tablets (Large) & Laptops (Small) — < 1200px ─── */
+@media (max-width: 1199px) {
+    :root {
+        --sidebar-width: 260px;
+    }
+}
+
+/* ─── Tablets — < 992px ─── */
+@media (max-width: 991px) {
+    :root {
+        --sidebar-width: 240px;
+        --page-px: 1.25rem;
+    }
+
+    #sidebar-wrapper {
+        box-shadow: 15px 0 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Move AI FAB up slightly to avoid overlapping with bottom bars on some mobiles */
+    .ai-fab {
+        bottom: 20px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        font-size: 1.2rem;
+    }
+}
+
+/* ─── Small Desktop / Tablet Transitions — < 768px ─── */
+@media (max-width: 767px) {
+    :root {
+        --sidebar-width: 280px; /* Full width for mobile overlay */
+        --page-px: 1rem;
+    }
+
+    #page-content-wrapper {
+        margin-left: 0 !important;
+    }
+
+    .navbar h2 {
+        font-size: 1.15rem;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Allow horizontal scrolling on all tables by default on mobile */
+    .table-responsive {
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Stack stat cards in dashboard more aggressively if Bootstrap grid isn't doing it */
+    .row.g-4 > [class*="col-"] {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ─── Mobile — < 576px ─── */
+@media (max-width: 575px) {
+    :root {
+        --page-px: 0.85rem;
+    }
+
+    .section-header h5 {
+        font-size: 1.1rem;
+    }
+
+    .card-title {
+        font-size: 0.7rem;
+    }
+
+    h2, .h2 {
+        font-size: 1.5rem !important;
+    }
+
+    .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    /* Quick Access Hub Icons */
+    .row-cols-2 > .col {
+        width: 50%;
+    }
+
+    /* Wallet cards stacking */
+    .col-md-4.border-end {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-dim);
+    }
+
+    /* AI Chat Widget Mobile Tweaks */
+    #aiChatWidget {
+        width: 95% !important;
+        right: 2.5% !important;
+        bottom: 80px !important;
+        max-height: 70vh !important;
+    }
+    
+    /* DataTable Mobile Pagination */
+    .dataTables_wrapper .dataTables_paginate {
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input:focus {
+        width: 100%;
+    }
+}
+
+/* ─── Portrait Phones — < 400px ─── */
+@media (max-width: 399px) {
+    .navbar h2 {
+        font-size: 1rem;
+    }
+    
+    .h4 {
+        font-size: 1.15rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Stack Quick Access Hub even more */
+    .row-cols-2 > .col {
+        width: 100%;
+    }
+}

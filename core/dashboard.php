@@ -445,7 +445,7 @@ include '../includes/header.php';
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right',
+                            position: window.innerWidth < 768 ? 'bottom' : 'right',
                             labels: {
                                 color: textColor,
                                 font: {
