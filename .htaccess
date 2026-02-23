@@ -1,0 +1,27 @@
+# Prevent Directory Listing
+Options -Indexes
+
+# Protect Sensitive Files (Apache 2.4 syntax)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(config|db)\.php$">
+    Require all denied
+</FilesMatch>
+
+# Block access to logs, SQL, and MD files
+<FilesMatch "\.(log|md|sql)$">
+    Require all denied
+</FilesMatch>
+
+# Protect includes directory using mod_rewrite for better compatibility
+RewriteEngine On
+
+# Block access to the includes and .git folders
+RewriteRule ^includes/ - [F,L]
+RewriteRule ^\.git/ - [F,L]
+
+# Prevent directory browsing for the api folder (already covered by Options -Indexes)
+# But we can add a rewrite rule to be sure
+# RewriteRule ^api/$ - [F,L]

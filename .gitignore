@@ -1,0 +1,25 @@
+# Composer
+vendor/
+
+# Database / Local Config
+includes/config.php
+includes/db.php
+database.sql
+
+# Uploads & Logs
+uploads/*
+!uploads/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.zip
+*.rar
+
+# Git
+.git/

@@ -1,0 +1,2 @@
+# Strict protection for includes directory using Apache 2.4 syntax
+Require all denied
