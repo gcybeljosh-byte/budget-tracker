@@ -1,0 +1,20 @@
+{
+  "name": "budget-tracker",
+  "version": "2.5.0",
+  "description": "AI-Powered Budget Tracking System with expense categorization and personalized financial advice.",
+  "main": "index.php",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "php -S localhost:8000"
+  },
+  "keywords": [
+    "budget",
+    "tracker",
+    "ai",
+    "finance",
+    "php",
+    "gemini"
+  ],
+  "author": "",
+  "license": "ISC"
+}
