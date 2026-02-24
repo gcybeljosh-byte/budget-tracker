@@ -32,10 +32,10 @@ define('AI_MAINTENANCE_MODE', true);
  * 
  * Do NOT hardcode your real key below if you plan to share this code.
  */
-// Load local secrets if available (uses realpath to avoid include_once path-caching)
-$__localCfg = realpath(__DIR__ . '/config.local.php');
-if ($__localCfg && file_exists($__localCfg)) {
-    require_once $__localCfg;
+// Load local secrets if available
+$__localCfgPath = __DIR__ . DIRECTORY_SEPARATOR . 'config.local.php';
+if (file_exists($__localCfgPath)) {
+    require_once $__localCfgPath;
 }
 
 // Resolve API key: local file > environment variable > empty

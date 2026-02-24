@@ -16,7 +16,7 @@
         <!-- Superadmin: AI Status Banner -->
         <?php
         $__k = defined('AI_API_KEY') ? AI_API_KEY : '';
-        $__lf = __DIR__ . '/config.local.php';
+        $__lf = __DIR__ . DIRECTORY_SEPARATOR . 'config.local.php';
         if ($__k && strlen($__k) > 10) {
             $__ks = '&#x2705; Key OK (' . substr($__k, 0, 8) . '...)';
         } elseif (!file_exists($__lf)) {
