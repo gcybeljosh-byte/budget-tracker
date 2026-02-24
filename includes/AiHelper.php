@@ -718,7 +718,13 @@ class AiHelper
         }
 
 
-        $ch = curl_init($url);
+        // USE PROXY IF DEFINED
+        $finalUrl = $url;
+        if (defined('AI_PROXY_URL') && !empty(AI_PROXY_URL)) {
+            $finalUrl = AI_PROXY_URL;
+        }
+
+        $ch = curl_init($finalUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));

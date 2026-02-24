@@ -51,6 +51,12 @@ define('AI_API_KEY', 'AIzaSyBxDe2cpzoliPWBsZAnP-IpPMDft8fD0GQ');
  */
 define('AI_MODEL', 'gemini-1.5-flash');
 
+/**
+ * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree)
+ * If defined, the PHP app will talk to this URL instead of Google directly.
+ */
+define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
+
 // ============================================================================
 // APP CONFIGURATION
 // ============================================================================

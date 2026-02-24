@@ -63,6 +63,35 @@ app.post('/generate', async (req, res) => {
     }
 });
 
+/**
+ * POST /proxy
+ * True pass-through for the full Gemini payload.
+ */
+app.post('/proxy', async (req, res) => {
+    try {
+        if (!process.env.GEMINI_API_KEY) {
+            return res.status(500).json({ error: "GEMINI_API_KEY is not configured" });
+        }
+
+        const API_KEY = process.env.GEMINI_API_KEY;
+        const MODEL = "gemini-1.5-flash";
+        const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+        // Forward the exact body receive from PHP
+        const response = await axios.post(URL, req.body, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('Proxy Error:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json(
+            error.response ? error.response.data : { error: "Proxy connection failed" }
+        );
+    }
+});
+
 // 5. Start the Server
 app.listen(PORT, () => {
     console.log(`\n🚀 Server is running on port ${PORT}`);
