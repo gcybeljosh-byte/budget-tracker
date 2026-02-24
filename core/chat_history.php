@@ -294,7 +294,7 @@ ksort($groupedMessages);
             cancelButtonColor: '#d33'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('<?php echo SITE_URL; ?>api/conversations.php', {
+                fetch('<?php echo SITE_URL; ?>api/chat_history.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
