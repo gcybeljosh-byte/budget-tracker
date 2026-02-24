@@ -16,7 +16,7 @@ app.use(express.json()); // Allow JSON parsing in request bodies
 // 3. Initialize Google Gemini AI
 // Ensure you set GEMINI_API_KEY in your Render.com environment variables
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 // 4. API Endpoints
 
@@ -61,7 +61,7 @@ app.post('/proxy', async (req, res) => {
         }
 
         const API_KEY = process.env.GEMINI_API_KEY;
-        const MODEL = "gemini-1.5-flash";
+        const MODEL = "gemini-2.0-flash";
         const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         // Forward using native Node fetch

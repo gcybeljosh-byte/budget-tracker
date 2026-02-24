@@ -49,7 +49,7 @@ define('AI_API_KEY', 'AIzaSyBxDe2cpzoliPWBsZAnP-IpPMDft8fD0GQ');
  * 
  * Recommended for Budget Tracking: 'gpt-4o-mini' (best balance of cost/quality)
  */
-define('AI_MODEL', 'gemini-1.5-flash');
+define('AI_MODEL', 'gemini-2.0-flash');
 
 /**
  * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree)
