@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                         <div class="d-flex justify-content-center">
                             <div id="g_id_onload"
-                                data-client_id="818167411162-1ur80fs01jqva8ooe4tqssg15lk4tt6o.apps.googleusercontent.com"
+                                data-client_id="<?php echo GOOGLE_CLIENT_ID; ?>"
                                 data-callback="handleCredentialResponse"
                                 data-auto_prompt="false">
                             </div>

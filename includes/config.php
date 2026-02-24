@@ -57,6 +57,13 @@ define('AI_MODEL', 'gemini-1.5-flash');
  */
 define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
 
+/**
+ * GOOGLE CONFIGURATION
+ * Used for Sign-In with Google functionality.
+ * Link: https://console.cloud.google.com/apis/credentials
+ */
+define('GOOGLE_CLIENT_ID', '818167411162-1ur80fs01jqva8ooe4tqssg15lk4tt6o.apps.googleusercontent.com');
+
 // ============================================================================
 // APP CONFIGURATION
 // ============================================================================
@@ -65,8 +72,22 @@ define('APP_NAME', 'Budget Tracker');
 define('APP_VERSION', '2.5.0');
 
 // Path Configuration
-// ⚠️ PRODUCTION: Hardcoded for live hosting (InfinityFree)
-define('SITE_URL', 'https://budget-tracking-ai.great-site.net/');
+if (!defined('SITE_URL')) {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+
+    // Auto-detect production vs local
+    if (strpos($host, 'onrender.com') !== false || strpos($host, 'infinityfree') !== false || strpos($host, 'great-site.net') !== false) {
+        define('SITE_URL', $protocol . "://" . $host . "/");
+    } else {
+        // Local fallback
+        $scriptPath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        $rootPath = preg_replace('/(\/api|\/core|\/includes|\/auth)$/', '', rtrim($scriptPath, '/'));
+        $baseUrl = $protocol . "://" . $host . $rootPath . "/";
+        $baseUrl = preg_replace('/([^:])\/\//', '$1/', $baseUrl);
+        define('SITE_URL', $baseUrl);
+    }
+}
 define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 
 // ============================================================================
