@@ -51,10 +51,15 @@ define('AI_API_KEY', $finalKey ?: ''); // Keys are now loaded from Env Vars or c
 define('AI_MODEL', 'gemini-2.0-flash');
 
 /**
- * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree)
- * If defined, the PHP app will talk to this URL instead of Google directly.
+ * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree).
+ * Only activated on known production environments.
+ * Local development connects directly to Google Gemini (no proxy needed).
  */
-define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
+$_host = $_SERVER['HTTP_HOST'] ?? '';
+$_isProduction = strpos($_host, 'onrender.com') !== false
+    || strpos($_host, 'infinityfree') !== false
+    || strpos($_host, 'great-site.net') !== false;
+define('AI_PROXY_URL', $_isProduction ? 'https://budget-tracker-x42m.onrender.com/proxy' : '');
 
 /**
  * GOOGLE CONFIGURATION
