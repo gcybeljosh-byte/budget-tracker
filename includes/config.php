@@ -73,12 +73,14 @@ define('APP_VERSION', '2.5.0');
 
 // Path Configuration
 if (!defined('SITE_URL')) {
-    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+    $is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    $protocol = $is_https ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'] ?? '';
 
     // Auto-detect production vs local
     if (strpos($host, 'onrender.com') !== false || strpos($host, 'infinityfree') !== false || strpos($host, 'great-site.net') !== false) {
-        // Force HTTPS for known production environments
+        // Enforce HTTPS for known production environments
         $baseUrl = "https://" . $host . "/";
     } else {
         // Local fallback

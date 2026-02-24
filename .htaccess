@@ -19,6 +19,11 @@ Options -Indexes
 RewriteEngine On
 RewriteBase /
 
+# Force HTTPS
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Block access to the includes and .git folders
 RewriteRule ^includes/ - [F,L]
 RewriteRule ^\.git/ - [F,L]

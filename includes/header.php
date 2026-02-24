@@ -2,6 +2,17 @@
 <html lang="en">
 
 <head>
+    <?php
+    // Enforce HTTPS Redirect (InfinityFree / Render)
+    $is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+    if (!$is_https && strpos($_SERVER['HTTP_HOST'], 'localhost') === false) {
+        $https_url = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        header("Location: " . $https_url);
+        exit;
+    }
+    ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php
