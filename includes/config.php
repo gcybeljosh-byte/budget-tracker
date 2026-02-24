@@ -33,7 +33,8 @@ if (file_exists(__DIR__ . '/config.local.php')) {
 }
 
 $envKey = getenv('AI_API_KEY') ?: (getenv('GEMINI_API_KEY') ?: ($_SESSION['AI_API_KEY'] ?? null));
-$finalKey = defined('AI_API_KEY_LOCAL') ? AI_API_KEY_LOCAL : $envKey;
+$localKey = (defined('AI_API_KEY_LOCAL') && AI_API_KEY_LOCAL !== 'YOUR_KEY_HERE') ? AI_API_KEY_LOCAL : null;
+$finalKey = $localKey ?: $envKey;
 
 define('AI_API_KEY', $finalKey ?: ''); // Keys are now loaded from Env Vars or config.local.php
 

@@ -722,7 +722,10 @@ class AiHelper
         // USE PROXY IF DEFINED
         $finalUrl = $url;
         if (defined('AI_PROXY_URL') && !empty(AI_PROXY_URL)) {
-            $finalUrl = AI_PROXY_URL;
+            // Append key and model to the proxy URL to ensure the proxy can forward them correctly
+            $proxyBase = AI_PROXY_URL;
+            $separator = (strpos($proxyBase, '?') === false) ? '?' : '&';
+            $finalUrl = "{$proxyBase}{$separator}key={$apiKey}&model={$model}";
         }
 
         $ch = curl_init($finalUrl);

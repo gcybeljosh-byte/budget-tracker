@@ -56,12 +56,13 @@ app.post('/generate', async (req, res) => {
  */
 app.post('/proxy', async (req, res) => {
     try {
-        if (!process.env.GEMINI_API_KEY) {
+        const API_KEY = req.query.key || process.env.GEMINI_API_KEY;
+        const MODEL = req.query.model || "gemini-2.0-flash";
+
+        if (!API_KEY) {
             return res.status(500).json({ error: "GEMINI_API_KEY is not configured" });
         }
 
-        const API_KEY = process.env.GEMINI_API_KEY;
-        const MODEL = "gemini-2.0-flash";
         const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         // Forward using native Node fetch
