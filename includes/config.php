@@ -34,27 +34,15 @@ if (file_exists(__DIR__ . '/config.local.php')) {
 
 $envKey = getenv('AI_API_KEY') ?: (getenv('GEMINI_API_KEY') ?: ($_SESSION['AI_API_KEY'] ?? null));
 $localKey = (defined('AI_API_KEY_LOCAL') && AI_API_KEY_LOCAL !== 'YOUR_KEY_HERE') ? AI_API_KEY_LOCAL : null;
-$finalKey = $localKey ?: $envKey;
+$fallbackKey = 'AIzaSyCgW5Fw-C8GI1a6vxXNUQEohN5zha3oh3k';
+$finalKey = $localKey ?: ($envKey ?: $fallbackKey);
 
 define('AI_API_KEY', $finalKey ?: ''); // Keys are now loaded from Env Vars or config.local.php
 
 /**
  * AI_MODEL: Specify which AI model to use
  * 
- * OpenAI Models (AI_PROVIDER = 'openai' or 'llm'):
- * - 'gpt-4o'           : Latest GPT-4 Optimized (Recommended, fast & smart)
- * - 'gpt-4o-mini'      : Faster, cheaper GPT-4 variant (Good for budget apps)
- * - 'gpt-4-turbo'      : GPT-4 Turbo (High quality, more expensive)
- * - 'gpt-4'            : Standard GPT-4 (High quality, expensive)
- * - 'gpt-3.5-turbo'    : Older, cheaper model (Still capable)
- * 
- * Gemini Models (AI_PROVIDER = 'gemini'):
- * - 'gemini-1.5-flash'       : Current, fast, free tier available (Recommended)
- * - 'gemini-1.5-pro'         : More capable for complex tasks
- * - 'gemini-2.0-flash'       : Latest, fastest
- * - 'gemini-2.0-pro'         : Most advanced (Deep reasoning)
- * 
- * Recommended for Budget Tracking: 'gpt-4o-mini' (best balance of cost/quality)
+ * Recommended for Budget Tracking: 'gemini-2.0-flash'
  */
 define('AI_MODEL', 'gemini-2.0-flash');
 
@@ -62,8 +50,7 @@ define('AI_MODEL', 'gemini-2.0-flash');
  * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree)
  * If defined, the PHP app will talk to this URL instead of Google directly.
  */
-// define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
-define('AI_PROXY_URL', ''); // Temporarily disabled for testing direct connection
+define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
 
 /**
  * GOOGLE CONFIGURATION

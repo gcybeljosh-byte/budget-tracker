@@ -13,20 +13,6 @@ if (!isset($_SESSION['id'])) {
     exit;
 }
 
-if (empty(AI_API_KEY)) {
-    $debug = [
-        'dir' => __DIR__,
-        'includes_dir' => realpath(__DIR__ . '/../includes'),
-        'local_exists' => file_exists(__DIR__ . '/../includes/config.local.php'),
-        'local_defined' => defined('AI_API_KEY_LOCAL'),
-        'key_val_len' => defined('AI_API_KEY_LOCAL') ? strlen(AI_API_KEY_LOCAL) : 0,
-        'config_path' => __DIR__ . '/../includes/config.php'
-    ];
-    $debug_str = json_encode($debug);
-    echo json_encode(['success' => false, 'message' => "System Error: AI_API_KEY is empty. Debug: $debug_str"]);
-    exit;
-}
-
 $user_id = $_SESSION['id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
