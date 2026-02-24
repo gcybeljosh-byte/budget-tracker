@@ -25,7 +25,11 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
  * Useful for verifying if the server is alive after deployment
  */
 app.get('/', (req, res) => {
-    res.json({ status: "alive", service: "Gemini AI Backend" });
+    res.json({
+        status: "alive",
+        service: "Gemini AI Backend",
+        apiKeyConfigured: !!process.env.GEMINI_API_KEY
+    });
 });
 
 /**

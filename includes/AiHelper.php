@@ -752,7 +752,15 @@ class AiHelper
             return $json['candidates'][0]['content']['parts'][0]['text'];
         }
 
-        $apiErrorMessage = $json['error']['message'] ?? 'Unknown Gemini API Error';
+        $apiErrorMessage = 'Unknown Gemini API Error';
+        if (isset($json['error']['message'])) {
+            $apiErrorMessage = $json['error']['message'];
+        } elseif (isset($json['error']) && is_string($json['error'])) {
+            $apiErrorMessage = $json['error'];
+        } elseif (isset($json['message'])) {
+            $apiErrorMessage = $json['message'];
+        }
+
         return json_encode([
             'response_message' => "Gemini API Error: $apiErrorMessage (HTTP $http_code)",
             'actions' => []
