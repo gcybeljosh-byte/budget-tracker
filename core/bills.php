@@ -196,7 +196,74 @@ include '../includes/header.php';
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<!-- Add Bill Modal -->
+<div class="modal fade" id="addBillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-bottom-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">Add Bill / Subscription</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-3">
+                <form id="addBillForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Title / Name</label>
+                        <input type="text" class="form-control rounded-3" id="billTitle" placeholder="e.g. Netflix, Electricity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?></span>
+                            <input type="number" class="form-control rounded-3 border-start-0" id="billAmount" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase">Next Due Date</label>
+                            <input type="date" class="form-control rounded-3" id="billDueDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase">Frequency</label>
+                            <select class="form-select rounded-3" id="billFrequency">
+                                <option value="monthly" selected>Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase">Category</label>
+                            <select class="form-select rounded-3" id="billCategory">
+                                <option value="Utilities" selected>Utilities</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Food">Food &amp; Dining</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Housing">Housing</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase">Payment Method</label>
+                            <select class="form-select rounded-3" id="billSourceType">
+                                <option value="Cash" selected>Cash</option>
+                                <option value="GCash">GCash</option>
+                                <option value="Maya">Maya</option>
+                                <option value="Bank">Bank</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
+                            <i class="fas fa-plus me-2"></i>Add Bill
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -591,3 +658,5 @@ include '../includes/header.php';
         <?php endif; ?>
     });
 </script>
+
+<?php include '../includes/footer.php'; ?>
