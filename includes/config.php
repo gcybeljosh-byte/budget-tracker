@@ -50,7 +50,7 @@ define('AI_API_KEY', $__finalKey);
  * 
  * Recommended for Budget Tracking: 'gemini-2.0-flash'
  */
-define('AI_MODEL', 'gemini-2.0-flash');
+define('AI_MODEL', 'gemini-1.5-flash');
 
 /**
  * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree).
