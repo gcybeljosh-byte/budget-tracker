@@ -675,7 +675,7 @@ class AiHelper
     private function callLLM($messages)
     {
         $apiKey = defined('AI_API_KEY') ? AI_API_KEY : '';
-        $model = defined('AI_MODEL') ? AI_MODEL : 'gemini-2.0-flash';
+        $model = defined('AI_MODEL') ? AI_MODEL : 'gemini-latest-flash';
 
         if (defined('AI_PROVIDER') && AI_PROVIDER === 'gemini') {
             return $this->callGemini($apiKey, $model, $messages);
