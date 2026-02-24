@@ -214,3 +214,65 @@
             <audio id="notificationSound" preload="auto">
                 <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
             </audio>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 MOBILE BOTTOM NAVIGATION BAR
+                 Visible only on mobile (≤576px) via CSS
+                 ═══════════════════════════════════════════════════════ -->
+            <?php if ($_SESSION['role'] !== 'superadmin'): ?>
+                <nav id="mobile-bottom-nav" aria-label="Mobile Navigation">
+                    <a href="<?php echo SITE_URL; ?>core/dashboard.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'dashboard.php' && $currentDir == 'core') ? 'active' : ''; ?>">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="<?php echo SITE_URL; ?>core/expenses.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'expenses.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-receipt"></i>
+                        <span>Expenses</span>
+                    </a>
+                    <a href="<?php echo SITE_URL; ?>core/savings.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'savings.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-piggy-bank"></i>
+                        <span>Savings</span>
+                    </a>
+                    <a href="<?php echo SITE_URL; ?>core/bills.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'bills.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Bills</span>
+                    </a>
+                    <a href="<?php echo SITE_URL; ?>core/profile.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                    </a>
+                </nav>
+            <?php endif; ?>
+
+            <script>
+                // Sidebar overlay — close sidebar when backdrop is tapped
+                (function() {
+                    const overlay = document.getElementById('sidebar-overlay');
+                    const toggle = document.getElementById('menu-toggle');
+                    if (!overlay || !toggle) return;
+
+                    overlay.addEventListener('click', function() {
+                        document.body.classList.remove('sb-sidenav-toggled');
+                        overlay.classList.remove('active');
+                    });
+
+                    // Also wire the overlay's active class to the toggle button
+                    // (works alongside the existing toggleWrapper script)
+                    const observer = new MutationObserver(function() {
+                        if (document.body.classList.contains('sb-sidenav-toggled')) {
+                            overlay.classList.add('active');
+                        } else {
+                            overlay.classList.remove('active');
+                        }
+                    });
+                    observer.observe(document.body, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
+                })();
+            </script>

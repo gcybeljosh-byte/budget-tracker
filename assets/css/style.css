@@ -1039,142 +1039,415 @@ table.dataTable thead .sorting_desc:after {
 }
 
 /* ──────────────────────────────────────────────────────────
-   RESPONSIVE DESIGN (BREAKPOINTS)
+   RESPONSIVE DESIGN — COMPREHENSIVE BREAKPOINTS
+   Mobile-first approach: sidebar drawer on tablet & mobile,
+   bottom nav on phones, improved card/table layouts everywhere
    ────────────────────────────────────────────────────────── */
 
-/* ─── Tablets (Large) & Laptops (Small) — < 1200px ─── */
+/* ─── Sidebar Overlay Backdrop ─── */
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.35s var(--ios-easing);
+}
+
+#sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ─── Mobile Bottom Navigation Bar ─── */
+#mobile-bottom-nav {
+    display: none;
+}
+
+/* ─── XL / Large Desktop — ≥ 1200px ─── */
+/* Default: sidebar is always visible, full width */
+
+/* ─── Large Tablet / Small Laptop — ≤ 1199px ─── */
 @media (max-width: 1199px) {
     :root {
-        --sidebar-width: 260px;
+        --sidebar-width: 255px;
     }
 }
 
-/* ─── Tablets — < 992px ─── */
+/* ─── Tablet Portrait / Landscape — ≤ 991px ─── */
+/* Sidebar becomes a slide-in drawer (overlay), same toggle as mobile */
 @media (max-width: 991px) {
     :root {
-        --sidebar-width: 240px;
-        --page-px: 1.25rem;
+        --sidebar-width: 280px;
+        --page-px: 1.15rem;
     }
 
+    /* Sidebar: always hidden by default, slides in on toggle */
     #sidebar-wrapper {
-        box-shadow: 15px 0 30px rgba(0, 0, 0, 0.1);
+        transform: translateX(calc(-1 * var(--sidebar-width)));
+        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.14);
+        z-index: 1001;
     }
 
-    /* Move AI FAB up slightly to avoid overlapping with bottom bars on some mobiles */
-    .ai-fab {
-        bottom: 20px;
-        right: 20px;
-        width: 52px;
-        height: 52px;
-        font-size: 1.2rem;
-    }
-}
-
-/* ─── Small Desktop / Tablet Transitions — < 768px ─── */
-@media (max-width: 767px) {
-    :root {
-        --sidebar-width: 280px; /* Full width for mobile overlay */
-        --page-px: 1rem;
+    /* When toggled open on tablet */
+    body.sb-sidenav-toggled #sidebar-wrapper {
+        transform: translateX(0);
     }
 
+    /* Page content takes full width — no sidebar offset */
     #page-content-wrapper {
         margin-left: 0 !important;
     }
 
-    .navbar h2 {
-        font-size: 1.15rem;
+    /* Overlay visible when sidebar open */
+    body.sb-sidenav-toggled #sidebar-overlay {
+        display: block;
+        opacity: 1;
     }
 
+    /* AI FAB: move slightly to avoid tablet chrome */
+    .ai-fab {
+        bottom: 22px;
+        right: 22px;
+        width: 54px;
+        height: 54px;
+        font-size: 1.25rem;
+    }
+
+    /* Stat cards: 2-column grid on tablet */
+    .col-xl-3.col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    /* Notification dropdown — prevent overflow on tablet */
+    .dropdown-menu[style*="width: 320px"] {
+        width: 290px !important;
+    }
+
+    /* Dashboard quick access — 4 columns on tablet */
+    .row-cols-md-4 > .col {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    /* Card body slightly reduced */
     .card-body {
         padding: 1.25rem;
     }
 
-    /* Allow horizontal scrolling on all tables by default on mobile */
+    /* Tables scroll within card */
+    .table-responsive {
+        border-radius: 0.875rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Modal: centered and slightly narrower */
+    .modal-dialog {
+        max-width: 92%;
+        margin: 1.5rem auto;
+    }
+}
+
+/* ─── Mobile Landscape / Large Phone — ≤ 767px ─── */
+@media (max-width: 767px) {
+    :root {
+        --sidebar-width: 285px;
+        --page-px: 1rem;
+    }
+
+    /* Reset from Bootstrap's tablet offset (already 0 on tablet above) */
+    #page-content-wrapper {
+        margin-left: 0 !important;
+    }
+
+    /* Navbar: compact title */
+    .navbar h2 {
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 55vw;
+    }
+
+    .navbar {
+        padding: 0.75rem var(--page-px);
+    }
+
+    /* Cards: reduced padding */
+    .card-body {
+        padding: 1.15rem;
+    }
+
+    /* Stat KPI cards: single column on small devices */
+    .col-md-3,
+    .col-md-4,
+    .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Row gap reduction */
+    .row.g-4 {
+        --bs-gutter-y: 0.85rem;
+        --bs-gutter-x: 0.85rem;
+    }
+
+    /* Tables */
     .table-responsive {
         border-radius: 0.75rem;
         margin-bottom: 1rem;
     }
 
-    /* Stack stat cards in dashboard more aggressively if Bootstrap grid isn't doing it */
-    .row.g-4 > [class*="col-"] {
-        margin-bottom: 0.5rem;
+    /* Table text slightly smaller */
+    .table tbody td,
+    .table thead th {
+        font-size: 0.82rem;
+        padding: 0.75rem 0.75rem;
     }
 }
 
-/* ─── Mobile — < 576px ─── */
+/* ─── Mobile Portrait — ≤ 575px ─── */
 @media (max-width: 575px) {
     :root {
-        --page-px: 0.85rem;
+        --page-px: 0.9rem;
     }
 
-    .section-header h5 {
-        font-size: 1.1rem;
+    /* Body: extra padding at bottom to clear mobile bottom nav */
+    body {
+        padding-bottom: 70px;
+    }
+
+    /* ─ Bottom Navigation Bar ─ */
+    #mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 62px;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-top: 1px solid var(--border-dim);
+        z-index: 998;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 0.5rem;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        color: var(--text-muted);
+        font-size: 0.6rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        transition: color 0.2s ease, background 0.2s ease;
+        flex: 1;
+        max-width: 72px;
+    }
+
+    .bottom-nav-item i {
+        font-size: 1.15rem;
+        line-height: 1;
+        transition: transform 0.2s var(--ios-spring);
+    }
+
+    .bottom-nav-item:hover,
+    .bottom-nav-item.active {
+        color: var(--primary-color);
+        background: rgba(0, 122, 255, 0.07);
+    }
+
+    .bottom-nav-item.active i {
+        transform: scale(1.15);
+    }
+
+    /* ─ Sidebar on mobile ─ */
+    #sidebar-wrapper {
+        transform: translateX(calc(-1 * var(--sidebar-width)));
+    }
+
+    body.sb-sidenav-toggled #sidebar-wrapper {
+        transform: translateX(0);
+    }
+
+    body.sb-sidenav-toggled #sidebar-overlay {
+        display: block;
+        opacity: 1;
+    }
+
+    /* ─ AI FAB: above bottom nav ─ */
+    .ai-fab {
+        bottom: 75px;
+        right: 18px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.15rem;
+    }
+
+    /* ─ AI Chat Widget ─ */
+    #aiChatWidget {
+        width: 96% !important;
+        right: 2% !important;
+        bottom: 82px !important;
+        max-height: 68vh !important;
+        border-radius: 1.15rem !important;
+    }
+
+    /* ─ Cards ─ */
+    .card-body {
+        padding: 1rem;
     }
 
     .card-title {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
+    }
+
+    /* ─ Typography ─ */
+    .section-header h5 {
+        font-size: 1.05rem;
     }
 
     h2, .h2 {
-        font-size: 1.5rem !important;
+        font-size: 1.45rem !important;
     }
 
+    /* ─ Buttons ─ */
     .btn {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.85rem;
+        padding: 0.48rem 0.8rem;
+        font-size: 0.84rem;
     }
 
-    /* Quick Access Hub Icons */
+    /* ─ Quick Access Hub ─ */
     .row-cols-2 > .col {
         width: 50%;
     }
 
-    /* Wallet cards stacking */
+    /* ─ Wallet/savings card borders stack fix ─ */
     .col-md-4.border-end {
         border-right: none !important;
         border-bottom: 1px solid var(--border-dim);
     }
 
-    /* AI Chat Widget Mobile Tweaks */
-    #aiChatWidget {
-        width: 95% !important;
-        right: 2.5% !important;
-        bottom: 80px !important;
-        max-height: 70vh !important;
+    /* ─ Tables ─ */
+    .table tbody td,
+    .table thead th {
+        font-size: 0.78rem;
+        padding: 0.65rem 0.6rem;
+        white-space: nowrap;
     }
-    
-    /* DataTable Mobile Pagination */
+
+    /* ─ DataTables ─ */
     .dataTables_wrapper .dataTables_paginate {
         justify-content: center;
+        flex-wrap: wrap;
         margin-top: 0.5rem;
     }
-    
-    .dataTables_wrapper .dataTables_filter input {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-    
+
+    .dataTables_wrapper .dataTables_filter input,
     .dataTables_wrapper .dataTables_filter input:focus {
         width: 100%;
     }
+
+    .dataTables_wrapper .dataTables_filter {
+        display: block;
+        text-align: left;
+    }
+
+    .dataTables_wrapper .dataTables_filter label {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* ─ Notification dropdown ─ */
+    .dropdown-menu[aria-labelledby="notificationDropdown"] {
+        width: calc(100vw - 1.8rem) !important;
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    /* ─ Modals: nearly full-screen ─ */
+    .modal-dialog {
+        max-width: 100%;
+        margin: 0.5rem auto;
+    }
+
+    .modal-content {
+        border-radius: 1.25rem !important;
+    }
+
+    .modal-body {
+        padding: 1.15rem !important;
+    }
+
+    /* ─ Navbar ─ */
+    .navbar h2 {
+        font-size: 1.05rem;
+        max-width: 50vw;
+    }
+
+    /* ─ Stat grid: all single-column ─ */
+    [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* But keep 2-col for quick access hub */
+    .row-cols-2 > .col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
 }
 
-/* ─── Portrait Phones — < 400px ─── */
+/* ─── Portrait Phones — ≤ 399px ─── */
 @media (max-width: 399px) {
+    :root {
+        --page-px: 0.75rem;
+    }
+
     .navbar h2 {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
-    
-    .h4 {
-        font-size: 1.15rem !important;
+
+    .h4, .h4 {
+        font-size: 1.1rem !important;
     }
-    
+
     .card-body {
-        padding: 1rem;
+        padding: 0.85rem;
     }
-    
-    /* Stack Quick Access Hub even more */
+
+    /* Quick Hub: single column on very small phones */
     .row-cols-2 > .col {
-        width: 100%;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    #mobile-bottom-nav {
+        height: 58px;
+    }
+
+    .bottom-nav-item {
+        font-size: 0.55rem;
+        padding: 0.35rem 0.4rem;
+    }
+
+    .bottom-nav-item i {
+        font-size: 1rem;
     }
 }
