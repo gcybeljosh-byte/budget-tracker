@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // 1. Configure Environment Variables
@@ -23,7 +22,6 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /**
  * Health Check Endpoint
- * Useful for verifying if the server is alive after deployment
  */
 app.get('/', (req, res) => {
     res.json({
@@ -35,42 +33,26 @@ app.get('/', (req, res) => {
 
 /**
  * POST /generate
- * Accepts: { "prompt": "your question here" }
- * Returns: { "response": "AI generated answer" }
+ * Standard generation using SDK
  */
 app.post('/generate', async (req, res) => {
     try {
         const { prompt } = req.body;
+        if (!prompt) return res.status(400).json({ error: "Missing 'prompt'" });
+        if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: "API Key not set" });
 
-        if (!prompt) {
-            return res.status(400).json({ error: "Missing 'prompt' in request body" });
-        }
-
-        if (!process.env.GEMINI_API_KEY) {
-            return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server" });
-        }
-
-        // Generate content using the SDK
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        const text = response.text();
-
-        res.json({ response: text });
-
+        res.json({ response: response.text() });
     } catch (error) {
-        console.error('Gemini API Error:', error);
-
-        // Handle specific API errors
-        const statusCode = error.status || 500;
-        const message = error.message || "An error occurred during AI generation";
-
-        res.status(statusCode).json({ error: message });
+        console.error('Gemini SDK Error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
 /**
  * POST /proxy
- * True pass-through for the full Gemini payload.
+ * True pass-through using native FETCH (Fixes axios errors)
  */
 app.post('/proxy', async (req, res) => {
     try {
@@ -82,24 +64,23 @@ app.post('/proxy', async (req, res) => {
         const MODEL = "gemini-1.5-flash";
         const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
-        // Forward the exact body receive from PHP
-        const response = await axios.post(URL, req.body, {
-            headers: { 'Content-Type': 'application/json' }
+        // Forward using native Node fetch
+        const response = await fetch(URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
         });
 
-        res.json(response.data);
+        const data = await response.json();
+        res.status(response.status).json(data);
 
     } catch (error) {
-        console.error('Proxy Error:', error.response ? error.response.data : error.message);
-        res.status(error.response ? error.response.status : 500).json(
-            error.response ? error.response.data : { error: "Proxy connection failed" }
-        );
+        console.error('Proxy Error:', error.message);
+        res.status(500).json({ error: "Proxy connection failed: " + error.message });
     }
 });
 
 // 5. Start the Server
 app.listen(PORT, () => {
-    console.log(`\n🚀 Server is running on port ${PORT}`);
-    console.log(`🔗 Local URL: http://localhost:${PORT}`);
-    console.log(`🛠️ Mode: ES Modules\n`);
+    console.log(`\n🚀 AI Backend running on port ${PORT} (Using native fetch)\n`);
 });
