@@ -1,5 +1,5 @@
     </div>
-</div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -50,7 +50,7 @@
             }
 
             let prompt = "";
-            switch(module) {
+            switch (module) {
                 case 'savings':
                     prompt = "Analyze my savings growth and sources for this year. Am I on track?";
                     break;
@@ -73,61 +73,65 @@
     </script>
 
     <script>
-    /* ── Smooth Page Transition ── */
-    (function() {
-        // Fade body out before navigating away
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a[href]');
-            if (!link) return;
-            const href = link.getAttribute('href');
-            // Skip: no href, same-page anchors, js: links, Bootstrap toggles, blank targets, or links with their own onclick (e.g. logout confirm)
-            if (!href || href.startsWith('#') || href.startsWith('javascript') ||
-                link.hasAttribute('data-bs-toggle') || link.target === '_blank' ||
-                link.hasAttribute('onclick')) return;
-            e.preventDefault();
-            document.body.style.transition = 'opacity 0.18s ease';
-            document.body.style.opacity   = '0';
-            setTimeout(() => { window.location.href = href; }, 180);
-        });
-    })();
+        /* ── Smooth Page Transition ── */
+        (function() {
+            // Fade body out before navigating away
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+                const href = link.getAttribute('href');
+                // Skip: no href, same-page anchors, js: links, Bootstrap toggles, blank targets, or links with their own onclick (e.g. logout confirm)
+                if (!href || href.startsWith('#') || href.startsWith('javascript') ||
+                    link.hasAttribute('data-bs-toggle') || link.target === '_blank' ||
+                    link.hasAttribute('onclick')) return;
+                e.preventDefault();
+                document.body.style.transition = 'opacity 0.18s ease';
+                document.body.style.opacity = '0';
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 180);
+            });
+        })();
     </script>
-    
+
     <!-- Anti-Inspection & DevTools Protection -->
     <script>
-    (function() {
-        // Disable Right-click
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        (function() {
+            // Disable Right-click
+            document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // Forbidden Keys Detection
-        document.addEventListener('keydown', function(e) {
-            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
-            if (
-                e.keyCode === 123 || 
-                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))
-            ) {
-                e.preventDefault();
-                return false;
-            }
-        });
+            // Forbidden Keys Detection
+            document.addEventListener('keydown', function(e) {
+                // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
+                if (
+                    e.keyCode === 123 ||
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+                    (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))
+                ) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
 
-        // Periodic Console Clearing
-        setInterval(() => {
-            console.clear();
-        }, 1000);
+            // Periodic Console Clearing
+            /*
+            setInterval(() => {
+                console.clear();
+            }, 1000);
+            */
 
-        // DevTools simple detection via window size
-        const threshold = 160;
-        const checkDevTools = () => {
-            if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-                // If DevTools is likely open, we could redirect or show a warning
-                // For now, just keeping the console cleared is a good first step.
-            }
-        };
-        window.addEventListener('resize', checkDevTools);
-    })();
+            // DevTools simple detection via window size
+            const threshold = 160;
+            const checkDevTools = () => {
+                if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+                    // If DevTools is likely open, we could redirect or show a warning
+                    // For now, just keeping the console cleared is a good first step.
+                }
+            };
+            window.addEventListener('resize', checkDevTools);
+        })();
     </script>
-    
-</body>
 
-</html>
+    </body>
+
+    </html>

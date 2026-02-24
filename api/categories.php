@@ -80,14 +80,15 @@ switch ($method) {
             $stmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
             $stmt->bind_param("is", $user_id, $name);
             if ($stmt->execute()) {
-                if ($conn->affected_rows > 0) {
+                if ($stmt->affected_rows > 0) {
                     echo json_encode(['success' => true, 'message' => 'Category added successfully']);
                 } else {
-                    echo json_encode(['success' => false, 'message' => 'Category already exists']);
+                    echo json_encode(['success' => false, 'message' => 'Category already exists or could not be added']);
                 }
             } else {
-                echo json_encode(['success' => false, 'message' => 'Database error']);
+                echo json_encode(['success' => false, 'message' => 'Database error: ' . $stmt->error]);
             }
+            $stmt->close();
         } elseif ($action === 'delete') {
             $id = $_POST['id'] ?? '';
             if (empty($id)) {
