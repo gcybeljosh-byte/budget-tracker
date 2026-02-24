@@ -13,6 +13,11 @@ if (!isset($_SESSION['id'])) {
     exit;
 }
 
+if (empty(AI_API_KEY)) {
+    echo json_encode(['success' => false, 'message' => 'System Error: AI_API_KEY is not defined or empty. Please check config.local.php.']);
+    exit;
+}
+
 $user_id = $_SESSION['id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
