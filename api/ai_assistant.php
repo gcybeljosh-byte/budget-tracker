@@ -15,13 +15,15 @@ if (!isset($_SESSION['id'])) {
 
 if (empty(AI_API_KEY)) {
     $debug = [
-        'local_file_exists' => file_exists(__DIR__ . '/../includes/config.local.php'),
-        'local_key_defined' => defined('AI_API_KEY_LOCAL'),
-        'local_key_value' => defined('AI_API_KEY_LOCAL') ? (AI_API_KEY_LOCAL === 'YOUR_KEY_HERE' ? 'placeholder' : 'set') : 'not defined',
-        'env_key' => getenv('AI_API_KEY') ? 'set' : (getenv('GEMINI_API_KEY') ? 'gemini_set' : 'not set'),
-        'site_url' => defined('SITE_URL') ? SITE_URL : 'not defined'
+        'dir' => __DIR__,
+        'includes_dir' => realpath(__DIR__ . '/../includes'),
+        'local_exists' => file_exists(__DIR__ . '/../includes/config.local.php'),
+        'local_defined' => defined('AI_API_KEY_LOCAL'),
+        'key_val_len' => defined('AI_API_KEY_LOCAL') ? strlen(AI_API_KEY_LOCAL) : 0,
+        'config_path' => __DIR__ . '/../includes/config.php'
     ];
-    echo json_encode(['success' => false, 'message' => 'System Error: AI_API_KEY is empty.', 'debug' => $debug]);
+    $debug_str = json_encode($debug);
+    echo json_encode(['success' => false, 'message' => "System Error: AI_API_KEY is empty. Debug: $debug_str"]);
     exit;
 }
 
