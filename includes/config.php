@@ -62,7 +62,7 @@ define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
  * Used for Sign-In with Google functionality.
  * Link: https://console.cloud.google.com/apis/credentials
  */
-define('GOOGLE_CLIENT_ID', '818167411162-1ur80fs01jqva8ooe4tqssg15lk4tt6o.apps.googleusercontent.com');
+define('GOOGLE_CLIENT_ID', '818167411162-lashcfje1kv56ao030ee2salf5qnkioo.apps.googleusercontent.com');
 
 // ============================================================================
 // APP CONFIGURATION
