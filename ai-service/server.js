@@ -62,7 +62,7 @@ app.post('/proxy', async (req, res) => {
 
         const API_KEY = process.env.GEMINI_API_KEY;
         const MODEL = "gemini-1.5-flash";
-        const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+        const URL = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${API_KEY}`;
 
         // Forward using native Node fetch
         const response = await fetch(URL, {
