@@ -28,7 +28,7 @@ $response = ['success' => false, 'message' => 'Invalid request'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-    
+
     switch ($action) {
         case 'add':
             $date = $_POST['date'] ?? '';
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amount = $_POST['amount'] ?? '';
             $source_type = $_POST['source_type'] ?? 'Cash';
             $expense_source = $_POST['expense_source'] ?? 'Allowance';
-            
+
             if ($date && $category && $description && $amount) {
                 // Balance Validation
                 $currentBalance = $balanceHelper->getBalanceBySource($user_id, $expense_source, $source_type);
@@ -47,9 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
 
+                // Auto-Add category if it doesn't exist
+                $catStmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
+                $catStmt->bind_param("is", $user_id, $category);
+                $catStmt->execute();
+                $catStmt->close();
+
                 $stmt = $conn->prepare("INSERT INTO expenses (user_id, date, category, description, amount, source_type, expense_source) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $stmt->bind_param("isssdss", $user_id, $date, $category, $description, $amount, $source_type, $expense_source);
-                
+
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense added successfully', 'id' => $stmt->insert_id];
                     $notifications->checkLowAllowance($user_id);
@@ -62,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response = ['success' => false, 'message' => 'All fields are required'];
             }
             break;
-            
+
         case 'edit':
             $id = $_POST['id'] ?? '';
             $date = $_POST['date'] ?? '';
@@ -71,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amount = $_POST['amount'] ?? '';
             $source_type = $_POST['source_type'] ?? 'Cash';
             $expense_source = $_POST['expense_source'] ?? 'Allowance';
-            
+
             if ($id && $date && $category && $description && $amount) {
                 // Balance Validation (Adjustment check)
                 // First, get the old amount and source to "revert" it temporarily for calculation
@@ -87,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($oldData['expense_source'] === $expense_source && $oldData['source_type'] === $source_type) {
                         $currentBalance += $oldData['amount'];
                     }
-                    
+
                     if ($amount > $currentBalance) {
                         $response = ['success' => false, 'message' => 'Insufficient balance for update. Available: ' . $currentBalance];
                         echo json_encode($response);
@@ -95,9 +101,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
+                // Auto-Add category if it doesn't exist
+                $catStmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
+                $catStmt->bind_param("is", $user_id, $category);
+                $catStmt->execute();
+                $catStmt->close();
+
                 $stmt = $conn->prepare("UPDATE expenses SET date = ?, category = ?, description = ?, amount = ?, source_type = ?, expense_source = ? WHERE id = ? AND user_id = ?");
                 $stmt->bind_param("sssdssii", $date, $category, $description, $amount, $source_type, $expense_source, $id, $user_id);
-                
+
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense updated successfully'];
                     logActivity($conn, $user_id, 'expense_edit', "Edited expense ID $id: $description - $amount");
@@ -109,14 +121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response = ['success' => false, 'message' => 'All fields are required'];
             }
             break;
-            
+
         case 'delete':
             $id = $_POST['id'] ?? '';
-            
+
             if ($id) {
                 $stmt = $conn->prepare("DELETE FROM expenses WHERE id = ? AND user_id = ?");
                 $stmt->bind_param("ii", $id, $user_id);
-                
+
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense deleted successfully'];
                     logActivity($conn, $user_id, 'expense_delete', "Deleted expense ID $id");
@@ -128,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response = ['success' => false, 'message' => 'ID is required'];
             }
             break;
-            
+
         default:
             $response = ['success' => false, 'message' => 'Unknown action'];
     }
@@ -138,16 +150,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     $expenses = [];
     while ($row = $result->fetch_assoc()) {
         $expenses[] = $row;
     }
     $stmt->close();
-    
+
     $response = ['success' => true, 'data' => $expenses];
 }
 
 echo json_encode($response);
 $conn->close();
-?>

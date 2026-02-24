@@ -12,7 +12,7 @@ class AiHelper
     {
         $this->conn = $db_connection;
         $this->user_id = $user_id;
-        require_once 'BalanceHelper.php';
+        require_once __DIR__ . '/BalanceHelper.php';
         $this->balanceHelper = new BalanceHelper($this->conn);
     }
 
@@ -382,6 +382,17 @@ class AiHelper
 
         // If not valid JSON, treat as plain text response
         if (json_last_error() !== JSON_ERROR_NONE) {
+            // If the response starts with { then it's likely an error message from callGemini
+            if (strpos(trim($rawResponse), '{') === 0) {
+                $errorData = json_decode($rawResponse, true);
+                if (isset($errorData['response_message'])) {
+                    return [
+                        'message' => $errorData['response_message'],
+                        'action_performed' => false
+                    ];
+                }
+            }
+
             // Attempt to fallback to regex detection if LLM failed to output JSON
             $intentData = $this->detectIntent($userMessage);
             if ($intentData['intent'] !== 'query' && $intentData['confidence'] > 0.8) {

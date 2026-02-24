@@ -24,31 +24,34 @@ mysqli_query($conn, $createTable);
 
 // Ensure default categories exist for this user if none found
 $checkCount = mysqli_query($conn, "SELECT COUNT(*) as count FROM categories WHERE user_id = $user_id");
-$countRow = mysqli_fetch_assoc($checkCount);
-if ($countRow['count'] == 0) {
-    $defaultCategories = ['Food & Dining', 'Transportation', 'Utilities', 'Entertainment', 'Shopping', 'Health', 'Education', 'Other'];
-    foreach ($defaultCategories as $cat) {
-        $stmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
-        $stmt->bind_param("is", $user_id, $cat);
-        $stmt->execute();
-        $stmt->close();
+if ($checkCount) {
+    $countRow = mysqli_fetch_assoc($checkCount);
+    if ($countRow && $countRow['count'] == 0) {
+        $defaultCategories = ['Food & Dining', 'Transportation', 'Utilities', 'Entertainment', 'Shopping', 'Health', 'Education', 'Other'];
+        foreach ($defaultCategories as $cat) {
+            $stmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
+            $stmt->bind_param("is", $user_id, $cat);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 }
 
-// Migration Logic: Move 'Food' to 'Other' and remove 'Food' category
-$checkFood = mysqli_query($conn, "SELECT id FROM categories WHERE user_id = $user_id AND name = 'Food'");
-if (mysqli_num_rows($checkFood) > 0) {
-    // 1. Ensure 'Other' exists
-    mysqli_query($conn, "INSERT IGNORE INTO categories (user_id, name) VALUES ($user_id, 'Other')");
-    
-    // 2. Update expenses
-    $stmt = $conn->prepare("UPDATE expenses SET category = 'Other' WHERE user_id = ? AND category = 'Food'");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $stmt->close();
+// Migration Logic: Move 'Food' to 'Other' once
+if (!isset($_SESSION['migration_food_done'])) {
+    $checkFood = mysqli_query($conn, "SELECT id FROM categories WHERE user_id = $user_id AND name = 'Food'");
+    if ($checkFood && mysqli_num_rows($checkFood) > 0) {
+        // 1. Ensure 'Other' exists
+        mysqli_query($conn, "INSERT IGNORE INTO categories (user_id, name) VALUES ($user_id, 'Other')");
 
-    // 3. Delete 'Food' category
-    mysqli_query($conn, "DELETE FROM categories WHERE user_id = $user_id AND name = 'Food'");
+        // 2. Update expenses (Suppress errors if table/column missing)
+        @mysqli_query($conn, "UPDATE expenses SET category = 'Other' WHERE user_id = $user_id AND category = 'Food'");
+
+        // 3. Delete 'Food' category
+        mysqli_query($conn, "DELETE FROM categories WHERE user_id = $user_id AND name = 'Food'");
+
+        $_SESSION['migration_food_done'] = true;
+    }
 }
 
 switch ($method) {
@@ -97,7 +100,7 @@ switch ($method) {
             $checkStmt->bind_param("ii", $id, $user_id);
             $checkStmt->execute();
             $checkResult = $checkStmt->get_result()->fetch_assoc();
-            
+
             if ($checkResult['count'] > 0) {
                 echo json_encode(['success' => false, 'message' => 'Cannot delete category that is currently in use by expenses']);
                 exit;
