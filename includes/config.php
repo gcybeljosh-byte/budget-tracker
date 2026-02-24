@@ -59,15 +59,24 @@ define('APP_NAME', 'Budget Tracker');
 define('APP_VERSION', '2.5.0');
 
 // Path Configuration
-// ⚠️ PRODUCTION: Hardcoded for live hosting (InfinityFree)
-define('SITE_URL', 'https://budget-tracking-ai.great-site.net/');
+if (!defined('SITE_URL')) {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+    $host = $_SERVER['HTTP_HOST'] ?? '';
 
-// 💻 LOCAL DEV: Uncomment the lines below and comment out the line above when developing locally
-// $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-// $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-// $root = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
-// $baseUrl = $protocol . '://' . $host . rtrim(dirname($root, 2), '/') . '/budget-tracker/';
-// define('SITE_URL', $baseUrl);
+    // Auto-detect production vs local
+    if (strpos($host, 'great-site.net') !== false || strpos($host, 'infinityfree') !== false) {
+        define('SITE_URL', 'https://budget-tracking-ai.great-site.net/');
+    } else {
+        // Local fallback
+        $scriptPath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        // If we are in api/ or core/, go up one level
+        $rootPath = preg_replace('/(\/api|\/core|\/includes)$/', '', rtrim($scriptPath, '/'));
+        $baseUrl = $protocol . "://" . $host . $rootPath . "/";
+        // Clean up double slashes
+        $baseUrl = preg_replace('/([^:])\/\//', '$1/', $baseUrl);
+        define('SITE_URL', $baseUrl);
+    }
+}
 define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 
 // ============================================================================
