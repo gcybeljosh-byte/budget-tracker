@@ -11,6 +11,23 @@
             <button onclick="toggleChatWidget()" class="btn btn-sm btn-outline-secondary rounded-pill px-4">Close Hub</button>
         </div>
     <?php endif; ?>
+
+    <?php if (($_SESSION['role'] ?? '') === 'superadmin'): ?>
+        <!-- Superadmin: AI Status Banner -->
+        <div style="background: linear-gradient(135deg,#6366f1,#a855f7); padding: 6px 12px; font-size: 0.72rem; color: #fff; display:flex; align-items:center; gap:6px;">
+            <i class="fas fa-shield-alt"></i>
+            <span><strong>Superadmin Mode</strong> &mdash;
+                <?php if (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE): ?>
+                    Maintenance ON &bull; You bypass it.
+                <?php else: ?>
+                    Maintenance OFF &bull; AI is live for all.
+                <?php endif; ?>
+                &bull; Key: <?php
+                            $k = defined('AI_API_KEY') ? AI_API_KEY : '';
+                            echo ($k && $k !== 'YOUR_KEY_HERE') ? '✅ Loaded (' . substr($k, 0, 6) . '...)' : '❌ NOT SET';
+                            ?></span>
+        </div>
+    <?php endif; ?>
     <!-- Header -->
     <div class="card-header text-white d-flex justify-content-between align-items-center py-3"
         style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 0.5rem 0.5rem 0 0;">
@@ -49,7 +66,11 @@
         if (widget.style.display === 'none') {
             widget.style.display = 'flex';
             if (fab) fab.style.display = 'none';
-            setTimeout(() => document.getElementById('widgetUserMessage').focus(), 100);
+            // Only focus when input is enabled (not in maintenance mode for non-superadmin)
+            setTimeout(() => {
+                const inp = document.getElementById('widgetUserMessage');
+                if (inp && !inp.disabled) inp.focus();
+            }, 100);
         } else {
             widget.style.display = 'none';
             if (fab) fab.style.display = 'flex';

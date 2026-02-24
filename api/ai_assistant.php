@@ -13,6 +13,17 @@ if (!isset($_SESSION['id'])) {
     exit;
 }
 
+// ── Maintenance Mode Guard ──────────────────────────────────────────────────
+// Superadmin bypasses maintenance so they can verify the AI is working.
+$userRole = $_SESSION['role'] ?? 'user';
+if (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && $userRole !== 'superadmin') {
+    echo json_encode([
+        'success' => false,
+        'message' => '🔧 The AI Help Desk is currently under scheduled maintenance. It will be back shortly!'
+    ]);
+    exit;
+}
+
 $user_id = $_SESSION['id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
