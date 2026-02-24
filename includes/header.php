@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <?php 
+    <?php
     require_once __DIR__ . '/config.php';
-    
+
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    
+
     // Redirect if not logged in
     if (!isset($_SESSION['id'])) {
         header("Location: " . SITE_URL . "auth/login.php");
@@ -37,7 +37,7 @@
     }
 
     if (!isset($appName)) {
-        $appName = ucwords(str_replace('-', ' ', basename(dirname(__DIR__))));
+        $appName = defined('APP_NAME') ? APP_NAME : 'Budget Tracker';
     }
 
     // --- Theme Persistence Fallback ---
@@ -71,7 +71,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
     <!-- Currency Configuration -->
-    <?php 
+    <?php
     require_once __DIR__ . '/CurrencyHelper.php';
     $currencyConfig = CurrencyHelper::getJSConfig($_SESSION['user_currency'] ?? 'PHP');
     ?>
