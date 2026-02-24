@@ -106,7 +106,7 @@
 
             showTypingIndicator();
 
-            fetch('<?php echo SITE_URL; ?>api/chat.php', {
+            fetch('<?php echo SITE_URL; ?>api/ai_assistant.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
