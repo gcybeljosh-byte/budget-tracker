@@ -3,8 +3,11 @@ vendor/
 
 # Database / Local Config
 includes/config.php
+includes/config.local.php
 includes/db.php
 database.sql
+.env
+ai-service/.env
 
 # Uploads & Logs
 uploads/*

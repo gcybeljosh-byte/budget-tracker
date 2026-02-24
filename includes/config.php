@@ -21,15 +21,21 @@ define('AI_PROVIDER', 'gemini');
 /**
  * AI_API_KEY: Your API key for the selected provider
  * 
- * How to get API keys:
- * - OpenAI: https://platform.openai.com/api-keys (Requires payment/credits)
- * - Gemini: https://aistudio.google.com/app/apikey (Free tier available)
+ * SECURITY NOTE: To prevent leaks, this file now attempts to load the key from:
+ * 1. Server Environment Variables (Recommended for Render)
+ * 2. includes/config.local.php (Recommended for Local/InfinityFree)
  * 
- * IMPORTANT: Keep your API key secure! Never commit it to version control.
- * 
- * Example: define('AI_API_KEY', 'sk-proj-abc123...');
+ * Do NOT hardcode your real key below if you plan to share this code.
  */
-define('AI_API_KEY', 'AIzaSyDBZgMHiCPDZuWpD_I2WNzLxpJLx5jTaHU');
+// Load local secrets if they exist
+if (file_exists(__DIR__ . '/config.local.php')) {
+    include_once __DIR__ . '/config.local.php';
+}
+
+$envKey = getenv('AI_API_KEY') ?: (getenv('GEMINI_API_KEY') ?: ($_SESSION['AI_API_KEY'] ?? null));
+$finalKey = defined('AI_API_KEY_LOCAL') ? AI_API_KEY_LOCAL : $envKey;
+
+define('AI_API_KEY', $finalKey ?: ''); // Keys are now loaded from Env Vars or config.local.php
 
 /**
  * AI_MODEL: Specify which AI model to use
