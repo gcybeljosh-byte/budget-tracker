@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // 1. Configure Environment Variables
