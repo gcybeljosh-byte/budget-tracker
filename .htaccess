@@ -17,6 +17,7 @@ Options -Indexes
 
 # Protect includes directory using mod_rewrite for better compatibility
 RewriteEngine On
+RewriteBase /
 
 # Block access to the includes and .git folders
 RewriteRule ^includes/ - [F,L]
