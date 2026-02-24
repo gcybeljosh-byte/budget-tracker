@@ -712,6 +712,8 @@ class AiHelper
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 25);           // max 25s for full response
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 8);      // max 8s to establish connection
 
         // Handle local development SSL issues
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
