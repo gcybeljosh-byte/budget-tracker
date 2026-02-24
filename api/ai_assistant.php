@@ -6,19 +6,12 @@ require_once '../includes/db.php';
 require_once '../includes/config.php';
 require_once '../includes/AiHelper.php';
 
-// Debug: Override error suppression
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['id'])) {
-    file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] Auth failed\n", FILE_APPEND);
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit;
 }
-
-file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] Chat API Hit\n", FILE_APPEND);
 
 $user_id = $_SESSION['id'];
 
@@ -42,14 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )");
 
-    file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] User message saved\n", FILE_APPEND);
-
-    // 3. Generate AI Response
+    // 2. Save User Message
     $aiHelper = new AiHelper($conn, $user_id);
-    file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] AiHelper initialized\n", FILE_APPEND);
-
-    $aiHelper->enforceChatTimeout(10);
-    file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] Timeout enforced\n", FILE_APPEND);
+    $aiHelper->enforceChatTimeout(10); // Clear history if > 10 mins inactive
 
     $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, sender) VALUES (?, ?, 'user')");
     $stmt->bind_param("is", $user_id, $userMessage);
@@ -61,9 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // The AiHelper::getResponse method determines whether to use Real API or Simulation
     // based on the config.php settings.
-    file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] Calling getResponse...\n", FILE_APPEND);
     $aiResponse = $aiHelper->getResponse($userMessage);
-    file_put_contents('debug.log', "[" . date('Y-m-d H:i:s') . "] getResponse finished\n", FILE_APPEND);
 
     $responseMessage = '';
     $actionPerformed = false;
