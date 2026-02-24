@@ -78,15 +78,18 @@ if (!defined('SITE_URL')) {
 
     // Auto-detect production vs local
     if (strpos($host, 'onrender.com') !== false || strpos($host, 'infinityfree') !== false || strpos($host, 'great-site.net') !== false) {
-        define('SITE_URL', $protocol . "://" . $host . "/");
+        // Force HTTPS for known production environments
+        $baseUrl = "https://" . $host . "/";
     } else {
         // Local fallback
         $scriptPath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
         $rootPath = preg_replace('/(\/api|\/core|\/includes|\/auth)$/', '', rtrim($scriptPath, '/'));
         $baseUrl = $protocol . "://" . $host . $rootPath . "/";
-        $baseUrl = preg_replace('/([^:])\/\//', '$1/', $baseUrl);
-        define('SITE_URL', $baseUrl);
     }
+
+    // Ensure single trailing slash
+    $baseUrl = rtrim($baseUrl, '/') . '/';
+    define('SITE_URL', $baseUrl);
 }
 define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 

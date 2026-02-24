@@ -280,15 +280,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="d-flex justify-content-center">
                             <div id="g_id_onload"
                                 data-client_id="<?php echo GOOGLE_CLIENT_ID; ?>"
+                                data-context="signup"
+                                data-ux_mode="popup"
                                 data-callback="handleCredentialResponse"
                                 data-auto_prompt="false">
                             </div>
                             <div class="g_id_signin"
                                 data-type="standard"
-                                data-size="large"
+                                data-shape="rectangular"
                                 data-theme="outline"
                                 data-text="signup_with"
-                                data-shape="rectangular"
+                                data-size="large"
                                 data-logo_alignment="left">
                             </div>
                         </div>

@@ -194,15 +194,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="d-flex justify-content-center">
                             <div id="g_id_onload"
                                 data-client_id="<?php echo GOOGLE_CLIENT_ID; ?>"
+                                data-context="signin"
+                                data-ux_mode="popup"
                                 data-callback="handleCredentialResponse"
                                 data-auto_prompt="false">
                             </div>
                             <div class="g_id_signin"
                                 data-type="standard"
-                                data-size="large"
-                                data-theme="outline"
-                                data-text="sign_in_with"
                                 data-shape="rectangular"
+                                data-theme="outline"
+                                data-text="signin_with"
+                                data-size="large"
                                 data-logo_alignment="left">
                             </div>
                         </div>

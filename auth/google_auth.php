@@ -17,6 +17,21 @@ if (isset($_POST['credential'])) {
         $payload = json_decode(base64_decode($payloadRaw), true);
 
         if ($payload && isset($payload['email'])) {
+            // --- SECURITY: HARDEN JWT VALIDATION ---
+            $iss = $payload['iss'] ?? '';
+            $aud = $payload['aud'] ?? '';
+            $exp = $payload['exp'] ?? 0;
+
+            $valid_iss = ($iss === 'https://accounts.google.com' || $iss === 'accounts.google.com');
+            $valid_aud = ($aud === GOOGLE_CLIENT_ID);
+            $not_expired = ($exp > time());
+
+            if (!$valid_iss || !$valid_aud || !$not_expired) {
+                error_log("Google Auth Security Fail: iss=$iss, aud=$aud, exp=$exp (vs " . time() . ")");
+                header("Location: " . SITE_URL . "auth/login.php?error=secure_auth_failed");
+                exit;
+            }
+
             $email = trim($payload['email']);
             $first_name_google = trim($payload['given_name'] ?? ($payload['name'] ?? 'Google'));
             $last_name_google = trim($payload['family_name'] ?? 'User');
