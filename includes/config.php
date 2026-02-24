@@ -29,7 +29,7 @@ define('AI_PROVIDER', 'gemini');
  * 
  * Example: define('AI_API_KEY', 'sk-proj-abc123...');
  */
-define('AI_API_KEY', 'AIzaSyBxDe2cpzoliPWBsZAnP-IpPMDft8fD0GQ');
+define('AI_API_KEY', 'AIzaSyDBZgMHiCPDZuWpD_I2WNzLxpJLx5jTaHU');
 
 /**
  * AI_MODEL: Specify which AI model to use
