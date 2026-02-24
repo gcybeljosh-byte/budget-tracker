@@ -163,7 +163,11 @@
                             }));
                         }
                     } else {
-                        appendMessageToWidget('Error: ' + (result.message || 'Unknown'), 'bot');
+                        let errMsg = result.message || 'Unknown';
+                        if (result.debug_info) {
+                            errMsg += ' <br><small class="text-muted">(Debug: Key [' + result.debug_info.api_key_hint + '] via Proxy: ' + result.debug_info.proxy_active + ')</small>';
+                        }
+                        appendMessageToWidget('Error: ' + errMsg, 'bot');
                     }
                 })
                 .catch(err => {

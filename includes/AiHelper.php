@@ -765,8 +765,17 @@ class AiHelper
             $apiErrorMessage = $json['message'];
         }
 
+        // DIAGNOSTIC INFO
+        $proxyUsed = (defined('AI_PROXY_URL') && !empty(AI_PROXY_URL)) ? 'Yes' : 'No';
+        $keyHint = !empty($apiKey) ? substr($apiKey, 0, 8) . '...' . substr($apiKey, -4) : 'Empty';
+
         return json_encode([
             'response_message' => "Gemini API Error: $apiErrorMessage (HTTP $http_code)",
+            'debug_info' => [
+                'proxy_active' => $proxyUsed,
+                'api_key_hint' => $keyHint,
+                'model' => $model
+            ],
             'actions' => []
         ]);
     }
