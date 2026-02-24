@@ -220,7 +220,7 @@ include '../includes/header.php';
             <div class="modal-header border-bottom-0 p-4 pb-0">
                 <div class="d-flex justify-content-between align-items-center mb-0">
                     <h5 class="modal-title fw-bold">Manage Categories</h5>
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal" data-bs-target="#addExpenseModal" data-bs-toggle="modal">
                         <i class="fas fa-arrow-left me-1"></i> Back
                     </button>
                 </div>
@@ -395,6 +395,21 @@ include '../includes/header.php';
             style: 'currency',
             currency: window.userCurrency.code
         }).format(val);
+    }
+
+    function fetchDashboardStats() {
+        const baseUrl = window.SITE_URL || '';
+        fetch(baseUrl + 'api/dashboard.php?t=' + new Date().getTime())
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const totalEl = document.getElementById('totalExpenses');
+                    const balanceEl = document.getElementById('remainingBalance');
+                    if (totalEl) totalEl.textContent = formatCurrency(data.total_expenses);
+                    if (balanceEl) balanceEl.textContent = formatCurrency(data.balance);
+                }
+            })
+            .catch(error => console.error('Error fetching stats:', error));
     }
 
     function showAlert(message, type) {
@@ -704,8 +719,8 @@ include '../includes/header.php';
         editExpenseForm = document.getElementById('editExpenseForm');
 
         // Initial Load
-        fetchExpenses();
         fetchCategories();
+        fetchExpenses();
         fetchDashboardStats();
         loadBudgetLimits();
 
@@ -802,6 +817,55 @@ include '../includes/header.php';
                 })
                 .catch(error => console.error('Error adding:', error));
         });
+
+        // Add Category
+        const addCategoryForm = document.getElementById('addCategoryForm');
+        if (addCategoryForm) {
+            addCategoryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const nameInput = document.getElementById('newCategoryName');
+                const name = nameInput.value.trim();
+                if (!name) return;
+
+                const formData = new FormData();
+                formData.append('action', 'add');
+                formData.append('name', name);
+
+                const baseUrl = window.SITE_URL || '';
+                fetch(baseUrl + 'api/categories.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            showAlert(result.message, 'success');
+                            nameInput.value = '';
+                            fetchCategories();
+
+                            // Return to Add Expense Modal
+                            const manageModalEl = document.getElementById('manageCategoriesModal');
+                            const addModalEl = document.getElementById('addExpenseModal');
+
+                            const manageModal = bootstrap.Modal.getInstance(manageModalEl);
+                            if (manageModal) manageModal.hide();
+
+                            // Wait for hide to finish then show add expense modal
+                            manageModalEl.addEventListener('hidden.bs.modal', function handler() {
+                                const addModal = new bootstrap.Modal(addModalEl);
+                                addModal.show();
+                                manageModalEl.removeEventListener('hidden.bs.modal', handler);
+                            }, {
+                                once: true
+                            });
+
+                        } else {
+                            showAlert(result.message, 'danger');
+                        }
+                    })
+                    .catch(error => console.error('Error adding category:', error));
+            });
+        }
 
         // Update Expense
         editExpenseForm.addEventListener('submit', function(e) {
