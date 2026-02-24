@@ -4,7 +4,7 @@
     <div class="card-header text-white d-flex justify-content-between align-items-center py-3"
         style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 0.5rem 0.5rem 0 0;">
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-link text-white p-0 me-1" title="View Chat History" onclick="location.href='<?php echo SITE_URL; ?>core/chat_history.php'">
+            <button type="button" class="btn btn-link text-white p-0 me-1" title="View Chat History" onclick="location.href='<?php echo SITE_URL; ?>core/conversations.php'">
                 <i class="fas fa-history" style="font-size: 0.9rem;"></i>
             </button>
             <i class="fas fa-robot"></i>
@@ -66,7 +66,7 @@
                 lastActivityTime = now;
             }
 
-            fetch('<?php echo SITE_URL; ?>api/chat_history.php?mode=widget')
+            fetch('<?php echo SITE_URL; ?>api/conversations.php?mode=widget')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {

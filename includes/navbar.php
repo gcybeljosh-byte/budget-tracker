@@ -40,9 +40,9 @@
                             </div>
                         <?php endif; ?>
 
-                        <!-- Desktop-only: Page Action Buttons -->
+                        <!-- Page Action Buttons (Visible on all sizes) -->
                         <?php if (isset($extraNavContent)): ?>
-                            <div class="d-none d-lg-block border-start ps-3 me-1">
+                            <div class="ps-3 me-1">
                                 <?php echo str_replace('ms-auto', '', $extraNavContent); ?>
                             </div>
                         <?php endif; ?>
@@ -249,8 +249,8 @@
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Bills</span>
                     </a>
-                    <a href="<?php echo SITE_URL; ?>core/chat_history.php"
-                        class="bottom-nav-item <?php echo ($currentPage == 'chat_history.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo SITE_URL; ?>core/conversations.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'conversations.php') ? 'active' : ''; ?>">
                         <i class="fas fa-history"></i>
                         <span>History</span>
                     </a>
@@ -277,7 +277,8 @@
                     // Also wire the overlay's active class to the toggle button
                     // (works alongside the existing toggleWrapper script)
                     const observer = new MutationObserver(function() {
-                        if (document.body.classList.contains('sb-sidenav-toggled')) {
+                        const isMobileOrTablet = window.innerWidth <= 991;
+                        if (document.body.classList.contains('sb-sidenav-toggled') && isMobileOrTablet) {
                             overlay.classList.add('active');
                         } else {
                             overlay.classList.remove('active');
