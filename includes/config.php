@@ -32,16 +32,18 @@ define('AI_MAINTENANCE_MODE', true);
  * 
  * Do NOT hardcode your real key below if you plan to share this code.
  */
-// Load local secrets if they exist
-if (file_exists(__DIR__ . '/config.local.php')) {
-    include_once __DIR__ . '/config.local.php';
+// Load local secrets if available (uses realpath to avoid include_once path-caching)
+$__localCfg = realpath(__DIR__ . '/config.local.php');
+if ($__localCfg && file_exists($__localCfg)) {
+    require_once $__localCfg;
 }
 
-$envKey = getenv('AI_API_KEY') ?: (getenv('GEMINI_API_KEY') ?: ($_SESSION['AI_API_KEY'] ?? null));
-$localKey = (defined('AI_API_KEY_LOCAL') && AI_API_KEY_LOCAL !== 'YOUR_KEY_HERE') ? AI_API_KEY_LOCAL : null;
-$finalKey = $localKey ?: $envKey;
-
-define('AI_API_KEY', $finalKey ?: ''); // Keys are now loaded from Env Vars or config.local.php
+// Resolve API key: local file > environment variable > empty
+$__envKey   = getenv('AI_API_KEY') ?: getenv('GEMINI_API_KEY') ?: '';
+$__localKey = (defined('AI_API_KEY_LOCAL') && AI_API_KEY_LOCAL !== 'YOUR_KEY_HERE' && strlen(AI_API_KEY_LOCAL) > 10)
+    ? AI_API_KEY_LOCAL : '';
+$__finalKey = $__localKey ?: $__envKey;
+define('AI_API_KEY', $__finalKey);
 
 /**
  * AI_MODEL: Specify which AI model to use
