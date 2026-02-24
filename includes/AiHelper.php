@@ -688,7 +688,7 @@ class AiHelper
     {
         $apiKey = trim($apiKey);
         $model = trim($model);
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}";
 
         $contents = [];
         $systemInstruction = null;
