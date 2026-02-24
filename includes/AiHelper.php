@@ -675,7 +675,7 @@ class AiHelper
     private function callLLM($messages)
     {
         $apiKey = defined('AI_API_KEY') ? AI_API_KEY : '';
-        $model = defined('AI_MODEL') ? AI_MODEL : 'gemini-latest-flash';
+        $model = defined('AI_MODEL') ? AI_MODEL : 'gemini-1.5-flash';
 
         if (defined('AI_PROVIDER') && AI_PROVIDER === 'gemini') {
             return $this->callGemini($apiKey, $model, $messages);
@@ -688,7 +688,7 @@ class AiHelper
     {
         $apiKey = trim($apiKey);
         $model = trim($model);
-        $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $contents = [];
         $systemInstruction = null;
