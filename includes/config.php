@@ -59,24 +59,8 @@ define('APP_NAME', 'Budget Tracker');
 define('APP_VERSION', '2.5.0');
 
 // Path Configuration
-if (!defined('SITE_URL')) {
-    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-
-    // Auto-detect production vs local
-    if (strpos($host, 'great-site.net') !== false || strpos($host, 'infinityfree') !== false) {
-        define('SITE_URL', 'https://budget-tracking-ai.great-site.net/');
-    } else {
-        // Local fallback
-        $scriptPath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-        // If we are in api/ or core/, go up one level
-        $rootPath = preg_replace('/(\/api|\/core|\/includes)$/', '', rtrim($scriptPath, '/'));
-        $baseUrl = $protocol . "://" . $host . $rootPath . "/";
-        // Clean up double slashes
-        $baseUrl = preg_replace('/([^:])\/\//', '$1/', $baseUrl);
-        define('SITE_URL', $baseUrl);
-    }
-}
+// ⚠️ PRODUCTION: Hardcoded for live hosting (InfinityFree)
+define('SITE_URL', 'https://budget-tracking-ai.great-site.net/');
 define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 
 // ============================================================================
