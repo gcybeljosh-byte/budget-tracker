@@ -62,7 +62,8 @@ define('AI_MODEL', 'gemini-2.0-flash');
  * AI_PROXY_URL: Optional proxy for restrictive hosts (e.g., InfinityFree)
  * If defined, the PHP app will talk to this URL instead of Google directly.
  */
-define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
+// define('AI_PROXY_URL', 'https://budget-tracker-x42m.onrender.com/proxy');
+define('AI_PROXY_URL', ''); // Temporarily disabled for testing direct connection
 
 /**
  * GOOGLE CONFIGURATION
