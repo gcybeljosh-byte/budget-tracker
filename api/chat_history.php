@@ -22,11 +22,33 @@ $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
 
-// Handle POST Request (Save Message)
+// Handle POST Request (Save Message or Delete Fallback)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get JSON input
-    $data = json_decode(file_get_contents('php://input'), true);
-    
+    // Check for delete action fallback (for shared hosting that blocks DELETE)
+    $action = $_POST['action'] ?? '';
+
+    // If not in $_POST, it might be in JSON body
+    if (empty($action)) {
+        $json = json_decode(file_get_contents('php://input'), true);
+        $action = $json['action'] ?? '';
+        $data = $json;
+    } else {
+        $data = $_POST;
+    }
+
+    if ($action === 'delete') {
+        $stmt = $conn->prepare("DELETE FROM ai_chat_history WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'History cleared']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Database error']);
+        }
+        $stmt->close();
+        exit;
+    }
+
+    // Default Save Message Logic
     if (!isset($data['message']) || !isset($data['sender'])) {
         echo json_encode(['success' => false, 'message' => 'Missing fields']);
         exit;
@@ -93,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $stmt = $conn->prepare("DELETE FROM ai_chat_history WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
-    
+
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
     } else {
@@ -102,4 +124,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $stmt->close();
     exit;
 }
-?>

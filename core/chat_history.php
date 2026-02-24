@@ -4,17 +4,29 @@ $pageHeader = 'Chat History';
 include '../includes/header.php';
 require_once '../includes/db.php';
 
+// --- Self-Healing: Ensure chat history table exists ---
+$conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    message TEXT NOT NULL,
+    sender ENUM('user', 'bot') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
+
 // Fetch Chat History
 $user_id = $_SESSION['id'];
-$stmt = $conn->prepare("SELECT id, message, sender, created_at FROM ai_chat_history WHERE user_id = ? ORDER BY created_at ASC");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
 $messages = [];
-while ($row = $result->fetch_assoc()) {
-    $messages[] = $row;
+$stmt = $conn->prepare("SELECT id, message, sender, created_at FROM ai_chat_history WHERE user_id = ? ORDER BY created_at ASC");
+if ($stmt) {
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $messages[] = $row;
+    }
+    $stmt->close();
 }
-$stmt->close();
 
 // Group messages by date (keyed by Y-m-d for stable ordering)
 $groupedMessages = [];
@@ -283,7 +295,11 @@ ksort($groupedMessages);
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch('<?php echo SITE_URL; ?>api/chat_history.php', {
-                        method: 'DELETE'
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'action=delete'
                     })
                     .then(response => response.json())
                     .then(data => {
