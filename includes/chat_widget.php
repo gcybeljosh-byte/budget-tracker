@@ -1,5 +1,16 @@
 <!-- Global Chat Widget -->
-<div id="aiChatWidget" class="card shadow-lg border-0" style="position: fixed; bottom: 20px; right: 20px; width: 350px; height: 500px; z-index: 1050; display: none; flex-direction: column; transition: all 0.3s ease; overflow: hidden;">
+<div id="aiChatWidget" class="card shadow-lg border-0" style="position: fixed; bottom: 20px; right: 20px; width: 350px; height: 500px; z-index: 1050; display: none; flex-direction: column; transition: all 0.3s ease; overflow: hidden; <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE) ? 'filter: grayscale(0.5);' : ''; ?>">
+    <?php if (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE): ?>
+        <!-- Maintenance Overlay -->
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+            <div class="bg-warning-subtle text-warning p-3 rounded-circle mb-3 shadow-sm">
+                <i class="fas fa-tools fa-2x"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Under Maintenance</h5>
+            <p class="text-secondary small mb-3">Our AI Assistant is currently undergoing scheduled improvements to serve you better. We'll be back shortly!</p>
+            <button onclick="toggleChatWidget()" class="btn btn-sm btn-outline-secondary rounded-pill px-4">Close Hub</button>
+        </div>
+    <?php endif; ?>
     <!-- Header -->
     <div class="card-header text-white d-flex justify-content-between align-items-center py-3"
         style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 0.5rem 0.5rem 0 0;">
@@ -22,8 +33,8 @@
     <!-- Footer -->
     <div class="card-footer bg-white border-top p-3 shadow-sm">
         <form id="widgetChatForm" class="d-flex gap-2 align-items-center">
-            <input type="text" id="widgetUserMessage" class="form-control form-control-sm flex-grow-1" placeholder="Type your question..." required autocomplete="off" style="border-radius: 20px;">
-            <button type="submit" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 35px; height: 35px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;">
+            <input type="text" id="widgetUserMessage" class="form-control form-control-sm flex-grow-1" placeholder="<?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE) ? 'System offline...' : 'Type your question...'; ?>" required autocomplete="off" style="border-radius: 20px;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE) ? 'disabled' : ''; ?>>
+            <button type="submit" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 35px; height: 35px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE) ? 'disabled' : ''; ?>>
                 <i class="fas fa-paper-plane text-white" style="font-size: 0.85rem;"></i>
             </button>
         </form>

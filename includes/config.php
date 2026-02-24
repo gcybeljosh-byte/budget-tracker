@@ -19,6 +19,11 @@
 define('AI_PROVIDER', 'gemini');
 
 /**
+ * AI_MAINTENANCE_MODE: Set to true to show an "Under Maintenance" message in the chat widget.
+ */
+define('AI_MAINTENANCE_MODE', true);
+
+/**
  * AI_API_KEY: Your API key for the selected provider
  * 
  * SECURITY NOTE: To prevent leaks, this file now attempts to load the key from:
