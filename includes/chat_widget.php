@@ -115,7 +115,20 @@
                         message: message
                     })
                 })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        return res.text().then(text => {
+                            throw new Error('HTTP ' + res.status + ': ' + text);
+                        });
+                    }
+                    return res.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            throw new Error('Invalid JSON: ' + text.substring(0, 100));
+                        }
+                    });
+                })
                 .then(result => {
                     hideTypingIndicator();
                     if (result.success && result.data) {
@@ -139,12 +152,13 @@
                             }));
                         }
                     } else {
-                        appendMessageToWidget('Error: ' + result.message, 'bot');
+                        appendMessageToWidget('Error: ' + (result.message || 'Unknown'), 'bot');
                     }
                 })
                 .catch(err => {
                     hideTypingIndicator();
-                    appendMessageToWidget('System Error', 'bot');
+                    console.error('AI Chat Error:', err);
+                    appendMessageToWidget('System Error: ' + err.message, 'bot');
                 })
                 .finally(() => {
                     btn.disabled = false;

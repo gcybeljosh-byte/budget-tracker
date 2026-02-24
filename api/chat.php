@@ -6,6 +6,10 @@ require_once '../includes/db.php';
 require_once '../includes/config.php';
 require_once '../includes/AiHelper.php';
 
+// Debug: Override error suppression
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['id'])) {
