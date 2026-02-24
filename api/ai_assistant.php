@@ -14,7 +14,14 @@ if (!isset($_SESSION['id'])) {
 }
 
 if (empty(AI_API_KEY)) {
-    echo json_encode(['success' => false, 'message' => 'System Error: AI_API_KEY is not defined or empty. Please check config.local.php.']);
+    $debug = [
+        'local_file_exists' => file_exists(__DIR__ . '/../includes/config.local.php'),
+        'local_key_defined' => defined('AI_API_KEY_LOCAL'),
+        'local_key_value' => defined('AI_API_KEY_LOCAL') ? (AI_API_KEY_LOCAL === 'YOUR_KEY_HERE' ? 'placeholder' : 'set') : 'not defined',
+        'env_key' => getenv('AI_API_KEY') ? 'set' : (getenv('GEMINI_API_KEY') ? 'gemini_set' : 'not set'),
+        'site_url' => defined('SITE_URL') ? SITE_URL : 'not defined'
+    ];
+    echo json_encode(['success' => false, 'message' => 'System Error: AI_API_KEY is empty.', 'debug' => $debug]);
     exit;
 }
 
