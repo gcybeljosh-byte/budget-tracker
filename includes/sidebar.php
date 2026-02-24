@@ -67,7 +67,7 @@
                     <a href="<?php echo SITE_URL; ?>core/analytics.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'analytics.php') ? 'active' : ''; ?>">
                         <i class="fas fa-chart-bar me-2" style="width: 20px;"></i> Analytics
                     </a>
-                    <a href="<?php echo SITE_URL; ?>core/chat_history.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'chat_history.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo SITE_URL; ?>core/history_log.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
                         <i class="fas fa-history me-2" style="width: 20px;"></i> Chat History
                     </a>
                 <?php endif; ?>

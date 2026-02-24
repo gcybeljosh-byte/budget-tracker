@@ -209,8 +209,8 @@ ksort($groupedMessages);
         }
 
         // --- Page Tutorial ---
-        <?php if (!isset($seen_tutorials['chat_history.php'])): ?>
-            if (!(window.seenTutorials && window.seenTutorials['chat_history.php'])) {
+        <?php if (!isset($seen_tutorials['history_log.php'])): ?>
+            if (!(window.seenTutorials && window.seenTutorials['history_log.php'])) {
                 const steps = [{
                         title: '💬 AI Chat History',
                         text: 'This page shows all your past conversations with the AI Budget Assistant — organized by date for easy review.'
@@ -245,7 +245,7 @@ ksort($groupedMessages);
 
                 function showStep(index) {
                     if (index >= steps.length) {
-                        markPageTutorialSeen('chat_history.php');
+                        markPageTutorialSeen('history_log.php');
                         return;
                     }
                     const step = steps[index];
@@ -274,7 +274,7 @@ ksort($groupedMessages);
                         }
                     }).then((result) => {
                         if (result.isConfirmed) showStep(index + 1);
-                        else if (result.dismiss === Swal.DismissReason.cancel) markPageTutorialSeen('chat_history.php');
+                        else if (result.dismiss === Swal.DismissReason.cancel) markPageTutorialSeen('history_log.php');
                     });
                 }
 
@@ -294,7 +294,7 @@ ksort($groupedMessages);
             cancelButtonColor: '#d33'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('<?php echo SITE_URL; ?>api/chat_history.php', {
+                fetch('<?php echo SITE_URL; ?>api/history_log.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',

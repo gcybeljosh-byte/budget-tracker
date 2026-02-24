@@ -249,8 +249,8 @@
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Bills</span>
                     </a>
-                    <a href="<?php echo SITE_URL; ?>core/chat_history.php"
-                        class="bottom-nav-item <?php echo ($currentPage == 'chat_history.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo SITE_URL; ?>core/history_log.php"
+                        class="bottom-nav-item <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
                         <i class="fas fa-history"></i>
                         <span>History</span>
                     </a>
