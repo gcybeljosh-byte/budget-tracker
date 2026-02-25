@@ -506,10 +506,10 @@ if (isset($_SESSION['id'])) {
     <footer class="py-12 px-6 bg-slate-50 border-top border-slate-100">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-piggy-bank text-white text-sm"></i>
+                <div class="w-8 h-8 flex items-center justify-center">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="font-bold text-lg tracking-tight text-slate-800">Budget<span class="text-indigo-600">Tracker</span></span>
+                <span class="font-bold text-lg tracking-tight text-slate-800">BudgetTracker</span>
             </div>
             <p class="text-slate-400 text-sm font-medium">© 2026 Budget Tracker. Precision & Simplicity.</p>
             <div class="flex items-center gap-6">
