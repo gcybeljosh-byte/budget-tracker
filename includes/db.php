@@ -91,6 +91,32 @@ $conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
+// Journal Entries table
+$conn->query("CREATE TABLE IF NOT EXISTS journals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    end_date DATE NULL,
+    title VARCHAR(255) NOT NULL,
+    notes TEXT,
+    financial_status VARCHAR(50) DEFAULT 'Neutral',
+    overspending_warning TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
+
+// Journal Lines table (Simplified: Account and Amount)
+$conn->query("CREATE TABLE IF NOT EXISTS journal_lines (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    journal_id INT NOT NULL,
+    account_title VARCHAR(255) NOT NULL,
+    amount DECIMAL(15, 2) NOT NULL DEFAULT 0,
+    debit DECIMAL(15, 2) DEFAULT 0,
+    credit DECIMAL(15, 2) DEFAULT 0,
+    FOREIGN KEY (journal_id) REFERENCES journals(id) ON DELETE CASCADE
+)");
+ensureColumnExists($conn, 'journal_lines', 'amount', "DECIMAL(15, 2) NOT NULL DEFAULT 0");
+
 // Categories table
 $conn->query("CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,

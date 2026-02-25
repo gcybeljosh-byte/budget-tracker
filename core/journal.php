@@ -52,14 +52,13 @@ include '../includes/header.php';
 
                     // Handle Manual Ledger Lines
                     if (isset($_POST['lines_account']) && is_array($_POST['lines_account'])) {
-                        $lineStmt = $conn->prepare("INSERT INTO journal_lines (journal_id, account_title, debit, credit) VALUES (?, ?, ?, ?)");
+                        $lineStmt = $conn->prepare("INSERT INTO journal_lines (journal_id, account_title, amount) VALUES (?, ?, ?)");
                         for ($i = 0; $i < count($_POST['lines_account']); $i++) {
                             $account = trim($_POST['lines_account'][$i]);
-                            $debit = floatval($_POST['lines_debit'][$i]);
-                            $credit = floatval($_POST['lines_credit'][$i]);
+                            $amount = floatval($_POST['lines_amount'][$i]);
 
-                            if (!empty($account) && ($debit > 0 || $credit > 0)) {
-                                $lineStmt->bind_param("isdd", $journal_id, $account, $debit, $credit);
+                            if (!empty($account) && $amount != 0) {
+                                $lineStmt->bind_param("isd", $journal_id, $account, $amount);
                                 $lineStmt->execute();
                             }
                         }
@@ -132,14 +131,13 @@ include '../includes/header.php';
                     $delStmt->close();
 
                     if (isset($_POST['lines_account']) && is_array($_POST['lines_account'])) {
-                        $lineStmt = $conn->prepare("INSERT INTO journal_lines (journal_id, account_title, debit, credit) VALUES (?, ?, ?, ?)");
+                        $lineStmt = $conn->prepare("INSERT INTO journal_lines (journal_id, account_title, amount) VALUES (?, ?, ?)");
                         for ($i = 0; $i < count($_POST['lines_account']); $i++) {
                             $account = trim($_POST['lines_account'][$i]);
-                            $debit = floatval($_POST['lines_debit'][$i]);
-                            $credit = floatval($_POST['lines_credit'][$i]);
+                            $amount = floatval($_POST['lines_amount'][$i]);
 
-                            if (!empty($account) && ($debit > 0 || $credit > 0)) {
-                                $lineStmt->bind_param("isdd", $id, $account, $debit, $credit);
+                            if (!empty($account) && $amount != 0) {
+                                $lineStmt->bind_param("isd", $id, $account, $amount);
                                 $lineStmt->execute();
                             }
                         }
@@ -410,36 +408,38 @@ include '../includes/header.php';
 
                                         <?php if (!empty($lines)): ?>
                                             <div class="mt-4">
-                                                <h6 class="fw-bold text-secondary text-uppercase small mb-3">Ledger Entries</h6>
+                                                <h6 class="fw-bold text-secondary text-uppercase small mb-3">Journal Entries</h6>
                                                 <div class="table-responsive rounded-3 border">
                                                     <table class="table table-borderless table-striped mb-0 small">
                                                         <thead class="bg-light border-bottom">
                                                             <tr>
                                                                 <th class="ps-3">Account Title</th>
-                                                                <th class="text-end">Debit</th>
-                                                                <th class="text-end pe-3">Credit</th>
+                                                                <th class="text-end pe-3">Amount</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             <?php
-                                                            $totalDebit = 0;
-                                                            $totalCredit = 0;
+                                                            $totalAmount = 0;
                                                             foreach ($lines as $line):
-                                                                $totalDebit += $line['debit'];
-                                                                $totalCredit += $line['credit'];
+                                                                // Fallback for transition: if amount is 0, try to use debit/credit
+                                                                $val = $line['amount'];
+                                                                if ($val == 0) {
+                                                                    $val = $line['debit'] - $line['credit'];
+                                                                }
+                                                                $totalAmount += $val;
                                                             ?>
                                                                 <tr>
                                                                     <td class="ps-3 fw-medium"><?php echo htmlspecialchars($line['account_title']); ?></td>
-                                                                    <td class="text-end text-dark"><?php echo $line['debit'] > 0 ? number_format($line['debit'], 2) : '-'; ?></td>
-                                                                    <td class="text-end pe-3 text-dark"><?php echo $line['credit'] > 0 ? number_format($line['credit'], 2) : '-'; ?></td>
+                                                                    <td class="text-end pe-3 text-dark <?php echo $val < 0 ? 'text-danger' : ''; ?>">
+                                                                        <?php echo $currencySymbol . number_format($val, 2); ?>
+                                                                    </td>
                                                                 </tr>
                                                             <?php endforeach; ?>
                                                         </tbody>
                                                         <tfoot class="border-top fw-bold bg-light">
                                                             <tr>
                                                                 <td class="ps-3">Total</td>
-                                                                <td class="text-end"><?php echo $currencySymbol . number_format($totalDebit, 2); ?></td>
-                                                                <td class="text-end pe-3"><?php echo $currencySymbol . number_format($totalCredit, 2); ?></td>
+                                                                <td class="text-end pe-3"><?php echo $currencySymbol . number_format($totalAmount, 2); ?></td>
                                                             </tr>
                                                         </tfoot>
                                                     </table>
@@ -492,9 +492,8 @@ include '../includes/header.php';
                                                     <table class="table table-borderless table-sm mb-0" id="editLedgerTable<?php echo $row['id']; ?>">
                                                         <thead>
                                                             <tr class="text-secondary" style="font-size:0.75rem;">
-                                                                <th style="width:40%">Account</th>
-                                                                <th style="width:25%">Debit</th>
-                                                                <th style="width:25%">Credit</th>
+                                                                <th style="width:60%">Account</th>
+                                                                <th style="width:30%">Amount</th>
                                                                 <th style="width:10%"></th>
                                                             </tr>
                                                         </thead>
@@ -502,11 +501,11 @@ include '../includes/header.php';
                                                             <?php
                                                             if (!empty($lines)) {
                                                                 foreach ($lines as $line) {
+                                                                    $val = ($line['amount'] != 0) ? $line['amount'] : ($line['debit'] - $line['credit']);
                                                             ?>
                                                                     <tr>
                                                                         <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-white" placeholder="Account" value="<?php echo htmlspecialchars($line['account_title']); ?>" required></td>
-                                                                        <td><input type="number" step="0.01" name="lines_debit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00" value="<?php echo $line['debit']; ?>"></td>
-                                                                        <td><input type="number" step="0.01" name="lines_credit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00" value="<?php echo $line['credit']; ?>"></td>
+                                                                        <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00" value="<?php echo $val; ?>"></td>
                                                                         <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
                                                                     </tr>
                                                                 <?php
@@ -515,8 +514,7 @@ include '../includes/header.php';
                                                                 ?>
                                                                 <tr>
                                                                     <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-white" placeholder="Account" required></td>
-                                                                    <td><input type="number" step="0.01" name="lines_debit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
-                                                                    <td><input type="number" step="0.01" name="lines_credit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
+                                                                    <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
                                                                     <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
                                                                 </tr>
                                                             <?php
@@ -636,17 +634,15 @@ include '../includes/header.php';
                             <table class="table table-borderless table-sm mb-0" id="addLedgerTable">
                                 <thead>
                                     <tr class="text-secondary" style="font-size:0.75rem;">
-                                        <th style="width:40%">Account</th>
-                                        <th style="width:25%">Debit</th>
-                                        <th style="width:25%">Credit</th>
+                                        <th style="width:60%">Account</th>
+                                        <th style="width:30%">Amount</th>
                                         <th style="width:10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-white" placeholder="Account" required></td>
-                                        <td><input type="number" step="0.01" name="lines_debit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
-                                        <td><input type="number" step="0.01" name="lines_credit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
+                                        <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
                                         <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
                                     </tr>
                                 </tbody>
@@ -740,8 +736,7 @@ include '../includes/header.php';
         const newRow = table.insertRow();
         newRow.innerHTML = `
             <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-white" placeholder="Account" required></td>
-            <td><input type="number" step="0.01" name="lines_debit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
-            <td><input type="number" step="0.01" name="lines_credit[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
+            <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
             <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
         `;
     }
