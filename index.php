@@ -82,7 +82,7 @@ if (isset($_SESSION['id'])) {
                 <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 whitespace-nowrap">Budget<span class="text-indigo-600">Tracker</span></span>
+                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 whitespace-nowrap">BudgetTracker</span>
             </div>
             <div class="flex items-center gap-1 md:gap-4">
                 <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 font-bold text-sm md:text-base hover:text-indigo-600 ios-transition px-3 py-2 rounded-xl hover:bg-slate-50">Login</a>
@@ -121,46 +121,110 @@ if (isset($_SESSION['id'])) {
                 </a>
             </div>
 
-            <!-- Dashboard Preview -->
+            <!-- Dynamic Dashboard Preview (Pure CSS/Tailwind) -->
             <div class="relative max-w-5xl mx-auto px-4 md:px-0 group reveal">
+                <!-- Background Glow -->
                 <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2rem] md:rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 ios-transition"></div>
-                <div class="relative glass p-2 md:p-4 rounded-[2rem] md:rounded-[2.5rem] ios-shadow overflow-hidden">
-                    <div class="aspect-[4/3] md:aspect-video rounded-[1.5rem] overflow-hidden bg-slate-100 flex items-center justify-center relative">
-                        <!-- High Quality Mockup Image -->
-                        <img src="https://images.unsplash.com/photo-1551288049-bbbda5366391?auto=format&fit=crop&q=80&w=2070" alt="Dashboard Preview" class="w-full h-full object-cover shadow-inner border border-slate-100 float-animation">
 
-                        <!-- Mobile Centered Placeholder Info -->
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/40 md:hidden p-6 text-center">
-                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl">
-                                <i class="fas fa-chart-line text-white text-4xl mb-3"></i>
-                                <p class="text-white font-bold text-lg">Next-Gen Analytics</p>
-                                <p class="text-white/80 text-sm mt-2">Track every penny with precision on any device.</p>
+                <div class="relative glass p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] ios-shadow overflow-hidden min-h-[400px] md:min-h-[500px] flex flex-col gap-6">
+                    <!-- Internal Dashboard Mockup Header -->
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-slate-100 rounded-full"></div>
+                            <div class="text-left">
+                                <div class="h-2 w-24 bg-slate-100 rounded-full mb-2"></div>
+                                <div class="h-3 w-32 bg-slate-200 rounded-full"></div>
                             </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="w-8 h-8 bg-slate-50 rounded-lg"></div>
+                            <div class="w-8 h-8 bg-slate-50 rounded-lg"></div>
                         </div>
                     </div>
 
-                    <!-- Floating Stat 1 -->
-                    <div class="absolute top-12 left-12 glass p-4 md:p-6 rounded-2xl md:rounded-3xl ios-shadow md:block hidden float-animation" style="animation-delay: 1s;">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 md:w-12 md:h-12 bg-green-100 text-green-600 rounded-xl md:rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-arrow-up"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+                        <!-- Balance & Analytics Column -->
+                        <div class="md:col-span-2 flex flex-col gap-6">
+                            <!-- Animated Balance Cards -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-6 bg-white rounded-3xl ios-shadow border border-slate-50 float-animation">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Balance</p>
+                                    <h4 class="text-2xl font-extrabold text-slate-800">₱45,250.00</h4>
+                                    <div class="mt-4 flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-green-100 text-green-600 text-[10px] font-bold rounded-full">+12.5%</span>
+                                        <span class="text-[10px] text-slate-400">vs last month</span>
+                                    </div>
+                                </div>
+                                <div class="p-6 bg-slate-900 rounded-3xl shadow-xl float-animation" style="animation-delay: 0.5s;">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Monthly Spend</p>
+                                    <h4 class="text-2xl font-extrabold text-white">₱12,800.00</h4>
+                                    <div class="mt-4 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-indigo-500 h-full rounded-full transition-all duration-1000 w-[65%]" style="transition-delay: 1s;"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-left">
-                                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Net Profit</p>
-                                <p class="text-lg md:text-xl font-extrabold text-slate-800">+₱24,500.00</p>
+
+                            <!-- Animated Chart Preview -->
+                            <div class="flex-1 p-6 bg-white rounded-3xl ios-shadow border border-slate-50">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h5 class="font-bold text-slate-800">Spending Overview</h5>
+                                    <div class="flex gap-1">
+                                        <div class="w-12 h-2 bg-indigo-500 rounded-full"></div>
+                                        <div class="w-12 h-2 bg-slate-100 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-end justify-between h-32 gap-3 px-2">
+                                    <div class="w-full bg-slate-50 rounded-t-xl transition-all duration-1000 h-[40%]" style="transition-delay: 0.2s;"></div>
+                                    <div class="w-full bg-indigo-500 rounded-t-xl transition-all duration-1000 h-[70%]" style="transition-delay: 0.4s;"></div>
+                                    <div class="w-full bg-slate-50 rounded-t-xl transition-all duration-1000 h-[50%]" style="transition-delay: 0.6s;"></div>
+                                    <div class="w-full bg-purple-500 rounded-t-xl transition-all duration-1000 h-[90%]" style="transition-delay: 0.8s;"></div>
+                                    <div class="w-full bg-slate-50 rounded-t-xl transition-all duration-1000 h-[60%]" style="transition-delay: 1.0s;"></div>
+                                    <div class="w-full bg-indigo-600 rounded-t-xl transition-all duration-1000 h-[30%]" style="transition-delay: 1.2s;"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Floating Stat 2 (Mobile and Desktop Friendly) -->
-                    <div class="absolute bottom-12 right-12 glass p-4 md:p-6 rounded-2xl md:rounded-3xl ios-shadow md:block hidden float-animation" style="animation-delay: 2s;">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 text-indigo-600 rounded-xl md:rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-bullseye"></i>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Goal Status</p>
-                                <p class="text-lg md:text-xl font-extrabold text-slate-800">82% Reached</p>
+                        <!-- Sidebar / Transactions Column -->
+                        <div class="flex flex-col gap-6">
+                            <div class="p-6 bg-white rounded-3xl ios-shadow border border-slate-50 flex-1 flex flex-col gap-4 overflow-hidden relative">
+                                <h5 class="font-bold text-slate-800 mb-2">Recent Activity</h5>
+
+                                <!-- Simulated Transactions -->
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 ios-transition cursor-default">
+                                        <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-shopping-cart text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 text-left">
+                                            <p class="text-xs font-bold text-slate-700">Groceries</p>
+                                            <p class="text-[10px] text-slate-400">2 mins ago</p>
+                                        </div>
+                                        <p class="text-xs font-bold text-red-500">-₱450</p>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 ios-transition cursor-default">
+                                        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-wallet text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 text-left">
+                                            <p class="text-xs font-bold text-slate-700">Salary</p>
+                                            <p class="text-[10px] text-slate-400">1 hour ago</p>
+                                        </div>
+                                        <p class="text-xs font-bold text-green-500">+₱5k</p>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 ios-transition cursor-default">
+                                        <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-bolt text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 text-left">
+                                            <p class="text-xs font-bold text-slate-700">Electricity</p>
+                                            <p class="text-[10px] text-slate-400">Earlier today</p>
+                                        </div>
+                                        <p class="text-xs font-bold text-red-500">-₱2k</p>
+                                    </div>
+                                </div>
+
+                                <!-- Fade effect at the bottom -->
+                                <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
                             </div>
                         </div>
                     </div>
