@@ -804,6 +804,14 @@ class AiHelper
         $proxyUsed = (defined('AI_PROXY_URL') && !empty(AI_PROXY_URL)) ? 'Yes' : 'No';
         $keyHint = !empty($apiKey) ? substr($apiKey, 0, 8) . '...' . substr($apiKey, -4) : 'Empty';
 
+        // Graceful Error Handling for Quota (HTTP 429)
+        if ($http_code == 429) {
+            return json_encode([
+                'response_message' => "It looks like your daily AI limit has been reached! Please try again tomorrow to continue our chat.",
+                'actions' => []
+            ]);
+        }
+
         return json_encode([
             'response_message' => "Gemini API Error: $apiErrorMessage (HTTP $http_code)",
             'debug_info' => [
