@@ -17,6 +17,7 @@ $checkAllowance = $conn->query("SHOW COLUMNS FROM allowances LIKE 'source_type'"
 if ($checkAllowance->num_rows == 0) {
     $conn->query("ALTER TABLE allowances ADD COLUMN source_type VARCHAR(50) DEFAULT 'Cash'");
 }
+$conn->query("UPDATE allowances SET source_type = 'Cash' WHERE source_type IS NULL OR source_type = ''");
 
 // Expenses table
 $checkExpense = $conn->query("SHOW COLUMNS FROM expenses LIKE 'source_type'");
@@ -27,6 +28,15 @@ $checkSource = $conn->query("SHOW COLUMNS FROM expenses LIKE 'expense_source'");
 if ($checkSource->num_rows == 0) {
     $conn->query("ALTER TABLE expenses ADD COLUMN expense_source VARCHAR(50) DEFAULT 'Allowance' AFTER source_type");
 }
+$conn->query("UPDATE expenses SET source_type = 'Cash' WHERE source_type IS NULL OR source_type = ''");
+$conn->query("UPDATE expenses SET expense_source = 'Allowance' WHERE expense_source IS NULL OR expense_source = ''");
+
+// Savings table (Ensuring source_type exists and is populated)
+$checkSavings = $conn->query("SHOW COLUMNS FROM savings LIKE 'source_type'");
+if ($checkSavings->num_rows == 0) {
+    $conn->query("ALTER TABLE savings ADD COLUMN source_type VARCHAR(50) DEFAULT 'Cash'");
+}
+$conn->query("UPDATE savings SET source_type = 'Cash' WHERE source_type IS NULL OR source_type = ''");
 
 // Users table (Security Questions)
 $checkSQ = $conn->query("SHOW COLUMNS FROM users LIKE 'security_question'");
@@ -59,8 +69,8 @@ $response = [
     'recent_transactions' => []
 ];
 
-// 1. Total Allowance (Lifetime Pool for liquid balance sync)
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?");
+// 1. Monthly Allowance (For dashboard card labeled as monthly)
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
 $stmt->bind_param("i", $user_id);
 if ($stmt->execute()) {
     $row = $stmt->get_result()->fetch_row();
@@ -68,8 +78,8 @@ if ($stmt->execute()) {
 }
 $stmt->close();
 
-// 2. Total Expenses (Lifetime Gross - All Sources for transparency)
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ?");
+// 2. Monthly Expenses (For dashboard card labeled as monthly)
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
 $stmt->bind_param("i", $user_id);
 if ($stmt->execute()) {
     $result = $stmt->get_result();
