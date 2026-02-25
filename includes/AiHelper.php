@@ -202,17 +202,6 @@ class AiHelper
             $system['total_expenses_count'] = ($res && $row = $res->fetch_assoc()) ? $row['count'] : 0;
 
             if ($context['role'] === 'superadmin') {
-                // Ensure activity_logs table exists to avoid crash
-                $this->conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    user_id INT,
-                    action_type VARCHAR(50),
-                    description TEXT,
-                    ip_address VARCHAR(45),
-                    user_agent TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )");
-
                 // Sensitive Superadmin logs (Fixed column: action_type)
                 $res = $this->conn->query("SELECT action_type, description, created_at FROM activity_logs ORDER BY created_at DESC LIMIT 15");
                 $system['recent_system_activity'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
@@ -300,7 +289,13 @@ class AiHelper
         $prompt .= "Today's Date: {$todayDate} ({$currentDate})\n\n";
 
         $prompt .= "# FINANCIAL DATASET\n";
-        $prompt .= "```json\n" . json_encode($context, JSON_PRETTY_PRINT) . "\n```\n\n";
+        $jsonContext = json_encode($context);
+        if ($jsonContext === false) {
+            // Trim context if too large/complex for JSON
+            unset($context['full_datasets']);
+            $jsonContext = json_encode($context);
+        }
+        $prompt .= "```json\n" . ($jsonContext ?: "{}") . "\n```\n\n";
 
         $prompt .= "# CRITICAL RULES (EXPERT DOMAIN)\n";
         $prompt .= "1. CAPABILITIES: You can ONLY perform these actions: `add_expense`, `add_allowance`, `add_savings`, `create_goal`, `add_bill`.\n";
@@ -377,9 +372,15 @@ class AiHelper
         }
 
         // Clean markdown and find the first JSON object
-        $cleanJson = $rawResponse;
+        $cleanJson = trim($rawResponse);
         if (preg_match('/\{.*\}/s', $rawResponse, $matches)) {
             $cleanJson = $matches[0];
+        }
+
+        // Final safety: Remove any trailing text after the last }
+        $lastBrace = strrpos($cleanJson, '}');
+        if ($lastBrace !== false) {
+            $cleanJson = substr($cleanJson, 0, $lastBrace + 1);
         }
 
         $data = json_decode($cleanJson, true);

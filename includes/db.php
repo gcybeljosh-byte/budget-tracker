@@ -16,6 +16,10 @@ if (!$conn) {
 date_default_timezone_set('Asia/Manila');
 mysqli_query($conn, "SET time_zone = '+08:00'");
 
+// Production error settings
+error_reporting(0);
+ini_set('display_errors', 0);
+
 if (!function_exists('ensureColumnExists')) {
     /**
      * More robust version of ALTER TABLE ... ADD COLUMN IF NOT EXISTS
@@ -60,6 +64,42 @@ $conn->query("CREATE TABLE IF NOT EXISTS financial_goals (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
 
+// Recurring Payments table (Bills and Subscriptions)
+$conn->query("CREATE TABLE IF NOT EXISTS recurring_payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    amount DECIMAL(15, 2) NOT NULL,
+    category VARCHAR(50) DEFAULT 'Utilities',
+    due_date DATE NOT NULL,
+    frequency ENUM('monthly', 'yearly', 'weekly') DEFAULT 'monthly',
+    source_type VARCHAR(50) DEFAULT 'Cash',
+    is_active TINYINT(1) DEFAULT 1,
+    last_paid_at DATE DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
+
+// Activity Logs table
+$conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action_type VARCHAR(50),
+    description TEXT,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+// Categories table
+$conn->query("CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_category_name (user_id, name),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
 
 if (!function_exists('logActivity')) {
     /**
