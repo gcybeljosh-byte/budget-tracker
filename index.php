@@ -481,8 +481,8 @@ if (isset($_SESSION['id'])) {
             </h2>
 
             <div class="flex flex-col items-center gap-6">
-                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-[#6b4e71] text-white font-bold px-12 py-5 rounded-2xl text-xl shadow-2xl hover:bg-[#5a415f] hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
-                    Start now - It's free
+                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white font-bold px-12 py-5 rounded-2xl text-xl shadow-2xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
+                    Sign Up - It's Free
                 </a>
 
                 <div class="flex flex-col items-center gap-2">
