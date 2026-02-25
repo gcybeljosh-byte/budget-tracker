@@ -127,18 +127,20 @@ if (isset($_SESSION['id'])) {
                 <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2rem] md:rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 ios-transition"></div>
 
                 <div class="relative glass p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] ios-shadow overflow-hidden min-h-[400px] md:min-h-[500px] flex flex-col gap-6">
-                    <!-- Internal Dashboard Mockup Header -->
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-slate-100 rounded-full"></div>
+                    <!-- Internal Dashboard Mockup Header (Account Overview) -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shadow-inner">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                            </div>
                             <div class="text-left">
-                                <div class="h-2 w-24 bg-slate-100 rounded-full mb-2"></div>
-                                <div class="h-3 w-32 bg-slate-200 rounded-full"></div>
+                                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Signed in as</p>
+                                <h5 class="font-bold text-slate-800 leading-tight">Alex Thompson <span class="hidden md:inline text-indigo-500 ml-1 text-xs px-2 py-0.5 bg-indigo-50 rounded-full">Pro</span></h5>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <div class="w-8 h-8 bg-slate-50 rounded-lg"></div>
-                            <div class="w-8 h-8 bg-slate-50 rounded-lg"></div>
+                        <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100 self-start md:self-auto">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-600">February 2026 Overview</span>
                         </div>
                     </div>
 
