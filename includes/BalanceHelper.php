@@ -41,21 +41,28 @@ class BalanceHelper
         return (float)($res['balance'] ?? 0);
     }
 
-    public function getTotalSavings($user_id, $monthOnly = false)
+    public function getTotalSavings($user_id, $monthOnly = false, $source_type = null)
     {
         $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
-        $stmt = $this->conn->prepare("
+        $sourceFilter = $source_type ? " AND source_type = ?" : "";
+
+        $sql = "
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $dateFilter) as total
-        ");
-        $stmt->bind_param("ii", $user_id, $user_id);
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $sourceFilter $dateFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $sourceFilter $dateFilter) as total
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        if ($source_type) {
+            $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
+        } else {
+            $stmt->bind_param("ii", $user_id, $user_id);
+        }
+
         $stmt->execute();
         $res = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        // Note: For goals UI, we use financial_goals table. 
-        // For Wallet balance, we trust the savings transaction history.
         return (float)($res['total'] ?? 0);
     }
 
@@ -63,7 +70,7 @@ class BalanceHelper
     {
         // For real-time balance validation (e.g. adding expenses), we use LIFETIME balance
         if ($expense_source === 'Savings') {
-            return $this->getTotalSavings($user_id, false);
+            return $this->getTotalSavings($user_id, false, $source_type);
         } else {
             if ($source_type === 'Cash') {
                 return $this->getCashBalance($user_id, false);
@@ -80,10 +87,10 @@ class BalanceHelper
         if ($expense_source === 'Savings') {
             $stmt = $this->conn->prepare("
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $dateFilter) as total_saved,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $dateFilter) as total_spent
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $dateFilter) as total_saved,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Savings' $dateFilter) as total_spent
             ");
-            $stmt->bind_param("ii", $user_id, $user_id);
+            $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
             $stmt->execute();
             $res = $stmt->get_result()->fetch_assoc();
             $stmt->close();

@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentBalance = $balanceDetails['balance'];
 
                 if ($amount > $currentBalance) {
-                    $sourceName = ($expense_source === 'Savings' ? 'Savings' : ($source_type . ' Balance'));
+                    $sourceName = ($expense_source === 'Savings' ? ($source_type . ' Savings') : ($source_type . ' Balance'));
                     $reason = "Insufficient balance in $sourceName. ";
                     $reason .= "Available: " . number_format($currentBalance, 2) . ". ";
                     $reason .= "(Total " . ($expense_source === 'Savings' ? 'Deposits' : 'Allowance') . ": " . number_format($balanceDetails['allowance_sum'], 2);
