@@ -116,6 +116,22 @@ class BalanceHelper
         }
     }
 
+    public function getBalancesByAllSources($user_id)
+    {
+        $sources = ['Cash', 'GCash', 'Maya', 'Bank', 'Electronic'];
+        $results = [];
+
+        foreach ($sources as $source) {
+            $details = $this->getBalanceDetails($user_id, 'Allowance', $source);
+            $results[] = [
+                'source' => $source,
+                'balance' => $details['balance']
+            ];
+        }
+
+        return $results;
+    }
+
     public function syncBudgetLimits($user_id)
     {
         // 1. Fetch current monthly allowance total

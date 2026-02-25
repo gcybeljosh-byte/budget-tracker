@@ -101,19 +101,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = ['success' => false, 'message' => 'Unknown action'];
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Fetch all allowances for the user
-    $stmt = $conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? ORDER BY date DESC");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $mode = $_GET['mode'] ?? 'list';
 
-    $allowances = [];
-    while ($row = $result->fetch_assoc()) {
-        $allowances[] = $row;
+    if ($mode === 'sources') {
+        // Fetch aggregated balances for all sources
+        $sources = $balanceHelper->getBalancesByAllSources($user_id);
+        $response = ['success' => true, 'data' => $sources];
+    } elseif ($mode === 'history') {
+        $source = $_GET['source'] ?? '';
+        if (!$source) {
+            echo json_encode(['success' => false, 'message' => 'Source is required']);
+            exit;
+        }
+
+        // Fetch combined history of allowances and expenses for this source
+        $history = [];
+
+        // 1. Get Allowances
+        $stmt = $conn->prepare("SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? ORDER BY date DESC");
+        $stmt->bind_param("is", $user_id, $source);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $history[] = $row;
+        }
+        $stmt->close();
+
+        // 2. Get Expenses (from Allowance source)
+        $stmt = $conn->prepare("SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' ORDER BY date DESC");
+        $stmt->bind_param("is", $user_id, $source);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $history[] = $row;
+        }
+        $stmt->close();
+
+        // 3. Get Savings Transfers (Expenses that are technically deductions from Allowance)
+        $stmt = $conn->prepare("SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? ORDER BY date DESC");
+        $stmt->bind_param("is", $user_id, $source);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $history[] = $row;
+        }
+        $stmt->close();
+
+        // Sort by date DESC
+        usort($history, function ($a, $b) {
+            return strcmp($b['date'], $a['date']);
+        });
+
+        $response = ['success' => true, 'data' => $history];
+    } else {
+        // Fetch all allowances for the user (legacy/backup)
+        $stmt = $conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? ORDER BY date DESC");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $allowances = [];
+        while ($row = $result->fetch_assoc()) {
+            $allowances[] = $row;
+        }
+        $stmt->close();
+
+        $response = ['success' => true, 'data' => $allowances];
     }
-    $stmt->close();
-
-    $response = ['success' => true, 'data' => $allowances];
 }
 
 echo json_encode($response);
