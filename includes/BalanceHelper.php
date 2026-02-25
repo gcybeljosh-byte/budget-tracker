@@ -95,14 +95,13 @@ class BalanceHelper
                 'balance' => (float)$res['total_saved'] - (float)$res['total_spent']
             ];
         } else {
-            $sourceFilter = ($source_type === 'Cash') ? " = 'Cash'" : " IN ('GCash', 'Maya', 'Bank', 'Electronic')";
             $stmt = $this->conn->prepare("
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type $sourceFilter $dateFilter) as total_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type $sourceFilter AND expense_source = 'Allowance' $dateFilter) as total_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type $sourceFilter $dateFilter) as total_savings
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = ? $dateFilter) as total_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' $dateFilter) as total_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $dateFilter) as total_savings
             ");
-            $stmt->bind_param("iii", $user_id, $user_id, $user_id);
+            $stmt->bind_param("isisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
             $stmt->execute();
             $res = $stmt->get_result()->fetch_assoc();
             $stmt->close();
