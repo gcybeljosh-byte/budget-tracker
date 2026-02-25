@@ -146,19 +146,19 @@ if (isset($_SESSION['id'])) {
                         <!-- Balance & Analytics Column -->
                         <div class="md:col-span-2 flex flex-col gap-6">
                             <!-- Animated Balance Cards -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="p-6 bg-white rounded-3xl ios-shadow border border-slate-50 float-animation">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Balance</p>
-                                    <h4 class="text-2xl font-extrabold text-slate-800">₱45,250.00</h4>
-                                    <div class="mt-4 flex items-center gap-2">
-                                        <span class="px-2 py-0.5 bg-green-100 text-green-600 text-[10px] font-bold rounded-full">+12.5%</span>
-                                        <span class="text-[10px] text-slate-400">vs last month</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-4 md:p-6 bg-white rounded-3xl ios-shadow border border-slate-50 float-animation">
+                                    <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Total Balance</p>
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-slate-800">₱45,250.00</h4>
+                                    <div class="mt-3 md:mt-4 flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-green-100 text-green-600 text-[9px] md:text-[10px] font-bold rounded-full">+12.5%</span>
+                                        <span class="text-[9px] md:text-[10px] text-slate-400">vs last month</span>
                                     </div>
                                 </div>
-                                <div class="p-6 bg-slate-900 rounded-3xl shadow-xl float-animation" style="animation-delay: 0.5s;">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Monthly Spend</p>
-                                    <h4 class="text-2xl font-extrabold text-white">₱12,800.00</h4>
-                                    <div class="mt-4 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                <div class="p-4 md:p-6 bg-slate-900 rounded-3xl shadow-xl float-animation" style="animation-delay: 0.5s;">
+                                    <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 md:mb-2 text-slate-500">Monthly Spend</p>
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-white">₱12,800.00</h4>
+                                    <div class="mt-3 md:mt-4 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                                         <div class="bg-indigo-500 h-full rounded-full transition-all duration-1000 w-[65%]" style="transition-delay: 1s;"></div>
                                     </div>
                                 </div>
