@@ -326,9 +326,10 @@ include '../includes/header.php';
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
                         <div class="small text-muted">Via ${bill.source_type}</div>
-                        <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold mark-paid-btn" data-id="${bill.id}" onclick="event.stopPropagation()">
-                            Mark as Paid
-                        </button>
+                        <div class="text-end">
+                            <span class="extra-small text-muted d-block" style="font-size: 0.65rem;">Last Payment</span>
+                            <span class="small fw-bold text-success">${bill.last_paid_at ? 'Paid: ' + bill.last_paid_at : 'Never Paid'}</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -341,9 +342,6 @@ include '../includes/header.php';
                     e.preventDefault();
                     openEditBillModal(btn.dataset.id);
                 };
-            });
-            document.querySelectorAll('.mark-paid-btn').forEach(btn => {
-                btn.onclick = () => markBillPaid(btn.dataset.id);
             });
 
             document.querySelectorAll('.delete-bill').forEach(btn => {
