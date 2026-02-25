@@ -174,9 +174,35 @@ class AiHelper
             'journal' => !empty($context['full_datasets']['journals']) ? $context['full_datasets']['journals'][0]['date'] : 'No entries',
             'goals' => !empty($context['full_datasets']['financial_goals']) ? count(array_filter($context['full_datasets']['financial_goals'], fn($g) => $g['status'] === 'Active')) . "/" . count($context['full_datasets']['financial_goals']) . " active" : "0/0 active",
             'forecast' => $context['stats']['this_month']['expenses'] > 0 ? $context['balance'] / ($context['stats']['this_month']['expenses'] / max(1, (int)date('j'))) : 0, // Simplified runway
-            'reports_this_month' => count(array_filter($context['full_datasets']['reports'] ?? [], fn($r) => strpos($r['created_at'], date('Y-m')) === 0)),
+            'reports_this_month' => count(array_filter($context['full_datasets']['reports'] ?? [], fn($r) => strpos($r['created_at'], date('Y-m-d')) === 0)),
             'top_category' => !empty($context['expenses_by_category']) ? array_keys($context['expenses_by_category'], max($context['expenses_by_category']))[0] : 'None'
         ];
+
+        // 12. ROLE-BASED SYSTEM DATA (Admins/Superadmins only)
+        if ($context['role'] === 'superadmin' || $context['role'] === 'admin') {
+            // Platform-wide counts
+            $system = [];
+            $res = $this->conn->query("SELECT COUNT(*) as total FROM users");
+            $system['total_users'] = $res->fetch_assoc()['total'];
+
+            $res = $this->conn->query("SELECT COUNT(*) as active FROM users WHERE role != 'inactive'");
+            $system['active_users'] = $res->fetch_assoc()['active'];
+
+            // Monthly transaction volume (Sanitized)
+            $res = $this->conn->query("SELECT COUNT(*) as count FROM expenses WHERE DATE_FORMAT(date, '%Y-%m') = '" . date('Y-m') . "'");
+            $system['total_expenses_count'] = $res->fetch_assoc()['count'];
+
+            if ($context['role'] === 'superadmin') {
+                // Sensitive Superadmin logs
+                $res = $this->conn->query("SELECT activity_type, description, created_at FROM activity_logs ORDER BY created_at DESC LIMIT 15");
+                $system['recent_system_activity'] = $res->fetch_all(MYSQLI_ASSOC);
+
+                $res = $this->conn->query("SELECT first_name, last_name, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 5");
+                $system['newest_users'] = $res->fetch_all(MYSQLI_ASSOC);
+            }
+
+            $context['system_metrics'] = $system;
+        }
 
         return $context;
     }
@@ -235,9 +261,9 @@ class AiHelper
         $symbol = $symbols[$currencyCode] ?? '₱';
 
         $prompt = "# IDENTITY\n";
-        $prompt .= "You are an Empathetic Financial Advisor integrated into a Budget Tracking System engineered and developed by Cybel Josh A. Gamido (Super Admin) from the University of Southern Mindanao (USM).\n";
+        $prompt .= "You are an AI Expert in Budget Tracking and an Empathetic Financial Advisor integrated into the Budget Tracker System engineered by Cybel Josh A. Gamido (Super Admin) from USM.\n";
         $prompt .= "The developer can be contacted at gcybeljosh@gmail.com.\n";
-        $prompt .= "Your role is to be a supportive, welcoming, and helpful guide. While you are data-driven, you should communicate with warmth and use the user's name ({$name}) to build rapport.\n\n";
+        $prompt .= "Your role is to guide users ({$name}) through their financial journey with precision, warmth, and strategic insight.\n\n";
 
         $prompt .= "# GREETING PROTOCOL\n";
         $prompt .= "1. RESPONSE TO GREETINGS: If the user greets you (e.g., 'Hello', 'Hi', 'Good morning'), you MUST respond with a friendly greeting using their name ({$name}) and ask how you can help with their finances today.\n";
@@ -267,15 +293,17 @@ class AiHelper
         }
         $prompt .= "\n";
 
-        $prompt .= "# CRITICAL RULES (STRICT CLOSED-DOMAIN)\n";
-        $prompt .= "1. NO GLOBAL KNOWLEDGE: You are strictly forbidden from sharing general knowledge, facts, or advice outside the provided Financial Dataset. If the answer is not in the data, state: \"I'm sorry, I don't have that information in your records.\"\n";
-        $prompt .= "2. Strict Responsiveness: Answer ONLY the specific question asked based on the JSON data. Do not provide extra analysis unless prompted.\n";
-        $prompt .= "3. No External Identity: You are not a general-purpose AI. You are a BudgetTracker System Tool.\n";
-        $prompt .= "4. NO HALLUCINATION: Do not invent numbers, dates, or facts. Never guess.\n";
-        $prompt .= "5. Source of Truth: Use ONLY the provided Financial Dataset. Do not cite external benchmarks or generic costs.\n";
+        $prompt .= "# CRITICAL RULES (EXPERT DOMAIN)\n";
+        $prompt .= "1. ROLE-BASED ISOLATION: You MUST only discuss data provided in the JSON context. \n";
+        $prompt .= "   - REGULAR USER: Can only see their personal records. Zero platform awareness.\n";
+        $prompt .= "   - ADMIN: Can see platform metrics (user counts, etc.) but NO private data of others.\n";
+        $prompt .= "   - SUPERADMIN: Full access to system logs and user management data provided in the context.\n";
+        $prompt .= "2. SAVING TIPS: You are encouraged to provide actionable saving tips based on the user's spending patterns (e.g., 'I see you spent {$symbol}X on Food; try meal prepping to save!').\n";
+        $prompt .= "3. BUDGET PLANS: You can suggest structured budget plans based on their allowance (e.g., the 50/30/20 rule applied to their {$symbol}{$budgetGoal}).\n";
+        $prompt .= "4. RECORD FINDING: If a user asks for a record you can't find, give a step-by-step UI guide (e.g., 'Go to the Expenses tab, use the search bar, and filter by...').\n";
+        $prompt .= "5. NO GLOBAL KNOWLEDGE: Do not discuss general world news, sports, or celebrities. Stay focused on Finance and the Budget Tracker System.\n";
         $prompt .= "6. Currency: Always use {$symbol} for amounts.\n";
-        $prompt .= "7. Privacy: You have ZERO visibility into other users. Never discuss system infrastructure.\n";
-        $prompt .= "8. JSON Output: Output actions in strictly valid JSON format.\n\n";
+        $prompt .= "7. JSON Output: Output actions in strictly valid JSON format.\n\n";
 
         $prompt .= "# DATA SCARCITY PROTOCOL\n";
         $prompt .= "1. If `gross_allowance` is 0, say: \"Hello {$name}! I noticed you haven't recorded any income yet. Would you like to add an allowance to get started?\"\n";
