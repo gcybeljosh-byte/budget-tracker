@@ -51,17 +51,17 @@ if (isset($_SESSION['id'])) {
 
 <body class="text-slate-900 overflow-x-hidden">
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-        <div class="max-w-6xl mx-auto flex items-center justify-between glass px-6 py-3 rounded-3xl ios-shadow">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                    <i class="fas fa-piggy-bank text-white text-lg"></i>
+    <nav class="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between glass px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl ios-shadow">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-indigo-600 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <i class="fas fa-piggy-bank text-white text-sm md:text-lg"></i>
                 </div>
-                <span class="font-bold text-xl tracking-tight text-slate-800">Budget<span class="text-indigo-600">Tracker</span></span>
+                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800">Budget<span class="text-indigo-600 hidden xs:inline">Tracker</span></span>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 font-semibold hover:text-indigo-600 ios-transition px-4 py-2 rounded-2xl hover:bg-slate-50">Login</a>
-                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-0.5 ios-transition">Sign Up</a>
+            <div class="flex items-center gap-2 md:gap-4">
+                <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 font-bold text-sm md:text-base md:font-semibold hover:text-indigo-600 ios-transition px-3 md:px-4 py-2 rounded-xl md:rounded-2xl hover:bg-slate-50">Login</a>
+                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white text-sm md:text-base font-bold px-4 md:px-6 py-2 md:py-2.5 rounded-xl md:rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-0.5 ios-transition">Sign Up</a>
             </div>
         </div>
     </nav>
@@ -73,57 +73,44 @@ if (isset($_SESSION['id'])) {
         <div class="absolute top-1/2 -left-24 w-72 h-72 bg-purple-100 rounded-full blur-3xl opacity-50 -z-10"></div>
 
         <div class="max-w-6xl mx-auto text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full mb-8 ios-shadow animate-bounce">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full mb-6 md:mb-8 ios-shadow animate-bounce">
                 <span class="flex h-2 w-2 rounded-full bg-indigo-500"></span>
-                <span class="text-indigo-600 font-bold text-xs uppercase tracking-widest">Version 2.5 New Features</span>
+                <span class="text-indigo-600 font-bold text-[10px] md:text-xs uppercase tracking-widest">Version 2.5 New Features</span>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-[1.1]">
-                Master your finances <br>
+            <h1 class="text-4xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 md:mb-8 leading-[1.1]">
+                Master your finances <br class="hidden md:block">
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">with effortless clarity.</span>
             </h1>
 
-            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 leading-relaxed">
+            <p class="text-base md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 md:mb-12 leading-relaxed px-4 md:px-0">
                 Experience a revolutionary way to track expenses, manage savings, and reach your financial goals with an interface designed for simplicity.
             </p>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
-                <a href="<?php echo SITE_URL; ?>auth/register.php" class="w-full sm:w-auto bg-slate-900 text-white font-bold px-10 py-5 rounded-[2rem] text-lg shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-16 md:mb-20 px-4 md:px-0">
+                <a href="<?php echo SITE_URL; ?>auth/register.php" class="w-full sm:w-auto bg-slate-900 text-white font-bold px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-base md:text-lg shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
                     Start Your Path <i class="fas fa-arrow-right text-sm"></i>
                 </a>
-                <a href="#features" class="w-full sm:w-auto glass text-slate-700 font-bold px-10 py-5 rounded-[2rem] text-lg ios-shadow hover:bg-white hover:-translate-y-1 ios-transition">
+                <a href="#features" class="w-full sm:w-auto glass text-slate-700 font-bold px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-base md:text-lg ios-shadow hover:bg-white hover:-translate-y-1 ios-transition">
                     Explore Features
                 </a>
             </div>
 
             <!-- Dashboard Preview -->
-            <div class="relative max-w-5xl mx-auto group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 ios-transition"></div>
-                <div class="relative glass p-4 rounded-[2.5rem] ios-shadow">
-                    <img src="https://images.unsplash.com/photo-1551288049-bbbda5366391?auto=format&fit=crop&q=80&w=2070" alt="Dashboard Preview" class="rounded-[1.5rem] w-full shadow-inner border border-slate-100">
+            <div class="relative max-w-5xl mx-auto px-4 md:px-0 group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2rem] md:rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 ios-transition"></div>
+                <div class="relative glass p-2 md:p-4 rounded-[2rem] md:rounded-[2.5rem] ios-shadow overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1551288049-bbbda5366391?auto=format&fit=crop&q=80&w=2070" alt="Dashboard Preview" class="rounded-[1.5rem] w-full shadow-inner border border-slate-100 object-cover aspect-[4/3] md:aspect-video">
 
                     <!-- Floating Stat 1 -->
-                    <div class="absolute -top-12 -left-6 md:-left-12 glass p-6 rounded-3xl ios-shadow hidden md:block">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:static md:translate-x-0 md:translate-y-0 md:absolute md:-top-12 md:-left-12 glass p-4 md:p-6 rounded-2xl md:rounded-3xl ios-shadow md:block hidden">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-green-100 text-green-600 rounded-xl md:rounded-2xl flex items-center justify-center">
                                 <i class="fas fa-arrow-up"></i>
                             </div>
                             <div class="text-left">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Net Profit</p>
-                                <p class="text-xl font-extrabold text-slate-800">+₱24,500.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Floating Stat 2 -->
-                    <div class="absolute -bottom-10 -right-6 md:-right-12 glass p-6 rounded-3xl ios-shadow hidden md:block">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-bullseye"></i>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Savings Goal</p>
-                                <p class="text-xl font-extrabold text-slate-800">82% Complete</p>
+                                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Net Profit</p>
+                                <p class="text-lg md:text-xl font-extrabold text-slate-800">+₱24,500.00</p>
                             </div>
                         </div>
                     </div>
