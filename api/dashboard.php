@@ -56,11 +56,30 @@ if ($stmt->execute()) {
 }
 $stmt->close();
 
+// 0. Lifetime Totals (For Pool calculations and Ratios)
+$lifetime_allowance = 0;
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+if ($stmt->execute()) {
+    $lifetime_allowance = (float)$stmt->get_result()->fetch_row()[0];
+}
+$stmt->close();
+
+$lifetime_expenses = 0;
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+if ($stmt->execute()) {
+    $lifetime_expenses = (float)$stmt->get_result()->fetch_row()[0];
+}
+$stmt->close();
+
 $response = [
     'success' => true,
     'user_name' => $user_name,
-    'total_allowance' => 0,
-    'total_expenses' => 0,
+    'lifetime_allowance' => $lifetime_allowance,
+    'lifetime_expenses' => $lifetime_expenses,
+    'total_allowance' => 0, // Monthly placeholder
+    'total_expenses' => 0,  // Monthly placeholder
     'balance' => 0,
     'cash_balance' => 0,
     'digital_balance' => 0,
@@ -144,7 +163,7 @@ $response['analytics'] = [
     'daily_average' => $daily_average,
     'projected_spending' => $daily_average * $days_in_month,
     'runway' => ($daily_average > 0) ? ($response['balance'] / $daily_average) : 999, // Days left until funds run out
-    'savings_rate' => ($response['total_allowance'] > 0) ? (($response['balance'] / $response['total_allowance']) * 100) : 0
+    'savings_rate' => ($lifetime_allowance > 0) ? (($response['balance'] / $lifetime_allowance) * 100) : 0
 ];
 
 // 4.4 Peak Spending Day (New Feature)

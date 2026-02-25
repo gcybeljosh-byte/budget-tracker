@@ -146,10 +146,10 @@ if ($_SESSION['role'] === 'superadmin') {
         .then(r => r.json()).then(d => {
             if (!d.success) return;
             const sym = '₱';
-            const statusColor = d.projected_balance > d.current_balance ? 'danger' : 'success';
-            const trendBadge = d.projected_balance > d.current_balance ?
-                '<span class="badge bg-danger-subtle text-danger rounded-pill extra-small">Spending Trend Up</span>' :
-                '<span class="badge bg-success-subtle text-success rounded-pill extra-small">Below Budget</span>';
+            const statusColor = d.projected_balance <= 0 ? 'danger' : 'success';
+            const trendBadge = d.is_on_track ?
+                '<span class="badge bg-success-subtle text-success rounded-pill extra-small"><i class="fas fa-check-circle me-1"></i>On Track</span>' :
+                '<span class="badge bg-danger-subtle text-danger rounded-pill extra-small"><i class="fas fa-exclamation-triangle me-1"></i>Over Budget Soon</span>';
 
             const runwayText = d.runway_days === null ? 'More data required' : `${d.runway_days} days`;
             const runwayColor = (d.runway_days === null) ? 'muted' : (d.runway_days < 7 ? 'danger' : 'success');
@@ -166,6 +166,9 @@ if ($_SESSION['role'] === 'superadmin') {
                     <div class="text-muted small mb-1">Projected End-of-Month</div>
                     <div class="fs-4 fw-bold text-${statusColor}">${sym}${d.projected_balance.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
                     <div class="mt-1">${trendBadge}</div>
+                    <div class="extra-small text-muted mt-2" style="font-size: 0.6rem;" title="${d.basis}">
+                        <i class="fas fa-info-circle me-1"></i>Basis: Run rate projection
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">

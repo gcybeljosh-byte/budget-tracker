@@ -130,6 +130,8 @@ if ($action === 'trends') {
         'runway_days'        => $runwayDays,
         'last_month_total'   => $lastMonthTotal,
         'trend_pct'          => round($trendPct, 1),
+        'is_on_track'        => ($projectedBalance > 0), // If we won't hit zero, we are technically "on track"
+        'basis'              => "Current Balance (" . number_format($currentBalance, 2) . ") - (Daily Avg (" . number_format($dailyAvg, 2) . ") * Days Left (" . $daysLeft . "))"
     ]);
 }
 
