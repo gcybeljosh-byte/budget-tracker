@@ -28,8 +28,22 @@ include '../includes/header.php';
 
         <!-- Premium Stats Cards -->
         <div class="row g-4 mb-4">
+            <!-- Remaining Balance (Spendable) -->
+            <div class="col-md-3 stagger-item">
+                <div class="card h-100 border-0 shadow-sm rounded-4 bg-gradient-success text-white overflow-hidden transition-all hover-lift">
+                    <div class="card-body d-flex align-items-center p-4">
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3 text-white shadow-sm">
+                            <i class="fas fa-wallet fa-xl"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-1" style="font-size: 0.65rem;">Remaining Balance</h6>
+                            <h4 class="fw-bold mb-0" id="statRemaining"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Total Savings -->
-            <div class="col-md-4 stagger-item">
+            <div class="col-md-3 stagger-item">
                 <div class="card h-100 border-0 shadow-sm rounded-4 bg-light overflow-hidden transition-all hover-lift">
                     <div class="card-body d-flex align-items-center p-4">
                         <div class="rounded-circle bg-success-subtle p-3 me-3 text-success shadow-sm">
@@ -43,7 +57,7 @@ include '../includes/header.php';
                 </div>
             </div>
             <!-- This Month -->
-            <div class="col-md-4 stagger-item">
+            <div class="col-md-3 stagger-item">
                 <div class="card h-100 border-0 shadow-sm rounded-4 bg-light overflow-hidden transition-all hover-lift">
                     <div class="card-body d-flex align-items-center p-4">
                         <div class="rounded-circle bg-primary-subtle p-3 me-3 text-primary shadow-sm">
@@ -57,7 +71,7 @@ include '../includes/header.php';
                 </div>
             </div>
             <!-- This Year -->
-            <div class="col-md-4 stagger-item">
+            <div class="col-md-3 stagger-item">
                 <div class="card h-100 border-0 shadow-sm rounded-4 bg-light overflow-hidden transition-all hover-lift">
                     <div class="card-body d-flex align-items-center p-4">
                         <div class="rounded-circle bg-info-subtle p-3 me-3 text-info shadow-sm">
@@ -227,6 +241,7 @@ include '../includes/header.php';
         }
 
         function fetchStats() {
+            // Fetch savings-specific stats
             fetch('<?php echo SITE_URL; ?>api/savings.php?action=stats')
                 .then(response => response.json())
                 .then(result => {
@@ -238,6 +253,16 @@ include '../includes/header.php';
                     }
                 })
                 .catch(error => console.error('Error fetching savings stats:', error));
+
+            // Fetch real-time consolidated remaining balance from dashboard
+            fetch('<?php echo SITE_URL; ?>api/dashboard.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('statRemaining').textContent = formatCurrency(data.balance);
+                    }
+                })
+                .catch(error => console.error('Error fetching remaining balance:', error));
         }
 
         function fetchSavings() {

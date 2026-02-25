@@ -43,7 +43,7 @@ include '../includes/header.php';
             <div class="col-md-6 col-lg-4 stagger-item">
                 <div class="card h-100 border-0 shadow-sm rounded-4 bg-gradient-success text-white overflow-hidden transition-all hover-lift">
                     <div class="card-body p-4">
-                        <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-2"><i class="fas fa-piggy-bank me-2"></i>Total Balance</h6>
+                        <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-2"><i class="fas fa-wallet me-2"></i>Remaining Balance</h6>
                         <h2 class="fw-bold mb-0" id="dashBalance"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
                     </div>
                 </div>

@@ -116,8 +116,8 @@ $response['digital_balance'] = $balanceHelper->getDigitalBalance($user_id, false
 // 3.3 Total Savings (Net of Savings Expenses - Lifetime Standing)
 $response['total_savings'] = $balanceHelper->getTotalSavings($user_id, false);
 
-// 3. Balance (Consolidated available funds: Cash + Digital + Savings)
-$response['balance'] = $response['cash_balance'] + $response['digital_balance'] + $response['total_savings'];
+// 3. Balance (Consolidated available spendable funds: Cash + Digital)
+$response['balance'] = $response['cash_balance'] + $response['digital_balance'];
 
 // 4. Category Spending (Current month only, only from Allowance)
 $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
