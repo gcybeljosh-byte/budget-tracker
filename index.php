@@ -235,8 +235,198 @@ if (isset($_SESSION['id'])) {
         </div>
     </main>
 
-    <!-- Features Section -->
-    <section id="features" class="py-24 px-6 bg-white overflow-hidden">
+    <!-- Dynamic Ecosystem Section -->
+    <section id="ecosystem" class="py-24 px-6 bg-slate-50 relative overflow-hidden">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">The Ecosystem of Financial Freedom.</h2>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto">16 integrated modules designed to work in perfect harmony, replacing the chaos of manual tracking.</p>
+            </div>
+
+            <!-- Feature Grid -->
+            <div id="feature-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6 mb-20 reveal">
+                <?php
+                $ecosystem = [
+                    ['name' => 'Monthly Dashboard', 'icon' => 'tachometer-alt', 'color' => 'indigo', 'manual' => 'Mental Math'],
+                    ['name' => 'Quick Access Hub', 'icon' => 'layer-group', 'color' => 'purple', 'manual' => 'Searching Pockets'],
+                    ['name' => 'Monthly Statements', 'icon' => 'file-invoice', 'color' => 'blue', 'manual' => 'Bank Line Ups'],
+                    ['name' => 'Precision Expenses', 'icon' => 'receipt', 'color' => 'orange', 'manual' => 'Scribbled Napkins'],
+                    ['name' => 'AI Budget Planner', 'icon' => 'magic', 'color' => 'pink', 'manual' => 'Crystal Balls'],
+                    ['name' => 'Budget Limits', 'icon' => 'sliders-h', 'color' => 'rose', 'manual' => 'Just Hoping'],
+                    ['name' => 'Allowance Tracker', 'icon' => 'hand-holding-dollar', 'color' => 'emerald', 'manual' => 'Physical Notebooks'],
+                    ['name' => 'Savings Sync', 'icon' => 'sync', 'color' => 'cyan', 'manual' => 'Under Mattress'],
+                    ['name' => 'Bills Hub', 'icon' => 'file-invoice-dollar', 'color' => 'amber', 'manual' => 'Shoebox Receipts'],
+                    ['name' => 'Safe-to-Spend', 'icon' => 'shield-halved', 'color' => 'sky', 'manual' => 'Flipping a Coin'],
+                    ['name' => 'Goal Deep Dive', 'icon' => 'bullseye', 'color' => 'violet', 'manual' => 'Wishing on Stars'],
+                    ['name' => 'Financial Journal', 'icon' => 'book', 'color' => 'slate', 'manual' => 'Scattered Post-its'],
+                    ['name' => 'Expense Trends', 'icon' => 'chart-line', 'color' => 'green', 'manual' => 'Guessing Game'],
+                    ['name' => 'Spending Heatmap', 'icon' => 'calendar-alt', 'color' => 'red', 'manual' => 'Coloring Books'],
+                    ['name' => 'AI Assistant', 'icon' => 'robot', 'color' => 'fuchsia', 'manual' => 'Asking Strangers'],
+                    ['name' => 'Hardened Security', 'icon' => 'lock', 'color' => 'indigo', 'manual' => 'Open Pockets'],
+                ];
+                foreach ($ecosystem as $f): ?>
+                    <div class="feature-card group cursor-default" data-manual="<?php echo $f['manual']; ?>" data-feature="<?php echo $f['name']; ?>" data-icon="fa-<?php echo $f['icon']; ?>">
+                        <div class="bg-white p-6 rounded-[2rem] ios-shadow border border-slate-100 flex flex-col items-center gap-4 ios-transition hover:-translate-y-1 h-full min-h-[160px] justify-center text-center">
+                            <div class="feature-icon w-12 h-12 rounded-2xl flex items-center justify-center text-white bg-<?php echo $f['color']; ?>-500 shadow-lg shadow-<?php echo $f['color']; ?>-100 ios-transition">
+                                <i class="fas fa-<?php echo $f['icon']; ?> fs-5"></i>
+                            </div>
+                            <span class="feature-label font-bold text-slate-800 text-sm md:text-base leading-tight"><?php echo $f['name']; ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- "Imagine Without" Toggle -->
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 reveal">
+                <div class="flex items-center gap-6">
+                    <span class="text-slate-400 font-bold uppercase tracking-widest text-xs">Standard World</span>
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" id="imagine-toggle" class="sr-only peer">
+                        <div class="w-20 h-10 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-8 after:w-9 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-purple-600 shadow-inner group-hover:scale-105 active:scale-95 ios-transition"></div>
+                    </label>
+                    <span class="text-indigo-600 font-bold uppercase tracking-widest text-xs">Imagine without BudgetTracker</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Grid Styles -->
+        <style>
+            .feature-card.is-manual .feature-icon {
+                background: #f1f5f9 !important;
+                color: #94a3b8 !important;
+                box-shadow: none !important;
+                transform: rotate(15deg);
+            }
+
+            .feature-card.is-manual .feature-label {
+                color: #94a3b8 !important;
+                text-decoration: line-through;
+            }
+
+            .bg-indigo-500 {
+                background-color: #6366f1;
+            }
+
+            .bg-purple-500 {
+                background-color: #a855f7;
+            }
+
+            .bg-blue-500 {
+                background-color: #3b82f6;
+            }
+
+            .bg-orange-500 {
+                background-color: #f97316;
+            }
+
+            .bg-pink-500 {
+                background-color: #ec4899;
+            }
+
+            .bg-rose-500 {
+                background-color: #f43f5e;
+            }
+
+            .bg-emerald-500 {
+                background-color: #10b981;
+            }
+
+            .bg-cyan-500 {
+                background-color: #06b6d4;
+            }
+
+            .bg-amber-500 {
+                background-color: #f59e0b;
+            }
+
+            .bg-sky-500 {
+                background-color: #0ea5e9;
+            }
+
+            .bg-violet-500 {
+                background-color: #8b5cf6;
+            }
+
+            .bg-slate-500 {
+                background-color: #64748b;
+            }
+
+            .bg-green-500 {
+                background-color: #22c55e;
+            }
+
+            .bg-red-500 {
+                background-color: #ef4444;
+            }
+
+            .bg-fuchsia-500 {
+                background-color: #d946ef;
+            }
+
+            .shadow-indigo-100 {
+                box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
+            }
+
+            .shadow-purple-100 {
+                box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.2);
+            }
+
+            .shadow-blue-100 {
+                box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+            }
+
+            .shadow-orange-100 {
+                box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);
+            }
+
+            .shadow-pink-100 {
+                box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.2);
+            }
+
+            .shadow-rose-100 {
+                box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.2);
+            }
+
+            .shadow-emerald-100 {
+                box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+            }
+
+            .shadow-cyan-100 {
+                box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.2);
+            }
+
+            .shadow-amber-100 {
+                box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2);
+            }
+
+            .shadow-sky-100 {
+                box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.2);
+            }
+
+            .shadow-violet-100 {
+                box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.2);
+            }
+
+            .shadow-slate-100 {
+                box-shadow: 0 10px 15px -3px rgba(100, 116, 139, 0.2);
+            }
+
+            .shadow-green-100 {
+                box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
+            }
+
+            .shadow-red-100 {
+                box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2);
+            }
+
+            .shadow-fuchsia-100 {
+                box-shadow: 0 10px 15px -3px rgba(217, 70, 239, 0.2);
+            }
+        </style>
+    </section>
+
+    <!-- Legacy Features Section Refined -->
+    <section id="features" class="py-24 px-6 bg-white overflow-hidden relative">
         <div class="max-w-6xl mx-auto">
             <div class="text-center mb-20 reveal">
                 <h2 class="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Financial management, refined.</h2>
@@ -309,6 +499,37 @@ if (isset($_SESSION['id'])) {
 
         window.addEventListener("scroll", reveal);
         window.addEventListener("load", reveal); // Initial check
+
+        // Imagine Toggle Logic
+        const imagineToggle = document.getElementById('imagine-toggle');
+        const featureCards = document.querySelectorAll('.feature-card');
+
+        imagineToggle.addEventListener('change', function() {
+            featureCards.forEach((card, index) => {
+                const label = card.querySelector('.feature-label');
+                const icon = card.querySelector('.feature-icon i');
+                const originalFeature = card.getAttribute('data-feature');
+                const manualAlt = card.getAttribute('data-manual');
+                const originalIcon = card.getAttribute('data-icon');
+
+                // Staggered animation
+                setTimeout(() => {
+                    card.style.transform = 'scale(0.95) rotate(-2deg)';
+                    setTimeout(() => {
+                        if (this.checked) {
+                            card.classList.add('is-manual');
+                            label.textContent = manualAlt;
+                            icon.className = 'fas fa-unlink'; // Broke/Manual icon
+                        } else {
+                            card.classList.remove('is-manual');
+                            label.textContent = originalFeature;
+                            icon.className = `fas ${originalIcon}`;
+                        }
+                        card.style.transform = '';
+                    }, 150);
+                }, index * 30);
+            });
+        });
     </script>
 </body>
 

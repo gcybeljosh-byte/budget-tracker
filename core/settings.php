@@ -77,6 +77,25 @@ include '../includes/header.php';
                     .toggle-btn-inactive:hover {
                         background-color: #e9ecef !important;
                     }
+
+                    /* Feature Colors */
+                    :root {
+                        --bs-indigo: #6366f1;
+                        --bs-purple: #a855f7;
+                        --bs-blue: #3b82f6;
+                        --bs-orange: #f97316;
+                        --bs-pink: #ec4899;
+                        --bs-rose: #f43f5e;
+                        --bs-emerald: #10b981;
+                        --bs-cyan: #06b6d4;
+                        --bs-amber: #f59e0b;
+                        --bs-sky: #0ea5e9;
+                        --bs-violet: #8b5cf6;
+                        --bs-slate: #64748b;
+                        --bs-green: #22c55e;
+                        --bs-red: #ef4444;
+                        --bs-fuchsia: #d946ef;
+                    }
                 </style>
 
                 <!-- Security Settings Section -->
@@ -392,28 +411,28 @@ include '../includes/header.php';
                                 <div class="row g-3">
                                     <?php
                                     $features = [
-                                        ['tachometer-alt',      'name' => 'Monthly Dashboard'],
-                                        ['layer-group',         'name' => 'Quick Access Hub'],
-                                        ['file-invoice',        'name' => 'Monthly Statements'],
-                                        ['receipt',             'name' => 'Precision Expenses'],
-                                        ['magic',               'name' => 'AI Budget Planner'],
-                                        ['sliders-h',           'name' => 'Budget Limits'],
-                                        ['hand-holding-dollar', 'name' => 'Allowance Tracker'],
-                                        ['sync',                'name' => 'Savings Sync'],
-                                        ['file-invoice-dollar', 'name' => 'Bills Hub'],
-                                        ['shield-halved',       'name' => 'Safe-to-Spend'],
-                                        ['bullseye',            'name' => 'Goal Deep Dive'],
-                                        ['book',                'name' => 'Financial Journal'],
-                                        ['chart-line',          'name' => 'Expense Trends'],
-                                        ['calendar-alt',        'name' => 'Spending Heatmap'],
-                                        ['robot',               'name' => 'AI Assistant'],
-                                        ['lock',                'name' => 'Hardened Security'],
+                                        ['tachometer-alt',      'name' => 'Monthly Dashboard',   'color' => 'indigo'],
+                                        ['layer-group',         'name' => 'Quick Access Hub',    'color' => 'purple'],
+                                        ['file-invoice',        'name' => 'Monthly Statements',  'color' => 'blue'],
+                                        ['receipt',             'name' => 'Precision Expenses',  'color' => 'orange'],
+                                        ['magic',               'name' => 'AI Budget Planner',   'color' => 'pink'],
+                                        ['sliders-h',           'name' => 'Budget Limits',       'color' => 'rose'],
+                                        ['hand-holding-dollar', 'name' => 'Allowance Tracker',   'color' => 'emerald'],
+                                        ['sync',                'name' => 'Savings Sync',        'color' => 'cyan'],
+                                        ['file-invoice-dollar', 'name' => 'Bills Hub',           'color' => 'amber'],
+                                        ['shield-halved',       'name' => 'Safe-to-Spend',       'color' => 'sky'],
+                                        ['bullseye',            'name' => 'Goal Deep Dive',      'color' => 'violet'],
+                                        ['book',                'name' => 'Financial Journal',   'color' => 'slate'],
+                                        ['chart-line',          'name' => 'Expense Trends',      'color' => 'green'],
+                                        ['calendar-alt',        'name' => 'Spending Heatmap',    'color' => 'red'],
+                                        ['robot',               'name' => 'AI Assistant',        'color' => 'fuchsia'],
+                                        ['lock',                'name' => 'Hardened Security',   'color' => 'indigo'],
                                     ];
                                     foreach ($features as $f): ?>
                                         <div class="col-6 col-md-3">
-                                            <div class="p-3 text-center bg-white border rounded-4 shadow-sm h-100 hover-lift transition-all">
-                                                <div class="mb-2 text-primary fs-4"><i class="fas fa-<?php echo $f[0]; ?>"></i></div>
-                                                <div class="small fw-bold text-dark"><?php echo $f['name']; ?></div>
+                                            <div class="p-4 text-center bg-white border border-light rounded-4 shadow-sm h-100 hover-lift transition-all">
+                                                <div class="mb-3 fs-3" style="color: var(--bs-<?php echo $f['color'] ?? 'primary'; ?>);"><i class="fas fa-<?php echo $f[0]; ?>"></i></div>
+                                                <div class="small fw-bold text-dark" style="font-size: 0.85rem;"><?php echo $f['name']; ?></div>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
