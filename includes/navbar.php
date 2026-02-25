@@ -239,20 +239,10 @@
                         <i class="fas fa-receipt"></i>
                         <span>Expenses</span>
                     </a>
-                    <a href="<?php echo SITE_URL; ?>core/savings.php"
-                        class="bottom-nav-item <?php echo ($currentPage == 'savings.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-piggy-bank"></i>
-                        <span>Savings</span>
-                    </a>
                     <a href="<?php echo SITE_URL; ?>core/bills.php"
                         class="bottom-nav-item <?php echo ($currentPage == 'bills.php') ? 'active' : ''; ?>">
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Bills</span>
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/history_log.php"
-                        class="bottom-nav-item <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-history"></i>
-                        <span>History</span>
                     </a>
                     <a href="<?php echo SITE_URL; ?>core/profile.php"
                         class="bottom-nav-item <?php echo ($currentPage == 'profile.php') ? 'active' : ''; ?>">

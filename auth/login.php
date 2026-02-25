@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
 
     <div class="container">
-        <div class="row justify-content-center w-100">
+        <div class="row justify-content-center">
             <div class="col-md-7 col-lg-5">
                 <div class="text-center mb-5">
                     <div class="mb-3 d-inline-flex align-items-center justify-content-center">
