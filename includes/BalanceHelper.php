@@ -115,4 +115,40 @@ class BalanceHelper
             ];
         }
     }
+
+    public function syncBudgetLimits($user_id)
+    {
+        // 1. Fetch current monthly allowance total
+        $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $newGoal = (float)$stmt->get_result()->fetch_assoc()['total'];
+        $stmt->close();
+
+        // 2. Fetch old goal to calculate ratio
+        $stmt = $this->conn->prepare("SELECT monthly_budget_goal FROM users WHERE id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $oldGoal = (float)($stmt->get_result()->fetch_assoc()['monthly_budget_goal'] ?? 0);
+        $stmt->close();
+
+        // 3. Update the monthly budget goal
+        $stmt = $this->conn->prepare("UPDATE users SET monthly_budget_goal = ? WHERE id = ?");
+        $stmt->bind_param("di", $newGoal, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // 4. Proportional scaling of category limits
+        if ($oldGoal > 0 && $newGoal != $oldGoal) {
+            $ratio = $newGoal / $oldGoal;
+            $stmt = $this->conn->prepare("UPDATE category_limits SET limit_amount = limit_amount * ? WHERE user_id = ?");
+            $stmt->bind_param("di", $ratio, $user_id);
+            $stmt->execute();
+            $stmt->close();
+
+            error_log("Budget sync for user $user_id: Ratio $ratio (Old: $oldGoal, New: $newGoal)");
+        }
+
+        return $newGoal;
+    }
 }
