@@ -67,7 +67,8 @@ class AiHelper
         $stmt = $this->conn->prepare("SELECT first_name, last_name, email, preferred_currency, ai_tone, notif_budget, notif_low_balance, monthly_budget_goal, role FROM users WHERE id = ?");
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
-        $user = $stmt->get_result()->fetch_assoc();
+        $res = $stmt->get_result();
+        $user = ($res) ? $res->fetch_assoc() : null;
         $context['user'] = $user;
         $context['role'] = $user['role'] ?? 'user';
         $context['currency'] = $user['preferred_currency'] ?? 'PHP';
@@ -112,8 +113,10 @@ class AiHelper
         $stmt->execute();
         $result = $stmt->get_result();
         $expenses = [];
-        while ($row = $result->fetch_assoc()) {
-            $expenses[$row['category']] = $row['total'];
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $expenses[$row['category']] = $row['total'];
+            }
         }
         $context['expenses_by_category'] = $expenses;
         $stmt->close();
@@ -122,13 +125,15 @@ class AiHelper
         $stmt = $this->conn->prepare("SELECT id, date, category, description, amount, source_type FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT 20");
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
-        $context['full_datasets']['expenses'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $context['full_datasets']['expenses'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
 
         $stmt = $this->conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT 10");
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
-        $context['full_datasets']['allowances'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $context['full_datasets']['allowances'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
 
         // 6. Recent Journals
@@ -141,7 +146,8 @@ class AiHelper
         $stmt = $this->conn->prepare("SELECT id, title, target_amount, saved_amount, deadline, status FROM financial_goals WHERE user_id = ? ORDER BY created_at DESC");
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
-        $context['full_datasets']['financial_goals'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $context['full_datasets']['financial_goals'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
 
         // 9. Budget Limits (with current-month spending per category)
@@ -159,14 +165,16 @@ class AiHelper
         ");
         $stmt->bind_param("si", $currentMonth, $this->user_id);
         $stmt->execute();
-        $context['full_datasets']['budget_limits'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $context['full_datasets']['budget_limits'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
 
         // 11. Upcoming Bills (Next 7 days)
         $stmt = $this->conn->prepare("SELECT id, title, amount, due_date, category, frequency FROM recurring_payments WHERE user_id = ? AND is_active = 1 AND due_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) ORDER BY due_date ASC");
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
-        $context['full_datasets']['upcoming_bills'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $context['full_datasets']['upcoming_bills'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
 
         // 10. Hub Summary (Snapshot for Dashboard Hub parity)
@@ -182,23 +190,35 @@ class AiHelper
         if ($context['role'] === 'superadmin' || $context['role'] === 'admin') {
             // Platform-wide counts
             $system = [];
+
             $res = $this->conn->query("SELECT COUNT(*) as total FROM users");
-            $system['total_users'] = $res->fetch_assoc()['total'];
+            $system['total_users'] = ($res && $row = $res->fetch_assoc()) ? $row['total'] : 0;
 
             $res = $this->conn->query("SELECT COUNT(*) as active FROM users WHERE role != 'inactive'");
-            $system['active_users'] = $res->fetch_assoc()['active'];
+            $system['active_users'] = ($res && $row = $res->fetch_assoc()) ? $row['active'] : 0;
 
             // Monthly transaction volume (Sanitized)
             $res = $this->conn->query("SELECT COUNT(*) as count FROM expenses WHERE DATE_FORMAT(date, '%Y-%m') = '" . date('Y-m') . "'");
-            $system['total_expenses_count'] = $res->fetch_assoc()['count'];
+            $system['total_expenses_count'] = ($res && $row = $res->fetch_assoc()) ? $row['count'] : 0;
 
             if ($context['role'] === 'superadmin') {
-                // Sensitive Superadmin logs
-                $res = $this->conn->query("SELECT activity_type, description, created_at FROM activity_logs ORDER BY created_at DESC LIMIT 15");
-                $system['recent_system_activity'] = $res->fetch_all(MYSQLI_ASSOC);
+                // Ensure activity_logs table exists to avoid crash
+                $this->conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT,
+                    action_type VARCHAR(50),
+                    description TEXT,
+                    ip_address VARCHAR(45),
+                    user_agent TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+
+                // Sensitive Superadmin logs (Fixed column: action_type)
+                $res = $this->conn->query("SELECT action_type, description, created_at FROM activity_logs ORDER BY created_at DESC LIMIT 15");
+                $system['recent_system_activity'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
 
                 $res = $this->conn->query("SELECT first_name, last_name, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 5");
-                $system['newest_users'] = $res->fetch_all(MYSQLI_ASSOC);
+                $system['newest_users'] = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
             }
 
             $context['system_metrics'] = $system;
@@ -212,16 +232,20 @@ class AiHelper
         $stmt = $this->conn->prepare("SELECT j.id, j.date, j.end_date, j.title, j.notes, j.financial_status FROM journals j WHERE j.user_id = ? ORDER BY j.date DESC, j.id DESC LIMIT ?");
         $stmt->bind_param("ii", $this->user_id, $limit);
         $stmt->execute();
-        $journals = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $journals = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
 
         // Fetch lines for each journal
-        foreach ($journals as &$journal) {
-            $stmt = $this->conn->prepare("SELECT account_title, debit, credit FROM journal_lines WHERE journal_id = ?");
-            $stmt->bind_param("i", $journal['id']);
-            $stmt->execute();
-            $journal['lines'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            $stmt->close();
+        if (!empty($journals)) {
+            foreach ($journals as &$journal) {
+                $stmt = $this->conn->prepare("SELECT account_title, debit, credit FROM journal_lines WHERE journal_id = ?");
+                $stmt->bind_param("i", $journal['id']);
+                $stmt->execute();
+                $resLines = $stmt->get_result();
+                $journal['lines'] = ($resLines) ? $resLines->fetch_all(MYSQLI_ASSOC) : [];
+                $stmt->close();
+            }
         }
         return $journals;
     }
@@ -242,7 +266,8 @@ class AiHelper
         $stmt = $this->conn->prepare("SELECT id, filename, report_type, period, created_at FROM reports WHERE user_id = ? ORDER BY created_at DESC LIMIT ?");
         $stmt->bind_param("ii", $this->user_id, $limit);
         $stmt->execute();
-        $reports = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $res = $stmt->get_result();
+        $reports = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
         $stmt->close();
         return $reports;
     }
