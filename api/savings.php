@@ -2,6 +2,7 @@
 session_start();
 header("Content-Type: application/json");
 require_once '../includes/db.php';
+require_once '../includes/BalanceHelper.php';
 
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
@@ -49,7 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($amount > 0) {
                 // Balance Validation: Ensure the source has enough allowance to be moved to savings
                 $balanceHelper = new BalanceHelper($conn);
-                $currentBalance = $balanceHelper->getBalanceBySource($user_id, 'Allowance', $source_type);
+                $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type);
+                $currentBalance = $balanceDetails['balance'];
 
                 if ($amount > $currentBalance) {
                     $response = ['success' => false, 'message' => "Insufficient $source_type Allowance to move to Savings. Available: " . number_format($currentBalance, 2)];
@@ -104,7 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $oldStmt->close();
 
                 if ($oldData) {
-                    $currentBalance = $balanceHelper->getBalanceBySource($user_id, 'Allowance', $source_type);
+                    $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type);
+                    $currentBalance = $balanceDetails['balance'];
+
                     if ($oldData['source_type'] === $source_type) {
                         $currentBalance += $oldData['amount'];
                     }
