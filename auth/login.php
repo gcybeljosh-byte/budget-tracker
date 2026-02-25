@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             justify-content: center;
             position: relative;
             overflow-x: hidden;
+            padding: 2rem 1rem;
         }
 
         .glass {
@@ -138,10 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
         .animate-float {
             animation: float 3s ease-in-out infinite;
         }
-
-        .form-input {
-            @apply w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700;
-        }
     </style>
 </head>
 
@@ -161,8 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
 
         <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow relative overflow-hidden">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100 animate-float text-white">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain brightness-0 invert">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
                 </div>
                 <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
                 <p class="text-slate-500 mt-2 font-medium">Continue your financial journey</p>

@@ -105,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             justify-content: center;
             position: relative;
             overflow-x: hidden;
+            padding: 2rem 1rem;
         }
 
         .glass {
@@ -166,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100 animate-float text-white text-2xl">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float text-indigo-600 text-2xl">
                     <i class="fas fa-key"></i>
                 </div>
                 <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Recover Account</h2>

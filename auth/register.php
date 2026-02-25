@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     <title>Register - Budget Tracker</title>
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/0/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             justify-content: center;
             position: relative;
             overflow-x: hidden;
-            padding: 2rem 0;
+            padding: 2rem 1rem;
         }
 
         .glass {
@@ -144,8 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
 
         <div class="glass p-8 md:p-12 rounded-[2.5rem] ios-shadow">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100 animate-float">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain brightness-0 invert">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
                 </div>
                 <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Join Budget Tracker</h2>
                 <p class="text-slate-500 mt-2 font-medium">Start your journey to financial freedom</p>
