@@ -22,9 +22,9 @@ if (isset($_SESSION['id'])) {
 
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
     if (empty($username) || empty($password)) {
         $error = "Please fill in all fields.";
     } else {
@@ -62,10 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             } else {
                 $error = "Invalid password.";
-                // Log failed login attempt
-                if ($id) {
-                    logActivity($conn, $id, 'login_failed', "Invalid password attempt for account: $username");
-                }
             }
         } else {
             $error = "User not found.";
@@ -83,147 +79,162 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login - Budget Tracker</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            padding: 2rem 0;
-            color: #3f4756;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .auth-card {
-            width: 100%;
-            max-width: 450px;
-            padding: 3rem;
-            background: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.02);
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        @media (max-width: 576px) {
-            .auth-card {
-                padding: 1.5rem;
+        .ios-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .ios-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bg-blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
             }
         }
 
-        .brand-text {
-            color: #1e293b;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
         }
 
-        .form-control {
-            background-color: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            color: #1e293b;
-            font-weight: 500;
+        .form-input {
+            @apply w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700;
         }
-
-        .form-control:focus {
-            background-color: #fff;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .form-floating>label {
-            color: #64748b;
-        }
-
-        .btn-primary {
-            background: #1e293b;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #0f172a;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
-        }
-    </style>
     </style>
 </head>
 
 <body>
+    <!-- Background Decorations -->
+    <div class="bg-blob bg-indigo-200 -top-48 -left-48"></div>
+    <div class="bg-blob bg-purple-200 -bottom-48 -right-48"></div>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-5">
-                <div class="text-center mb-5">
-                    <div class="mb-3 d-inline-flex align-items-center justify-content-center">
-                        <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" style="width: 48px; height: 48px; object-fit: contain;">
+    <div class="w-full max-w-md px-6 py-12 relative z-10">
+        <!-- Back Button -->
+        <div class="mb-8 text-center">
+            <a href="<?php echo SITE_URL; ?>" class="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm ios-transition group">
+                <i class="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform"></i>
+                Back to Home
+            </a>
+        </div>
+
+        <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow relative overflow-hidden">
+            <div class="text-center mb-10">
+                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100 animate-float text-white">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain brightness-0 invert">
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
+                <p class="text-slate-500 mt-2 font-medium">Continue your financial journey</p>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Username</label>
+                    <div class="relative group">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 ios-transition">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" name="username" class="w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="Enter your username" required>
                     </div>
-                    <h2 class="h4 fw-bold brand-text mb-1">Budget Tracker</h2>
-                    <p class="text-muted small">Manage your finances with ease.</p>
                 </div>
 
-                <div class="auth-card mx-auto">
-                    <div class="mb-4">
-                        <a href="<?php echo SITE_URL; ?>" class="text-secondary small text-decoration-none hover-primary flex items-center gap-2">
-                            <i class="fas fa-arrow-left"></i> Back to Home
-                        </a>
+                <div>
+                    <div class="flex items-center justify-between mb-2 ml-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Password</label>
+                        <a href="forgot_password.php" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest">Forgot?</a>
                     </div>
-                    <h5 class="text-center mb-4 fw-bold text-dark">Welcome Back</h5>
-
-                    <form method="POST">
-                        <div class="form-floating mb-3">
-                            <input type="text" name="username" class="form-control rounded-3" id="floatingInput" placeholder="Username" required>
-                            <label for="floatingInput">Username</label>
-                        </div>
-                        <div class="form-floating mb-4 position-relative">
-                            <input type="password" name="password" class="form-control rounded-3" id="floatingPassword" placeholder="Password" required>
-                            <label for="floatingPassword">Password</label>
-                            <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 me-2" onclick="togglePassword('floatingPassword', this)" style="z-index: 10;">
-                                <i class="fas fa-eye text-muted"></i>
-                            </button>
-                        </div>
-                        <div class="text-end mb-4">
-                            <a href="<?php echo SITE_URL; ?>auth/forgot_password.php" class="text-secondary small text-decoration-none hover-primary">Forgot Password?</a>
-                        </div>
-
-
-
-                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">
-                            <i class="fas fa-arrow-right me-2"></i>Sign In
+                    <div class="relative group">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 ios-transition">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password" id="password" class="w-full pl-12 pr-12 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="••••••••" required>
+                        <button type="button" onclick="togglePassword('password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 ios-transition">
+                            <i class="fas fa-eye"></i>
                         </button>
-
-                        <div class="text-center my-3 text-muted small">OR</div>
-
-                        <div class="d-flex justify-content-center">
-                            <div id="g_id_onload"
-                                data-client_id="<?php echo GOOGLE_CLIENT_ID; ?>"
-                                data-context="signin"
-                                data-ux_mode="popup"
-                                data-callback="handleCredentialResponse"
-                                data-auto_prompt="false">
-                            </div>
-                            <div class="g_id_signin"
-                                data-type="standard"
-                                data-shape="rectangular"
-                                data-theme="outline"
-                                data-text="signin_with"
-                                data-size="large"
-                                data-logo_alignment="left">
-                            </div>
-                        </div>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <p class="text-muted mb-0">Don't have an account? <a href="<?php echo SITE_URL; ?>auth/register.php" class="text-primary fw-bold text-decoration-none">Register here</a></p>
                     </div>
                 </div>
+
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-8">
+                    Sign In <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <div class="my-8 flex items-center gap-4">
+                <div class="flex-1 h-px bg-slate-100"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OR</span>
+                <div class="flex-1 h-px bg-slate-100"></div>
+            </div>
+
+            <!-- Google Sign In -->
+            <div class="flex justify-center">
+                <div id="g_id_onload"
+                    data-client_id="<?php echo GOOGLE_CLIENT_ID; ?>"
+                    data-context="signin"
+                    data-ux_mode="popup"
+                    data-callback="handleCredentialResponse"
+                    data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                    data-type="standard"
+                    data-shape="pill"
+                    data-theme="outline"
+                    data-text="signin_with"
+                    data-size="large"
+                    data-logo_alignment="left">
+                </div>
+            </div>
+
+            <div class="mt-10 text-center">
+                <p class="text-slate-500 text-sm font-medium">
+                    New here? <a href="register.php" class="text-indigo-600 font-bold hover:text-indigo-700 inline-flex items-center gap-1">Create account <i class="fas fa-external-link-alt text-[10px]"></i></a>
+                </p>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
@@ -240,12 +251,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         const urlParams = new URLSearchParams(window.location.search);
+
         <?php if ($error): ?>
             Swal.fire({
                 icon: 'error',
                 title: 'Login Failed',
                 text: '<?php echo $error; ?>',
-                confirmButtonColor: '#6366f1'
+                confirmButtonColor: '#4f46e5',
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                }
             });
         <?php endif; ?>
 
@@ -254,29 +270,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Swal.fire({
                 icon: isAuto ? 'warning' : 'success',
                 title: isAuto ? 'Session Expired' : 'Logged Out',
-                text: isAuto ? 'You have been logged out due to 5 minutes of inactivity for your security.' : 'You have been successfully logged out.',
-                confirmButtonColor: '#6366f1',
+                text: isAuto ? 'You have been logged out due to inactivity.' : 'Successfully logged out.',
+                confirmButtonColor: '#4f46e5',
                 timer: isAuto ? 5000 : 2000,
-                showConfirmButton: isAuto
-            });
-            // Clean URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        if (urlParams.get('error') === 'not_registered') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Account Not Found',
-                text: 'This Google account is not registered with Budget Tracker. Please go to the Sign Up page to create an account.',
-                confirmButtonText: 'Understood',
-                confirmButtonColor: '#6366f1'
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                }
             });
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // --- Google OAuth (GSI) ---
         function handleCredentialResponse(response) {
-            // Send the JWT credential to google_auth.php
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '<?php echo SITE_URL; ?>auth/google_auth.php';
@@ -297,8 +302,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             form.submit();
         }
     </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
 </body>
 
 </html>

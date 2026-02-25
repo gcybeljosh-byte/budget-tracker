@@ -5,6 +5,7 @@ if (isset($_SESSION['id'])) {
     exit;
 }
 
+include '../includes/config.php';
 include '../includes/db.php';
 
 $step = 1;
@@ -31,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt->fetch();
 
                 if (empty($security_question)) {
-                    $error = "No security question set for this account. Please contact the administrator.";
+                    $error = "No security question set for this account. Please contact an admin.";
                 } else {
                     $question = $security_question;
                     $step = 2;
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } elseif ($action === 'verify_answer') {
         $answer = trim($_POST['answer'] ?? '');
-        $step = 2; // Default to step 2 if verification fails
+        $step = 2; // Keep at step 2 if verification fails
 
         $stmt = $conn->prepare("SELECT security_question, security_answer FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
@@ -71,8 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("sss", $new_password, $new_password, $username);
 
             if ($stmt->execute()) {
-                $success = "Password reset successfully! You can now login with your new password.";
-                $step = 4; // Final success step
+                $success = "Password reset successfully! You can now login.";
+                $step = 4;
             } else {
                 $error = "Error updating password. Please try again.";
             }
@@ -88,224 +89,183 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - Budget Tracker</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
             min-height: 100vh;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            padding: 2rem 0;
-            color: #3f4756;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 450px;
-            padding: 3rem;
-            background: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.02);
-        }
-
-        .brand-text {
-            color: #1e293b;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .form-control {
-            background-color: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            color: #1e293b;
-            font-weight: 500;
-        }
-
-        .form-control:focus {
-            background-color: #fff;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .form-floating>label {
-            color: #64748b;
-        }
-
-        .btn-primary {
-            background: #1e293b;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #0f172a;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
-        }
-
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .step-indicator::before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e9ecef;
-            z-index: 1;
-        }
-
-        .step-dot {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #e9ecef;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
             position: relative;
-            z-index: 2;
-            transition: all 0.3s ease;
+            overflow-x: hidden;
         }
 
-        .step-dot.active {
-            border-color: #6366f1;
-            color: #6366f1;
-            background: #f0f7ff;
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .step-dot.completed {
-            background: #6366f1;
-            border-color: #6366f1;
-            color: white;
+        .ios-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .ios-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bg-blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-blob bg-indigo-200 -top-48 -left-48"></div>
+    <div class="bg-blob bg-purple-200 -bottom-48 -right-48"></div>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-5">
-                <div class="text-center mb-5">
-                    <div class="mb-3 d-inline-flex align-items-center justify-content-center">
-                        <img src="favicon.png" alt="Logo" style="width: 48px; height: 48px; object-fit: contain;">
-                    </div>
-                    <h2 class="h4 fw-bold brand-text mb-1">Budget Tracker</h2>
-                    <p class="text-muted small">Manage your finances with ease.</p>
+    <div class="w-full max-w-md px-6 py-12 relative z-10">
+        <div class="mb-8 text-center">
+            <a href="login.php" class="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm ios-transition group">
+                <i class="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform"></i>
+                Back to Login
+            </a>
+        </div>
+
+        <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow">
+            <div class="text-center mb-10">
+                <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100 animate-float text-white text-2xl">
+                    <i class="fas fa-key"></i>
                 </div>
-
-                <div class="auth-card mx-auto">
-                    <div class="mb-4">
-                        <a href="<?php echo SITE_URL; ?>" class="text-secondary small text-decoration-none hover-primary flex items-center gap-2">
-                            <i class="fas fa-arrow-left"></i> Back to Home
-                        </a>
-                    </div>
-                    <!-- Step Indicator -->
-                    <div class="step-indicator">
-                        <div class="step-dot <?php echo $step >= 1 ? ($step > 1 ? 'completed' : 'active') : ''; ?>">1</div>
-                        <div class="step-dot <?php echo $step >= 2 ? ($step > 2 ? 'completed' : 'active') : ''; ?>">2</div>
-                        <div class="step-dot <?php echo $step >= 3 ? ($step > 3 ? 'completed' : 'active') : ''; ?>">3</div>
-                    </div>
-
-                    <?php if ($step == 1): ?>
-                        <!-- Step 1: Username -->
-                        <h5 class="fw-bold mb-3">Identify Account</h5>
-                        <p class="text-muted small mb-4">Enter your username to begin the recovery process.</p>
-                        <form method="POST">
-                            <input type="hidden" name="action" value="check_username">
-                            <div class="form-floating mb-4">
-                                <input type="text" name="username" class="form-control rounded-3" id="userInp" placeholder="Username" required value="<?php echo htmlspecialchars($username); ?>">
-                                <label for="userInp">Username</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">
-                                Continue <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </form>
-                    <?php elseif ($step == 2): ?>
-                        <!-- Step 2: Security Question -->
-                        <h5 class="fw-bold mb-3">Verify Identity</h5>
-                        <p class="text-muted small mb-1">Please answer your security question:</p>
-                        <p class="fw-bold text-primary mb-4">"<?php echo htmlspecialchars($question); ?>"</p>
-                        <form method="POST">
-                            <input type="hidden" name="action" value="verify_answer">
-                            <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
-                            <div class="form-floating mb-4">
-                                <input type="text" name="answer" class="form-control rounded-3" id="ansInp" placeholder="Your Answer" required autofocus autocomplete="off">
-                                <label for="ansInp">Your Answer</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">
-                                Verify Answer <i class="fas fa-shield-halved ms-2"></i>
-                            </button>
-                        </form>
-                    <?php elseif ($step == 3): ?>
-                        <!-- Step 3: New Password -->
-                        <h5 class="fw-bold mb-3">Set New Password</h5>
-                        <p class="text-muted small mb-4">Choose a strong password with at least 6 characters.</p>
-                        <form method="POST">
-                            <input type="hidden" name="action" value="reset_password">
-                            <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
-                            <div class="form-floating mb-3">
-                                <input type="password" name="new_password" class="form-control rounded-3" id="newPass" placeholder="New Password" required minlength="6">
-                                <label for="newPass">New Password</label>
-                            </div>
-                            <div class="form-floating mb-4">
-                                <input type="password" name="confirm_password" class="form-control rounded-3" id="confPass" placeholder="Confirm Password" required minlength="6">
-                                <label for="confPass">Confirm Password</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm">
-                                Reset Password <i class="fas fa-save ms-2"></i>
-                            </button>
-                        </form>
-                    <?php elseif ($step == 4): ?>
-                        <!-- Step 4: Success -->
-                        <div class="text-center py-4">
-                            <div class="rounded-circle bg-success-subtle p-4 d-inline-block mb-4">
-                                <i class="fas fa-check-circle fa-4x text-success"></i>
-                            </div>
-                            <h4 class="fw-bold mb-3">Password Updated!</h4>
-                            <p class="text-muted mb-4"><?php echo $success; ?></p>
-                            <a href="login.php" class="btn btn-primary px-5 py-3 rounded-3 fw-bold shadow-sm">
-                                Proceed to Login
-                            </a>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="text-center mt-4 pt-2 border-top">
-                        <a href="login.php" class="text-secondary small text-decoration-none"><i class="fas fa-arrow-left me-2"></i> Back to Login</a>
-                    </div>
-                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Recover Account</h2>
+                <p class="text-slate-500 mt-2 font-medium">Follow the steps to reset password</p>
             </div>
+
+            <?php if ($error): ?>
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-xs font-bold rounded-2xl flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($step == 1): ?>
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="action" value="check_username">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Username</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" name="username" value="<?php echo htmlspecialchars($username); ?>" class="w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="Enter your username" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition flex items-center justify-center gap-2">
+                        Next Step <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+
+            <?php elseif ($step == 2): ?>
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="action" value="verify_answer">
+                    <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
+                    <div class="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 mb-6">
+                        <label class="block text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Security Question</label>
+                        <p class="text-indigo-900 font-bold leading-relaxed"><?php echo htmlspecialchars($question); ?></p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Your Answer</label>
+                        <input type="text" name="answer" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="Enter answer here" required>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition">
+                        Verify Answer
+                    </button>
+                    <button type="button" onclick="history.back()" class="w-full text-slate-400 font-bold text-sm hover:text-slate-600 ios-transition pt-2">
+                        Go Back
+                    </button>
+                </form>
+
+            <?php elseif ($step == 3): ?>
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="action" value="reset_password">
+                    <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">New Password</label>
+                        <input type="password" name="new_password" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="••••••••" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 ios-transition">
+                        Reset Password
+                    </button>
+                </form>
+
+            <?php elseif ($step == 4): ?>
+                <div class="text-center py-6">
+                    <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 italic">Success!</h3>
+                    <p class="text-slate-500 mb-8"><?php echo $success; ?></p>
+                    <a href="login.php" class="inline-block bg-slate-900 text-white font-bold px-10 py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition">
+                        Go to Login
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        <?php if ($error): ?>
+        // Alert handle for backend success from redirected page if any
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reset') === 'success') {
             Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: '<?php echo $error; ?>',
-                confirmButtonColor: '#6366f1'
+                icon: 'success',
+                title: 'Success!',
+                text: 'Your password has been reset.',
+                confirmButtonColor: '#4f46e5',
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                }
             });
-        <?php endif; ?>
+        }
     </script>
-
 </body>
 
 </html>
