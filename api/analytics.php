@@ -86,10 +86,11 @@ if ($action === 'trends') {
 } elseif ($action === 'forecast') {
     $balanceHelper = new BalanceHelper($conn);
 
-    // Current balance
+    // Current balance (Consolidated: Cash + Digital + Savings)
     $cash    = $balanceHelper->getCashBalance($user_id);
     $digital = $balanceHelper->getDigitalBalance($user_id);
-    $currentBalance = $cash + $digital;
+    $savings = $balanceHelper->getTotalSavings($user_id);
+    $currentBalance = $cash + $digital + $savings;
 
     // Daily average spending this month
     $dayOfMonth = (int)date('j');
