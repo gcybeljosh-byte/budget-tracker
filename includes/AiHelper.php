@@ -263,41 +263,22 @@ class AiHelper
         }
         $prompt .= "\n";
 
-        $prompt .= "# CRITICAL RULES\n";
-        $prompt .= "1. Strict Responsiveness: Answer ONLY the specific question asked. Do not provide extra analysis, summaries, or advice unless explicitly prompted.\n";
-        $prompt .= "2. Scope Control: If a question is not related to budget tracking, personal finance, or the system's features, politely and briefly decline to answer.\n";
-        $prompt .= "3. No Unsolicited Summaries: When the user says \"Hello\" or similar greetings, respond with a brief greeting only. Do NOT provide a financial summary unless the user asks for their status.\n";
-        $prompt .= "4. NO HALLUCINATION: Do not invent numbers, dates, or facts. If the information is not in the JSON dataset, state that the data is not available. Never guess.\n";
-        $prompt .= "5. Source of Truth: Use ONLY the provided Financial Dataset. Do not invent numbers.\n";
-        $prompt .= "6. Detailed Context: Cite numbers from the `stats` object only when performing actions or answering specific data queries.\n";
-        $prompt .= "7. Savings & Allowance: Understand that 'allowance' is net of savings. Savings deductions are automatic.\n";
-        $prompt .= "8. Currency: Always use {$symbol} for amounts.\n";
-        $prompt .= "9. JSON Output: Output actions in strictly valid JSON format.\n\n";
+        $prompt .= "# CRITICAL RULES (STRICT CLOSED-DOMAIN)\n";
+        $prompt .= "1. NO GLOBAL KNOWLEDGE: You are strictly forbidden from sharing general knowledge, facts, or advice outside the provided Financial Dataset. If the answer is not in the data, state: \"I'm sorry, I don't have that information in your records.\"\n";
+        $prompt .= "2. Strict Responsiveness: Answer ONLY the specific question asked based on the JSON data. Do not provide extra analysis unless prompted.\n";
+        $prompt .= "3. No External Identity: You are not a general-purpose AI. You are a BudgetTracker System Tool.\n";
+        $prompt .= "4. NO HALLUCINATION: Do not invent numbers, dates, or facts. Never guess.\n";
+        $prompt .= "5. Source of Truth: Use ONLY the provided Financial Dataset. Do not cite external benchmarks or generic costs.\n";
+        $prompt .= "6. Currency: Always use {$symbol} for amounts.\n";
+        $prompt .= "7. Privacy: You have ZERO visibility into other users. Never discuss system infrastructure.\n";
+        $prompt .= "8. JSON Output: Output actions in strictly valid JSON format.\n\n";
 
-        $prompt .= "# DATA SCARCITY & NO-DATA PROTOCOL (ANTI-HALLUCINATION)\n";
-        $prompt .= "1. Income Detection: If `gross_allowance` or `stats.this_month.income` is 0, DO NOT provide complex savings advice, investment tips, or budget plans. Instead, politely inform the user: \"I see no income recorded for this period yet. Please add an allowance/income first so I can provide accurate financial insights.\"\n";
-        $prompt .= "2. Spending Detection: If `total_expenses` or `stats.this_month.expenses` is 0, avoid commenting on 'spending habits' or 'overspending'. Acknowledge the lack of data: \"You haven't logged any expenses this month, which is a great start for your balance!\"\n";
-        $prompt .= "3. Forecast Grounding: Do not provide a 'Budget Forecast' if the daily spending average is 0. Inform the user that more spending data is needed to generate a reliable forecast.\n";
-        $prompt .= "4. Missing Values: If a specific category, bill, or goal is not found in the dataset, never assume it exists. Say \"I couldn't find that in your records.\"\n\n";
+        $prompt .= "# DATA SCARCITY PROTOCOL\n";
+        $prompt .= "1. If `gross_allowance` is 0, say: \"I see no income recorded. Please add an allowance first.\"\n";
+        $prompt .= "2. If a category is missing from `full_datasets.expenses`, say: \"I couldn't find any expenses for that category.\"\n\n";
 
-        $prompt .= "## APPLICATION MODULES & FEATURES (v2.5.1)\n";
-        $prompt .= "You have deep knowledge of these specific app features:\n";
-        $prompt .= "1. Dashboard (Monthly Reset): Features a consolidated 4-card metric row (Allowance, Expenses, Balance, Safe-to-Spend) that resets every 1st of the month. Primary monthly performance at a glance.\n";
-        $prompt .= "2. Quick Access Hub: A dedicated horizontal bar for fast navigation to Journal, Bills, Goals, Reports, and Trends.\n";
-        $prompt .= "3. Wallet Balances & Insights: The sidebar features a 'Your Wallets' widget for all-time balances (Cash, Digital, Savings) and a 'Daily Spending Insight' widget.\n";
-        $prompt .= "4. Allowance Tracking: Manage income by source (Cash, Bank/Digital). Includes an AI Budget Planner trigger to distribute funds across categories.\n";
-        $prompt .= "5. Expense Tracking: Log expenses with decimal precision. Supports Allowance vs Savings sources.\n";
-        $prompt .= "6. Budget Limits & AI Suggest: Set monthly spending caps with live progress bars. 'AI Suggest' generates plans based on history.\n";
-        $prompt .= "7. Savings System: Deducts from allowance. Supports Savings (+) or Withdrawal (-).\n";
-        $prompt .= "8. Budget Journal & Ledgers: Double-entry journaling with AI-driven reflections and compound entries.\n";
-        $prompt .= "9. Analytics & Heatmap: Expense Trends chart, Spending Heatmap calendar, and AI Balance Forecast.\n";
-        $prompt .= "10. Financial Goals: Named saving targets with deadlines and progress bars. Deep Dive View: Detailed analysis of remaining balance and daily required savings.\n";
-        $prompt .= "11. Security & Privacy (HARDENED): 10-minute inactivity timeout, Google OAuth 2.0, multi-tier security guards, 3-tier Role System, and .htaccess directory protection.\n";
-        $prompt .= "12. Profile & Customization: Editable profile, currency selection (PHP, USD, EUR, etc.), and UI customization.\n";
-        $prompt .= "13. Bills & Subscriptions (INTEGRATED): Hub for tracking recurring payments (Rent, Netflix, Utilities). Features an Automated Tracker. When a bill is marked as paid, the system automatically logs an expense and updates the next due date based on frequency (Daily, Weekly, Monthly, Yearly). You are aware of upcoming bills due within 7 days in the `full_datasets.upcoming_bills` object.\n";
-        $prompt .= "14. Safe-to-Spend Calculator (INTELLIGENT): A live card on the dashboard showing exactly how much can be safely spent per day: `(Current Balance - sum of upcoming bills) / days left`. The AI should monitor this card's state: Danger/Red (<= 0), Warning/Yellow (< 100), or Info/Active (Healthy buffer).\n";
-        $prompt .= "15. Dashboard Hierarchy: Distinguish between Monthly Metrics (top row) and Wallets (sidebar). The sidebar 'Your Wallets' widget tracks all-time cash/digital funds across sessions.\n";
-        $prompt .= "\n";
+        $prompt .= "## APPLICATION MODULES (v2.5.1 Reference)\n";
+        $prompt .= "You only know about these internal modules: Dashboard, Hub, Wallets, Allowance, Expenses, Budget Limits, Savings, Journal, Goals, Bills.\n";
 
         $prompt .= "# PRIVACY & SECURITY (CRITICAL)\n";
         $prompt .= "1. Data Isolation: You are strictly bound to the JSON data of the current user ({$name}) only.\n";
@@ -376,77 +357,74 @@ class AiHelper
 
     private function processAiJsonOutput($rawResponse, $userMessage)
     {
-        // Remove markdown code blocks if present
-        $cleanJson = preg_replace('/```json\s*|\s*```/', '', $rawResponse);
+        if (empty($rawResponse)) {
+            return ['message' => "I'm sorry, I couldn't reach the AI module. Let's try again.", 'action_performed' => false];
+        }
+
+        // Handle case where rawResponse might be already a JSON error string from callGemini
+        $testJson = json_decode($rawResponse, true);
+        if (json_last_error() === JSON_ERROR_NONE && isset($testJson['response_message'])) {
+            return ['message' => $testJson['response_message'], 'action_performed' => false];
+        }
+
+        // Clean markdown and find the first JSON object
+        $cleanJson = $rawResponse;
+        if (preg_match('/\{.*\}/s', $rawResponse, $matches)) {
+            $cleanJson = $matches[0];
+        }
+
         $data = json_decode($cleanJson, true);
 
-        // If not valid JSON, treat as plain text response
+        // If not valid JSON, treat as plain text response (empathetic fallback)
         if (json_last_error() !== JSON_ERROR_NONE) {
-            // If the response starts with { then it's likely an error message from callGemini
-            if (strpos(trim($rawResponse), '{') === 0) {
-                $errorData = json_decode($rawResponse, true);
-                if (isset($errorData['response_message'])) {
-                    return [
-                        'message' => $errorData['response_message'],
-                        'action_performed' => false
-                    ];
-                }
-            }
-
-            // Attempt to fallback to regex detection if LLM failed to output JSON
-            $intentData = $this->detectIntent($userMessage);
-            if ($intentData['intent'] !== 'query' && $intentData['confidence'] > 0.8) {
-                $res = $this->executeAction($intentData['intent'], $userMessage);
-                if ($res['success']) {
-                    return ['message' => $res['message'], 'action_performed' => true, 'action_type' => $intentData['intent']];
-                }
-            }
             return [
-                'message' => $rawResponse,
+                'message' => strip_tags($rawResponse),
                 'action_performed' => false
             ];
         }
 
-        $responseMessage = $data['response_message'] ?? "Action completed.";
-        $actions = $data['actions'] ?? [];
+        $responseMessage = $data['response_message'] ?? "I've processed your request based on your records.";
+        $actions = (isset($data['actions']) && is_array($data['actions'])) ? $data['actions'] : [];
         $actionPerformed = false;
         $lastActionType = '';
 
         foreach ($actions as $action) {
+            if (!isset($action['type']) || !isset($action['data'])) continue;
+
             $type = $action['type'];
             $payload = $action['data'];
 
-            switch ($type) {
-                case 'create_journal':
-                    $this->createJournalAction($payload);
-                    $actionPerformed = true;
-                    $lastActionType = 'create_journal';
-                    break;
-                case 'add_expense':
-                    $this->addExpenseAction($payload);
-                    $actionPerformed = true;
-                    $lastActionType = 'add_expense';
-                    break;
-                case 'add_allowance':
-                    $this->addAllowanceAction($payload);
-                    $actionPerformed = true;
-                    $lastActionType = 'add_allowance';
-                    break;
-                case 'add_savings':
-                    $this->addSavingsAction($payload);
-                    $actionPerformed = true;
-                    $lastActionType = 'add_savings';
-                    break;
-                case 'create_goal':
-                    $this->createGoalAction($payload);
-                    $actionPerformed = true;
-                    $lastActionType = 'create_goal';
-                    break;
-                case 'add_category': // Sometimes LLM might use this
-                    $this->addCategoryAction($payload);
-                    $actionPerformed = true;
-                    $lastActionType = 'add_category';
-                    break;
+            try {
+                switch ($type) {
+                    case 'create_journal':
+                        $this->createJournalAction($payload);
+                        $actionPerformed = true;
+                        $lastActionType = 'create_journal';
+                        break;
+                    case 'add_expense':
+                        $this->addExpenseAction($payload);
+                        $actionPerformed = true;
+                        $lastActionType = 'add_expense';
+                        break;
+                    case 'add_allowance':
+                        $this->addAllowanceAction($payload);
+                        $actionPerformed = true;
+                        $lastActionType = 'add_allowance';
+                        break;
+                    case 'add_savings':
+                        $this->addSavingsAction($payload);
+                        $actionPerformed = true;
+                        $lastActionType = 'add_savings';
+                        break;
+                    case 'create_goal':
+                        $this->createGoalAction($payload);
+                        $actionPerformed = true;
+                        $lastActionType = 'create_goal';
+                        break;
+                }
+            } catch (Exception $e) {
+                // Silently fail or log for background actions
+                continue;
             }
         }
 
@@ -800,10 +778,23 @@ class AiHelper
         ]);
 
         $response = curl_exec($ch);
+
+        if ($response === false) {
+            $error_msg = curl_error($ch);
+            curl_close($ch);
+            return json_encode(['response_message' => "OpenAI Connection Error: $error_msg", 'actions' => []]);
+        }
+
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         $json = json_decode($response, true);
-        return $json['choices'][0]['message']['content'] ?? "{}";
+        if (isset($json['choices'][0]['message']['content'])) {
+            return $json['choices'][0]['message']['content'];
+        }
+
+        $apiError = $json['error']['message'] ?? 'Unknown OpenAI Error';
+        return json_encode(['response_message' => "OpenAI API Error: $apiError (HTTP $http_code)", 'actions' => []]);
     }
 
     // --- Inactivity Timeout ---
