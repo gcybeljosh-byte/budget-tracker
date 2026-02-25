@@ -40,9 +40,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($date && $category && $description && $amount) {
                 // Balance Validation
-                $currentBalance = $balanceHelper->getBalanceBySource($user_id, $expense_source, $source_type);
+                $balanceDetails = $balanceHelper->getBalanceDetails($user_id, $expense_source, $source_type);
+                $currentBalance = $balanceDetails['balance'];
+
                 if ($amount > $currentBalance) {
-                    $response = ['success' => false, 'message' => 'Insufficient balance in ' . ($expense_source === 'Savings' ? 'Savings' : ($source_type . ' Balance')) . '. Available: ' . $currentBalance];
+                    $sourceName = ($expense_source === 'Savings' ? 'Savings' : ($source_type . ' Balance'));
+                    $reason = "Insufficient balance in $sourceName. ";
+                    $reason .= "Available: " . number_format($currentBalance, 2) . ". ";
+                    $reason .= "(Total " . ($expense_source === 'Savings' ? 'Deposits' : 'Allowance') . ": " . number_format($balanceDetails['allowance_sum'], 2);
+                    $reason .= ", Total Spent: " . number_format($balanceDetails['expense_sum'], 2);
+                    if ($expense_source !== 'Savings') {
+                        $reason .= ", In Savings: " . number_format($balanceDetails['savings_sum'], 2);
+                    }
+                    $reason .= ")";
+
+                    $response = ['success' => false, 'message' => $reason];
                     echo json_encode($response);
                     exit;
                 }
@@ -88,14 +100,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $oldStmt->close();
 
                 if ($oldData) {
-                    $currentBalance = $balanceHelper->getBalanceBySource($user_id, $expense_source, $source_type);
+                    $balanceDetails = $balanceHelper->getBalanceDetails($user_id, $expense_source, $source_type);
+                    $currentBalance = $balanceDetails['balance'];
+
                     // If source is the same, we add back the old amount to the balance before checking
                     if ($oldData['expense_source'] === $expense_source && $oldData['source_type'] === $source_type) {
                         $currentBalance += $oldData['amount'];
                     }
 
                     if ($amount > $currentBalance) {
-                        $response = ['success' => false, 'message' => 'Insufficient balance for update. Available: ' . $currentBalance];
+                        $response = ['success' => false, 'message' => 'Insufficient balance for update. Available: ' . number_format($currentBalance, 2)];
                         echo json_encode($response);
                         exit;
                     }

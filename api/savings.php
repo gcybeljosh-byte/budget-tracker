@@ -38,15 +38,25 @@ $response = ['success' => false, 'message' => 'Invalid request'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-    
+
     switch ($action) {
         case 'add':
             $date = $_POST['date'] ?? date('Y-m-d');
             $description = $_POST['description'] ?? 'Savings';
             $amount = $_POST['amount'] ?? 0;
             $source_type = $_POST['source_type'] ?? 'Cash';
-            
+
             if ($amount > 0) {
+                // Balance Validation: Ensure the source has enough allowance to be moved to savings
+                $balanceHelper = new BalanceHelper($conn);
+                $currentBalance = $balanceHelper->getBalanceBySource($user_id, 'Allowance', $source_type);
+
+                if ($amount > $currentBalance) {
+                    $response = ['success' => false, 'message' => "Insufficient $source_type Allowance to move to Savings. Available: " . number_format($currentBalance, 2)];
+                    echo json_encode($response);
+                    exit;
+                }
+
                 $stmt = $conn->prepare("INSERT INTO savings (user_id, date, amount, description, source_type) VALUES (?, ?, ?, ?, ?)");
                 $stmt->bind_param("isdss", $user_id, $date, $amount, $description, $source_type);
                 if ($stmt->execute()) {
@@ -60,10 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $response = ['success' => false, 'message' => 'Amount must be greater than 0'];
             }
             break;
-            
+
         case 'delete':
             $id = $_POST['id'] ?? 0;
-            
+
             $stmt = $conn->prepare("DELETE FROM savings WHERE id = ? AND user_id = ?");
             $stmt->bind_param("ii", $id, $user_id);
             if ($stmt->execute()) {
@@ -83,6 +93,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $source_type = $_POST['source_type'] ?? 'Cash';
 
             if ($id > 0 && $amount > 0) {
+                // Balance Validation for Edit
+                $balanceHelper = new BalanceHelper($conn);
+
+                // Get old amount to add it back for validation
+                $oldStmt = $conn->prepare("SELECT amount, source_type FROM savings WHERE id = ? AND user_id = ?");
+                $oldStmt->bind_param("ii", $id, $user_id);
+                $oldStmt->execute();
+                $oldData = $oldStmt->get_result()->fetch_assoc();
+                $oldStmt->close();
+
+                if ($oldData) {
+                    $currentBalance = $balanceHelper->getBalanceBySource($user_id, 'Allowance', $source_type);
+                    if ($oldData['source_type'] === $source_type) {
+                        $currentBalance += $oldData['amount'];
+                    }
+
+                    if ($amount > $currentBalance) {
+                        $response = ['success' => false, 'message' => "Insufficient $source_type Allowance for update. Available: " . number_format($currentBalance, 2)];
+                        echo json_encode($response);
+                        exit;
+                    }
+                }
+
                 $stmt = $conn->prepare("UPDATE savings SET amount = ?, date = ?, description = ?, source_type = ? WHERE id = ? AND user_id = ?");
                 $stmt->bind_param("dssii", $amount, $date, $description, $source_type, $id, $user_id);
                 if ($stmt->execute()) {
@@ -99,18 +132,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $action = $_GET['action'] ?? 'fetch';
-    
+
     if ($action === 'stats') {
         $today = date('Y-m-d');
         $thisMonth = date('Y-m');
         $thisYear = date('Y');
-        
+
         $stats = [
             'total' => 0,
             'monthly' => 0,
             'yearly' => 0
         ];
-        
+
         // Total (Lifetime) - Net of Expenses
         $stmt = $conn->prepare("
             SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ?) - 
@@ -120,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stats['total'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
-        
+
         // Monthly - Net of Expenses
         $stmt = $conn->prepare("
             SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?) - 
@@ -130,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stats['monthly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
-        
+
         // Yearly - Net of Expenses
         $stmt = $conn->prepare("
             SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ?) - 
@@ -140,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stats['yearly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
-        
+
         $response = ['success' => true, 'data' => $stats];
     } else {
         $sql = "
@@ -164,4 +197,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 echo json_encode($response);
 $conn->close();
-?>
