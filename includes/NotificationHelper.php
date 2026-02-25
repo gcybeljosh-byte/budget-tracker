@@ -105,7 +105,7 @@ class NotificationHelper
     public function checkLowAllowance($user_id)
     {
         // Check user preference
-        $prefStmt = $this->conn->prepare("SELECT notif_low_balance, preferred_currency FROM users WHERE id = ?");
+        $prefStmt = $this->conn->prepare("SELECT notif_low_balance, preferred_currency, first_name FROM users WHERE id = ?");
         $prefStmt->bind_param("i", $user_id);
         $prefStmt->execute();
         $pref = $prefStmt->get_result()->fetch_assoc();
@@ -114,6 +114,7 @@ class NotificationHelper
         if (($pref['notif_low_balance'] ?? 1) == 0) return;
 
         $currency = $pref['preferred_currency'] ?? 'PHP';
+        $firstName = $pref['first_name'] ?? 'User';
         require_once __DIR__ . '/CurrencyHelper.php';
         $symbol = CurrencyHelper::getSymbol($currency);
 
@@ -133,16 +134,16 @@ class NotificationHelper
         $threshold = ($currency === 'USD') ? 10 : 500;
 
         if ($balance < $threshold) {
-            // Check if a "low_allowance" notification was already sent today
+            // Check if a "low_balance" notification was already sent today
             $today = date('Y-m-d');
-            $type = 'low_allowance';
+            $type = 'low_balance';
             $checkStmt = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
             $checkStmt->bind_param("iss", $user_id, $type, $today);
             $checkStmt->execute();
 
             if ($checkStmt->get_result()->num_rows == 0) {
                 $formattedBalance = number_format($balance, 2);
-                $this->addNotification($user_id, $type, "\u26a0\ufe0f Low Balance Alert: Your balance is now {$symbol}{$formattedBalance}. Please spend wisely!");
+                $this->addNotification($user_id, $type, "⚠️ Hello {$firstName}! Your balance is now {$symbol}{$formattedBalance}. Please spend wisely!");
             }
             $checkStmt->close();
         }

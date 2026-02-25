@@ -88,14 +88,14 @@
                                                     <div class="d-flex align-items-start">
                                                         <div class="<?php
                                                                     if (strpos($notif['type'], 'reminder') !== false) echo 'bg-info-subtle text-info';
-                                                                    elseif ($notif['type'] === 'low_allowance') echo 'bg-danger-subtle text-danger';
+                                                                    elseif ($notif['type'] === 'low_balance') echo 'bg-danger-subtle text-danger';
                                                                     elseif (strpos($notif['type'], 'bill_deadline') !== false) echo 'bg-warning-subtle text-warning';
                                                                     elseif ($notif['type'] === 'new_user') echo 'bg-primary-subtle text-primary';
                                                                     else echo 'bg-success-subtle text-success';
                                                                     ?> p-2 rounded-circle me-3">
                                                             <i class="fas <?php
                                                                             if (strpos($notif['type'], 'reminder') !== false) echo 'fa-clock';
-                                                                            elseif ($notif['type'] === 'low_allowance') echo 'fa-exclamation-triangle';
+                                                                            elseif ($notif['type'] === 'low_balance') echo 'fa-exclamation-triangle';
                                                                             elseif (strpos($notif['type'], 'bill_deadline') !== false) echo 'fa-file-invoice-dollar';
                                                                             elseif ($notif['type'] === 'new_user') echo 'fa-user-plus';
                                                                             else echo 'fa-hand-holding-usd';
@@ -104,9 +104,9 @@
                                                         <div>
                                                             <h6 class="mb-0 small fw-bold"><?php
                                                                                             if (strpos($notif['type'], 'reminder') !== false) echo 'Expense Reminder';
-                                                                                            elseif ($notif['type'] === 'low_allowance') echo 'Low Balance Alert';
+                                                                                            elseif ($notif['type'] === 'low_balance') echo 'Low Balance Alert';
                                                                                             elseif (strpos($notif['type'], 'bill_deadline') !== false) echo 'Bill Deadline';
-                                                                                            elseif ($notif['type'] === 'new_user') echo 'New User Joined';
+                                                                                            elseif ($notif['type'] === 'new_user') echo 'New User Registered';
                                                                                             else echo 'Allowance Added';
                                                                                             ?></h6>
                                                             <p class="mb-0 text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($notif['message']); ?></p>
