@@ -12,30 +12,7 @@
         </div>
     <?php endif; ?>
 
-    <?php if (($_SESSION['role'] ?? '') === 'superadmin'): ?>
-        <!-- Superadmin: AI Status Banner -->
-        <?php
-        $__k = defined('AI_API_KEY') ? AI_API_KEY : '';
-        $__lf = __DIR__ . DIRECTORY_SEPARATOR . 'config.local.php';
-        if ($__k && strlen($__k) > 10) {
-            $__ks = '&#x2705; Key OK (' . substr($__k, 0, 8) . '...)';
-        } elseif (!file_exists($__lf)) {
-            $__ks = '&#x274C; config.local.php NOT FOUND at: ' . htmlspecialchars($__lf);
-        } elseif (!defined('AI_API_KEY_LOCAL')) {
-            $__ks = '&#x274C; AI_API_KEY_LOCAL not defined (file loaded but empty?)';
-        } elseif (AI_API_KEY_LOCAL === 'YOUR_KEY_HERE') {
-            $__ks = '&#x274C; Still placeholder - replace YOUR_KEY_HERE';
-        } else {
-            $__ks = '&#x26A0;&#xFE0F; Key in local.php but AI_API_KEY empty - do Ctrl+Shift+R';
-        }
-        ?>
-        <div style="background:linear-gradient(135deg,#6366f1,#a855f7);padding:6px 12px;font-size:0.72rem;color:#fff;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <i class="fas fa-shield-alt"></i>
-            <strong>SA</strong> &mdash;
-            <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE) ? '&#x1F527; Maint ON (bypass) &bull;' : '&#x1F7E2; AI Live &bull;'; ?>
-            <?php echo $__ks; ?>
-        </div>
-    <?php endif; ?>
+
     <!-- Header -->
     <div class="card-header text-white d-flex justify-content-between align-items-center py-3"
         style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 0.5rem 0.5rem 0 0;">
