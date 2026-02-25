@@ -476,8 +476,8 @@ if (isset($_SESSION['id'])) {
             </div>
 
             <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-10 relative">
-                <span class="font-['Caveat'] text-indigo-600 block mb-2 transform -rotate-2">Unleash</span>
-                your <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">financial potential</span>
+                <span class="font-['Caveat'] text-indigo-600 block mb-2 transform -rotate-2">Command</span>
+                your <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">wealth journey</span>
             </h2>
 
             <div class="flex flex-col items-center gap-6">
