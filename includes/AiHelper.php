@@ -6,6 +6,7 @@ class AiHelper
     private $conn;
     private $user_id;
     private $balanceHelper;
+    private $notificationHelper;
     private $cached_symbol = null;
 
     public function __construct($db_connection, $user_id)
@@ -13,7 +14,9 @@ class AiHelper
         $this->conn = $db_connection;
         $this->user_id = $user_id;
         require_once __DIR__ . '/BalanceHelper.php';
+        require_once __DIR__ . '/NotificationHelper.php';
         $this->balanceHelper = new BalanceHelper($this->conn);
+        $this->notificationHelper = new NotificationHelper($this->conn);
     }
 
     private function getFinancialStats($startDate = null, $endDate = null)
@@ -465,6 +468,7 @@ class AiHelper
         $stmt->execute();
         $stmt->close();
 
+        $this->notificationHelper->addNotification($this->user_id, 'bill_added', "Expert AI recorded your bill: $title ($amount)");
         logActivity($this->conn, $this->user_id, 'bill_add', "AI added bill: '$title' ($amount)");
         return ['success' => true];
     }
@@ -483,6 +487,10 @@ class AiHelper
         $stmt->bind_param("isssdss", $this->user_id, $date, $category, $desc, $data['amount'], $source_type, $expense_source);
         $stmt->execute();
         $stmt->close();
+
+        $this->notificationHelper->checkLowAllowance($this->user_id);
+        $this->notificationHelper->checkBudgetLimit($this->user_id);
+        logActivity($this->conn, $this->user_id, 'expense_add', "AI added expense: $desc ($category) - {$data['amount']}");
         return ['success' => true];
     }
 
@@ -498,6 +506,10 @@ class AiHelper
         $stmt->bind_param("issds", $this->user_id, $date, $desc, $data['amount'], $source);
         $stmt->execute();
         $stmt->close();
+
+        $this->notificationHelper->addNotification($this->user_id, 'allowance_added', "Expert AI recorded an allowance: $desc ({$data['amount']})");
+        $this->balanceHelper->syncBudgetLimits($this->user_id);
+        logActivity($this->conn, $this->user_id, 'allowance_add', "AI added allowance: $desc - {$data['amount']} ($source)");
         return ['success' => true];
     }
 
@@ -513,6 +525,9 @@ class AiHelper
         $stmt->bind_param("issds", $this->user_id, $date, $desc, $data['amount'], $source_type);
         $stmt->execute();
         $stmt->close();
+
+        $this->notificationHelper->addNotification($this->user_id, 'savings_added', "Expert AI recorded a savings deposit: $desc ({$data['amount']})");
+        logActivity($this->conn, $this->user_id, 'savings_add', "AI added savings: $desc - {$data['amount']} ($source_type)");
         return ['success' => true];
     }
 

@@ -9,6 +9,24 @@ include '../includes/header.php';
 
 <?php include '../includes/sidebar.php'; ?>
 
+<style>
+    .bg-orange {
+        background-color: #f97316 !important;
+    }
+
+    .text-orange {
+        color: #f97316 !important;
+    }
+
+    .bg-orange-subtle {
+        background-color: #ffedd5 !important;
+    }
+
+    .text-orange-subtle {
+        color: #ea580c !important;
+    }
+</style>
+
 <!-- Page Content -->
 <div id="page-content-wrapper">
 
@@ -105,7 +123,7 @@ include '../includes/header.php';
 
             if (!empty($title) && !empty($date) && $id > 0) {
                 $stmt = $conn->prepare("UPDATE journals SET date=?, end_date=?, title=?, notes=?, financial_status=?, overspending_warning=? WHERE id=? AND user_id=?");
-                $stmt->bind_param("ssssiii", $date, $endDate, $title, $notes, $status, $warning, $id, $_SESSION['id']);
+                $stmt->bind_param("sssssiii", $date, $endDate, $title, $notes, $status, $warning, $id, $_SESSION['id']);
                 if ($stmt->execute()) {
                     // Update Lines: Delete old -> Insert new (Simple approach)
                     $delStmt = $conn->prepare("DELETE FROM journal_lines WHERE journal_id = ?");
@@ -178,6 +196,38 @@ include '../includes/header.php';
             $budgetGoal = floatval($row['monthly_budget_goal']);
         }
         $stmt->close();
+
+        // --- Calculate Current Month's Total Expenses ---
+        $currentMonthExpenses = 0;
+        $startOfMonth = date('Y-m-01');
+        $endOfMonth = date('Y-m-t');
+        $expStmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ?");
+        $expStmt->bind_param("iss", $_SESSION['id'], $startOfMonth, $endOfMonth);
+        $expStmt->execute();
+        $currentMonthExpenses = (float)$expStmt->get_result()->fetch_assoc()['total'];
+        $expStmt->close();
+
+        // --- Financial Status Automation Logic ---
+        $pct = ($budgetGoal > 0) ? ($currentMonthExpenses / $budgetGoal) * 100 : 0;
+        $autoStatus = 'Neutral';
+        $statusClass = 'secondary';
+
+        if ($budgetGoal > 0) {
+            if ($pct <= 25) {
+                $autoStatus = 'Healthy';
+                $statusClass = 'success';
+            } elseif ($pct <= 50) {
+                $autoStatus = 'Moderate';
+                $statusClass = 'warning';
+            } elseif ($pct <= 75) {
+                $autoStatus = 'Caution';
+                $statusClass = 'orange'; // Custom color handled in CSS or Bootstrap
+            } else {
+                $autoStatus = 'Critical';
+                $statusClass = 'danger';
+            }
+        }
+        $isCritical = ($autoStatus === 'Critical');
         ?>
 
         <div class="d-flex justify-content-end mb-4">
@@ -253,10 +303,13 @@ include '../includes/header.php';
                                 $statusColor = 'success';
                                 $statusIcon = 'fa-smile';
                                 break;
-                            case 'caution':
                             case 'moderate':
                                 $statusColor = 'warning';
                                 $statusIcon = 'fa-meh';
+                                break;
+                            case 'caution':
+                                $statusColor = 'orange';
+                                $statusIcon = 'fa-exclamation-circle';
                                 break;
                             case 'critical':
                             case 'bad':
@@ -475,13 +528,24 @@ include '../includes/header.php';
                                             </div>
 
                                             <div class="mb-3">
-                                                <label class="form-label small fw-bold text-secondary text-uppercase">Financial Status</label>
+                                                <label class="form-label small fw-bold text-secondary text-uppercase d-flex justify-content-between">
+                                                    Financial Status
+                                                    <span class="text-<?php echo $statusClass; ?>"><?php echo number_format($pct, 1); ?>% of Goal</span>
+                                                </label>
+                                                <div class="p-2 border rounded-3 mb-2 bg-light">
+                                                    <div class="progress" style="height: 6px;">
+                                                        <div class="progress-bar bg-<?php echo $statusClass; ?>" role="progressbar" style="width: <?php echo min(100, $pct); ?>%"></div>
+                                                    </div>
+                                                </div>
                                                 <select class="form-select rounded-3" name="financial_status">
-                                                    <option value="Healthy" <?php echo ($row['financial_status'] == 'Healthy') ? 'selected' : ''; ?>>Healthy (Green)</option>
-                                                    <option value="Neutral" <?php echo ($row['financial_status'] == 'Neutral') ? 'selected' : ''; ?>>Neutral (Grey)</option>
-                                                    <option value="Caution" <?php echo ($row['financial_status'] == 'Caution') ? 'selected' : ''; ?>>Caution (Orange)</option>
-                                                    <option value="Critical" <?php echo ($row['financial_status'] == 'Critical') ? 'selected' : ''; ?>>Critical (Red)</option>
+                                                    <option value="Healthy" <?php echo ($autoStatus == 'Healthy') ? 'selected' : ''; ?>>Healthy (Green)</option>
+                                                    <option value="Moderate" <?php echo ($autoStatus == 'Moderate') ? 'selected' : ''; ?>>Moderate (Yellow)</option>
+                                                    <option value="Caution" <?php echo ($autoStatus == 'Caution') ? 'selected' : ''; ?>>Caution (Orange)</option>
+                                                    <option value="Critical" <?php echo ($autoStatus == 'Critical') ? 'selected' : ''; ?>>Critical (Red)</option>
                                                 </select>
+                                                <div class="form-text small text-<?php echo $statusClass; ?> fw-bold mt-1">
+                                                    <i class="fas fa-robot me-1"></i> Automated based on your monthly spending.
+                                                </div>
                                             </div>
 
                                             <div class="mb-3">
@@ -490,7 +554,7 @@ include '../includes/header.php';
                                             </div>
 
                                             <div class="form-check mb-4">
-                                                <input class="form-check-input" type="checkbox" name="overspending_warning" id="overspendingCheck<?php echo $row['id']; ?>" <?php echo $row['overspending_warning'] ? 'checked' : ''; ?>>
+                                                <input class="form-check-input" type="checkbox" name="overspending_warning" id="overspendingCheck<?php echo $row['id']; ?>" <?php echo $isCritical ? 'checked' : ''; ?>>
                                                 <label class="form-check-label text-danger fw-bold" for="overspendingCheck<?php echo $row['id']; ?>">
                                                     <i class="fas fa-exclamation-triangle me-1"></i> Flag as Overspending
                                                 </label>
@@ -591,13 +655,24 @@ include '../includes/header.php';
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Financial Status</label>
+                        <label class="form-label small fw-bold text-secondary text-uppercase d-flex justify-content-between">
+                            Financial Status
+                            <span class="text-<?php echo $statusClass; ?>"><?php echo number_format($pct, 1); ?>% of Goal</span>
+                        </label>
+                        <div class="p-2 border rounded-3 mb-2 bg-light">
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-<?php echo $statusClass; ?>" role="progressbar" style="width: <?php echo min(100, $pct); ?>%"></div>
+                            </div>
+                        </div>
                         <select class="form-select rounded-3" name="financial_status">
-                            <option value="Healthy">Healthy (Green)</option>
-                            <option value="Neutral" selected>Neutral (Grey)</option>
-                            <option value="Caution">Caution (Orange)</option>
-                            <option value="Critical">Critical (Red)</option>
+                            <option value="Healthy" <?php echo ($autoStatus == 'Healthy') ? 'selected' : ''; ?>>Healthy (Green)</option>
+                            <option value="Moderate" <?php echo ($autoStatus == 'Moderate') ? 'selected' : ''; ?>>Moderate (Yellow)</option>
+                            <option value="Caution" <?php echo ($autoStatus == 'Caution') ? 'selected' : ''; ?>>Caution (Orange)</option>
+                            <option value="Critical" <?php echo ($autoStatus == 'Critical') ? 'selected' : ''; ?>>Critical (Red)</option>
                         </select>
+                        <div class="form-text small text-<?php echo $statusClass; ?> fw-bold mt-1">
+                            <i class="fas fa-robot me-1"></i> Automated based on your monthly spending.
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -606,7 +681,7 @@ include '../includes/header.php';
                     </div>
 
                     <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" name="overspending_warning" id="overspendingCheck">
+                        <input class="form-check-input" type="checkbox" name="overspending_warning" id="overspendingCheck" <?php echo $isCritical ? 'checked' : ''; ?>>
                         <label class="form-check-label text-danger fw-bold" for="overspendingCheck">
                             <i class="fas fa-exclamation-triangle me-1"></i> Flag as Overspending
                         </label>
