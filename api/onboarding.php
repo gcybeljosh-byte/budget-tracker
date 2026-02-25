@@ -24,17 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     $stmt->bind_param("sdi", $currency, $budget_goal, $user_id);
-    
+
     if (!$stmt->execute()) {
         echo json_encode(['success' => false, 'message' => 'Failed to update user profile: ' . $conn->error]);
         exit;
     }
     $stmt->close();
-    
+
     // Clear temporary registration data after successful onboarding
     unset($_SESSION['google_registered_password']);
     unset($_SESSION['temp_registration_password']);
-    
+
     $_SESSION['user_currency'] = $currency; // Track currency in session
 
     // 2. Ensure Categories Table Exists
@@ -49,18 +49,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_query($conn, $createTable);
 
     // 3. Insert Selected Categories
-    if (!empty($categories)) {
-        $stmt_cat = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
-        if ($stmt_cat) {
-            foreach ($categories as $cat_name) {
-                $cat_name = trim($cat_name);
-                if (!empty($cat_name)) {
-                    $stmt_cat->bind_param("is", $user_id, $cat_name);
-                    $stmt_cat->execute();
+    if ($categories_json !== '[]') {
+        // Clear existing categories first to ensure exact match with onboarding choices
+        $conn->query("DELETE FROM categories WHERE user_id = $user_id");
+
+        if (!empty($categories)) {
+            $stmt_cat = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
+            if ($stmt_cat) {
+                foreach ($categories as $cat_name) {
+                    $cat_name = trim($cat_name);
+                    if (!empty($cat_name)) {
+                        $stmt_cat->bind_param("is", $user_id, $cat_name);
+                        $stmt_cat->execute();
+                    }
                 }
+                $stmt_cat->close();
             }
-            $stmt_cat->close();
         }
+    } else {
+        // User explicitly chose NO categories
+        $conn->query("DELETE FROM categories WHERE user_id = $user_id");
     }
 
     echo json_encode(['success' => true, 'message' => 'Onboarding completed successfully']);
@@ -69,4 +77,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $conn->close();
-?>

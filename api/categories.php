@@ -22,17 +22,23 @@ $createTable = "CREATE TABLE IF NOT EXISTS categories (
 )";
 mysqli_query($conn, $createTable);
 
-// Ensure default categories exist for this user if none found
-$checkCount = mysqli_query($conn, "SELECT COUNT(*) as count FROM categories WHERE user_id = $user_id");
-if ($checkCount) {
-    $countRow = mysqli_fetch_assoc($checkCount);
-    if ($countRow && $countRow['count'] == 0) {
-        $defaultCategories = ['Food & Dining', 'Transportation', 'Utilities', 'Entertainment', 'Shopping', 'Health', 'Education', 'Other'];
-        foreach ($defaultCategories as $cat) {
-            $stmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
-            $stmt->bind_param("is", $user_id, $cat);
-            $stmt->execute();
-            $stmt->close();
+// Ensure default categories exist for this user ONLY IF onboarding is NOT completed
+$userCheck = mysqli_query($conn, "SELECT onboarding_completed FROM users WHERE id = $user_id");
+$userRow = mysqli_fetch_assoc($userCheck);
+$isOnboardingCompleted = ($userRow && $userRow['onboarding_completed'] == 1);
+
+if (!$isOnboardingCompleted) {
+    $checkCount = mysqli_query($conn, "SELECT COUNT(*) as count FROM categories WHERE user_id = $user_id");
+    if ($checkCount) {
+        $countRow = mysqli_fetch_assoc($checkCount);
+        if ($countRow && $countRow['count'] == 0) {
+            $defaultCategories = ['Food & Dining', 'Transportation', 'Rent & Utilities', 'Entertainment', 'Shopping', 'Healthcare', 'Education', 'Savings', 'Other'];
+            foreach ($defaultCategories as $cat) {
+                $stmt = $conn->prepare("INSERT IGNORE INTO categories (user_id, name) VALUES (?, ?)");
+                $stmt->bind_param("is", $user_id, $cat);
+                $stmt->execute();
+                $stmt->close();
+            }
         }
     }
 }
