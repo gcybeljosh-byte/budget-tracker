@@ -86,8 +86,8 @@ if (!defined('SITE_URL')) {
 
     // Auto-detect production vs local
     if (strpos($host, 'onrender.com') !== false || strpos($host, 'infinityfree') !== false || strpos($host, 'great-site.net') !== false) {
-        // Enforce HTTPS for known production environments
-        $baseUrl = "https://" . $host . "/";
+        // Use the detected protocol for production environments to avoid mixed-content/CORS issues
+        $baseUrl = $protocol . "://" . $host . "/";
     } else {
         // Local fallback
         $scriptPath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));

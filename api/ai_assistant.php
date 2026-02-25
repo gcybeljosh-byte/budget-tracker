@@ -89,6 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'created_at' => date('Y-m-d H:i:s'),
             'action_performed' => $actionPerformed,
             'action_type' => $actionType
+        ],
+        'debug_info' => [
+            'api_key_hint' => substr(defined('AI_API_KEY') ? AI_API_KEY : '', 0, 4) . '...',
+            'proxy_active' => (defined('AI_PROXY_URL') && !empty(AI_PROXY_URL)) ? 'Yes' : 'No'
         ]
     ]);
     exit;
