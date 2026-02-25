@@ -25,7 +25,7 @@ if (isset($_SESSION['id'])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -462,6 +462,44 @@ if (isset($_SESSION['id'])) {
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="py-24 px-6 bg-white relative overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center relative z-10 reveal">
+            <!-- Decorative Doodles -->
+            <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-full h-24 pointer-events-none opacity-40">
+                <svg viewBox="0 0 400 100" class="w-full h-full fill-none stroke-amber-400 stroke-[3] stroke-round">
+                    <path d="M100,80 Q110,40 120,80 M130,70 Q140,30 150,70 M250,70 Q260,30 270,70 M280,80 Q290,40 300,80" class="animate-pulse" />
+                    <path d="M50,50 L70,30 M60,60 L80,40 M320,30 L340,50 M330,40 L350,60" />
+                </svg>
+            </div>
+
+            <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-10 relative">
+                <span class="font-['Caveat'] text-indigo-600 block mb-2 transform -rotate-2">Unleash</span>
+                your <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">financial potential</span>
+            </h2>
+
+            <div class="flex flex-col items-center gap-6">
+                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-[#6b4e71] text-white font-bold px-12 py-5 rounded-2xl text-xl shadow-2xl hover:bg-[#5a415f] hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
+                    Start now - It's free
+                </a>
+
+                <div class="flex flex-col items-center gap-2">
+                    <div class="text-teal-600 animate-bounce">
+                        <i class="fas fa-arrow-up text-lg"></i>
+                    </div>
+                    <div class="flex flex-col text-slate-400 font-bold uppercase tracking-widest text-[10px] md:text-xs gap-1">
+                        <span>No credit card required</span>
+                        <span class="text-slate-300">Instant access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extra background blobs for the CTA -->
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-50 rounded-full blur-3xl opacity-40 -z-0"></div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-teal-50 rounded-full blur-3xl opacity-40 -z-0"></div>
     </section>
 
     <!-- Footer -->
