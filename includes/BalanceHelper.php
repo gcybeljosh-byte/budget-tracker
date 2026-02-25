@@ -14,9 +14,9 @@ class BalanceHelper
         $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
         $stmt = $this->conn->prepare("
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = 'Cash' $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = 'Cash' AND expense_source = 'Allowance' $dateFilter) -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = 'Cash' $dateFilter) as balance
+                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) = 'Cash' $dateFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = 'Cash' AND expense_source = 'Allowance' $dateFilter) -
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = 'Cash' $dateFilter) as balance
         ");
         $stmt->bind_param("iii", $user_id, $user_id, $user_id);
         $stmt->execute();

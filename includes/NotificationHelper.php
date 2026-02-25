@@ -100,6 +100,62 @@ class NotificationHelper
     }
 
     /**
+     * Check if monthly spending exceeds or nears the budget goal
+     */
+    public function checkBudgetLimit($user_id)
+    {
+        // 1. Fetch budget goal and currency
+        $stmt = $this->conn->prepare("SELECT monthly_budget_goal, preferred_currency, first_name FROM users WHERE id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        $goal = (float)($user['monthly_budget_goal'] ?? 0);
+        if ($goal <= 0) return; // No goal set
+
+        $currency = $user['preferred_currency'] ?? 'PHP';
+        $firstName = $user['first_name'] ?? 'User';
+        require_once __DIR__ . '/CurrencyHelper.php';
+        $symbol = CurrencyHelper::getSymbol($currency);
+
+        // 2. Calculate current month's expenses (sourced from Allowance)
+        $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $totalSpent = (float)$stmt->get_result()->fetch_assoc()['total'];
+        $stmt->close();
+
+        $today = date('Y-m-d');
+        $formattedGoal = number_format($goal, 2);
+        $formattedSpent = number_format($totalSpent, 2);
+
+        // 3. Logic for Exceeded (100%)
+        if ($totalSpent >= $goal) {
+            $type = 'budget_exceeded';
+            // Prevent multiple "exceeded" alerts on the same day if amount hasn't changed significantly or just once a day
+            $check = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
+            $check->bind_param("iss", $user_id, $type, $today);
+            $check->execute();
+            if ($check->get_result()->num_rows == 0) {
+                $this->addNotification($user_id, $type, "🚨 Attention {$firstName}! You have exceeded your monthly budget of {$symbol}{$formattedGoal}. Current spending: {$symbol}{$formattedSpent}.");
+            }
+            $check->close();
+        }
+        // 4. Logic for Near (90%)
+        elseif ($totalSpent >= ($goal * 0.9)) {
+            $type = 'budget_near';
+            $check = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
+            $check->bind_param("iss", $user_id, $type, $today);
+            $check->execute();
+            if ($check->get_result()->num_rows == 0) {
+                $this->addNotification($user_id, $type, "⚠️ Warning {$firstName}! You've used 90%+ of your monthly budget ({$symbol}{$formattedSpent} / {$symbol}{$formattedGoal}).");
+            }
+            $check->close();
+        }
+    }
+
+    /**
      * Check if balance is low (below ₱500)
      */
     public function checkLowAllowance($user_id)

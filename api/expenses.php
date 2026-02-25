@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense added successfully', 'id' => $stmt->insert_id];
                     $notifications->checkLowAllowance($user_id);
+                    $notifications->checkBudgetLimit($user_id);
                     logActivity($conn, $user_id, 'expense_add', "Added expense: $description ($category) - $amount");
                 } else {
                     $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
@@ -126,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense updated successfully'];
+                    $notifications->checkBudgetLimit($user_id);
                     logActivity($conn, $user_id, 'expense_edit', "Edited expense ID $id: $description - $amount");
                 } else {
                     $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
