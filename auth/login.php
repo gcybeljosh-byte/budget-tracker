@@ -165,6 +165,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="auth-card mx-auto">
+                    <div class="mb-4">
+                        <a href="<?php echo SITE_URL; ?>" class="text-secondary small text-decoration-none hover-primary flex items-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Back to Home
+                        </a>
+                    </div>
                     <h5 class="text-center mb-4 fw-bold text-dark">Welcome Back</h5>
 
                     <form method="POST">

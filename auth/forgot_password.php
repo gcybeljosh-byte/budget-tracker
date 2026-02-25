@@ -211,6 +211,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="auth-card mx-auto">
+                    <div class="mb-4">
+                        <a href="<?php echo SITE_URL; ?>" class="text-secondary small text-decoration-none hover-primary flex items-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Back to Home
+                        </a>
+                    </div>
                     <!-- Step Indicator -->
                     <div class="step-indicator">
                         <div class="step-dot <?php echo $step >= 1 ? ($step > 1 ? 'completed' : 'active') : ''; ?>">1</div>
