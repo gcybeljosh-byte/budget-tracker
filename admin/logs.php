@@ -117,126 +117,127 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        </div> <!-- end row -->
+    </div> <!-- end container-fluid -->
 
-<!-- User Logs Modal -->
-<div class="modal fade" id="userLogsModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-light border-0 p-4">
-                <div>
-                    <h5 class="modal-title fw-bold mb-0">Activity History: <span id="modalUserName" class="text-primary"></span></h5>
-                    <p class="small text-muted mb-0">Detailed audit trail for this user</p>
+    <!-- User Logs Modal -->
+    <div class="modal fade" id="userLogsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-light border-0 p-4">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">Activity History: <span id="modalUserName" class="text-primary"></span></h5>
+                        <p class="small text-muted mb-0">Detailed audit trail for this user</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button id="deleteAllLogs" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                            <i class="fas fa-trash-alt me-1"></i> Delete All Logs
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                    <button id="deleteAllLogs" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm">
-                        <i class="fas fa-trash-alt me-1"></i> Delete All Logs
-                    </button>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="userLogsTable">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th class="ps-4 py-3 text-secondary small text-uppercase">Timestamp</th>
+                                    <th class="py-3 text-secondary small text-uppercase">Action</th>
+                                    <th class="py-3 text-secondary small text-uppercase">IP & Device</th>
+                                    <th class="py-3 text-secondary small text-uppercase pe-4">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userLogsBody">
+                                <!-- Populated via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="modal-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="userLogsTable">
-                        <thead class="bg-light sticky-top">
-                            <tr>
-                                <th class="ps-4 py-3 text-secondary small text-uppercase">Timestamp</th>
-                                <th class="py-3 text-secondary small text-uppercase">Action</th>
-                                <th class="py-3 text-secondary small text-uppercase">IP & Device</th>
-                                <th class="py-3 text-secondary small text-uppercase pe-4">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userLogsBody">
-                            <!-- Populated via AJAX -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
     </div>
-</div>
 
-<style>
-    .bg-gradient-success {
-        background: linear-gradient(135deg, #28a745 0%, #198754 100%);
-    }
+    <?php include '../includes/footer.php'; ?>
 
-    .pulse {
-        animation: pulse-green 2s infinite;
-    }
-
-    @keyframes pulse-green {
-        0% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    <style>
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #28a745 0%, #198754 100%);
         }
 
-        70% {
-            transform: scale(1);
-            box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+        .pulse {
+            animation: pulse-green 2s infinite;
         }
 
-        100% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
-        }
-    }
-
-    .sticky-top {
-        z-index: 1020;
-    }
-</style>
-
-<script>
-    $(document).ready(function() {
-        $('#usersTable').DataTable({
-            pageLength: 25,
-            order: [
-                [3, 'desc']
-            ],
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Find a user..."
+        @keyframes pulse-green {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
             }
-        });
 
-        let currentUserModalId = null;
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+            }
 
-        $(document).on('click', '.view-logs', function() {
-            const userId = $(this).data('id');
-            const userName = $(this).data('name');
-            currentUserModalId = userId;
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+            }
+        }
 
-            $('#modalUserName').text(userName);
-            fetchUserLogs(userId);
-            $('#userLogsModal').modal('show');
-        });
+        .sticky-top {
+            z-index: 1020;
+        }
+    </style>
 
-        function fetchUserLogs(userId) {
-            $('#userLogsBody').html('<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>');
+    <script>
+        $(document).ready(function() {
+            $('#usersTable').DataTable({
+                pageLength: 25,
+                order: [
+                    [3, 'desc']
+                ],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Find a user..."
+                }
+            });
 
-            fetch(`<?php echo SITE_URL; ?>api/admin_logs.php?action=fetch_user_logs&user_id=${userId}`)
-                .then(res => res.json())
-                .then(result => {
-                    if (result.success) {
-                        let html = '';
-                        if (result.data.length === 0) {
-                            html = '<tr><td colspan="4" class="text-center py-4 text-muted">No logs found for this user.</td></tr>';
-                        } else {
-                            result.data.forEach(log => {
-                                const date = new Date(log.created_at);
-                                const dateStr = date.toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                });
-                                const timeStr = date.toLocaleTimeString('en-US', {
-                                    hour12: false
-                                });
+            let currentUserModalId = null;
 
-                                html += `
+            $(document).on('click', '.view-logs', function() {
+                const userId = $(this).data('id');
+                const userName = $(this).data('name');
+                currentUserModalId = userId;
+
+                $('#modalUserName').text(userName);
+                fetchUserLogs(userId);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('userLogsModal')).show();
+            });
+
+            function fetchUserLogs(userId) {
+                $('#userLogsBody').html('<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>');
+
+                fetch(`<?php echo SITE_URL; ?>api/admin_logs.php?action=fetch_user_logs&user_id=${userId}`)
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            let html = '';
+                            if (result.data.length === 0) {
+                                html = '<tr><td colspan="4" class="text-center py-4 text-muted">No logs found for this user.</td></tr>';
+                            } else {
+                                result.data.forEach(log => {
+                                    const date = new Date(log.created_at);
+                                    const dateStr = date.toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    });
+                                    const timeStr = date.toLocaleTimeString('en-US', {
+                                        hour12: false
+                                    });
+
+                                    html += `
                                 <tr>
                                     <td class="ps-4">
                                         <div class="fw-bold text-dark small">${dateStr}</div>
@@ -258,47 +259,45 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                                     </td>
                                 </tr>
                             `;
-                            });
+                                });
+                            }
+                            $('#userLogsBody').html(html);
                         }
-                        $('#userLogsBody').html(html);
+                    });
+            }
+
+            $('#deleteAllLogs').on('click', function() {
+                if (!currentUserModalId) return;
+
+                Swal.fire({
+                    title: 'Delete All Logs?',
+                    text: "This action cannot be undone for this user.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, delete everything'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const formData = new FormData();
+                        formData.append('action', 'delete_user_logs');
+                        formData.append('user_id', currentUserModalId);
+
+                        fetch('<?php echo SITE_URL; ?>api/admin_logs.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(result => {
+                                if (result.success) {
+                                    Swal.fire('Deleted!', result.message, 'success');
+                                    bootstrap.Modal.getOrCreateInstance(document.getElementById('userLogsModal')).hide();
+                                    window.location.reload(); // Refresh to update counts
+                                } else {
+                                    Swal.fire('Error', result.message, 'error');
+                                }
+                            });
                     }
                 });
-        }
-
-        $('#deleteAllLogs').on('click', function() {
-            if (!currentUserModalId) return;
-
-            Swal.fire({
-                title: 'Delete All Logs?',
-                text: "This action cannot be undone for this user.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                confirmButtonText: 'Yes, delete everything'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const formData = new FormData();
-                    formData.append('action', 'delete_user_logs');
-                    formData.append('user_id', currentUserModalId);
-
-                    fetch('<?php echo SITE_URL; ?>api/admin_logs.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(res => res.json())
-                        .then(result => {
-                            if (result.success) {
-                                Swal.fire('Deleted!', result.message, 'success');
-                                $('#userLogsModal').modal('hide');
-                                window.location.reload(); // Refresh to update counts
-                            } else {
-                                Swal.fire('Error', result.message, 'error');
-                            }
-                        });
-                }
             });
         });
-    });
-</script>
-
-<?php include '../includes/footer.php'; ?>
+    </script>
