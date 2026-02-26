@@ -83,17 +83,31 @@ include '../includes/header.php';
     }
 
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
-        color: #9ca3af !important;
         margin-right: 0 !important;
         border: none !important;
         background: transparent !important;
-        font-size: 1.25rem;
+        font-size: 0 !important;
+        /* Hide the default 'x' */
         line-height: 1;
         padding: 0 !important;
+        color: transparent !important;
     }
 
-    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover {
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove::after {
+        content: '\f1f8';
+        /* FontAwesome solid trash icon */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        font-size: 0.85rem;
+        /* Icon size */
+        color: #9ca3af !important;
+        display: inline-block;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover::after {
         color: #ef4444 !important;
+        /* Red on hover */
     }
 
     .select2-container--bootstrap-5 .select2-selection__clear {
