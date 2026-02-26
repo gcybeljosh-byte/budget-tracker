@@ -54,17 +54,28 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
                     <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-circle text-success me-2 small pulse"></i>User Presence</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        <?php foreach ($allUsers as $u):
+                    <div class="d-flex flex-wrap gap-2" id="presenceContainer">
+                        <?php
+                        $displayLimit = 7;
+                        $count = 0;
+                        foreach ($allUsers as $u):
+                            $count++;
                             $isOnline = ($u['last_activity'] && strtotime($u['last_activity']) > strtotime('-5 minutes'));
                             $statusClass = $isOnline ? 'bg-success' : 'bg-secondary';
                             $roleBadge = ($u['role'] === 'admin') ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.5rem;">ADMIN</span>' : '';
+                            $hiddenClass = ($count > $displayLimit) ? 'd-none presence-extra' : '';
                         ?>
-                            <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill border shadow-sm">
+                            <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill border shadow-sm transition-all <?php echo $hiddenClass; ?>">
                                 <span class="rounded-circle <?php echo $statusClass; ?> me-2" style="width: 10px; height: 10px; <?php echo $isOnline ? 'box-shadow: 0 0 8px #198754;' : ''; ?>"></span>
                                 <span class="small fw-bold">@<?php echo htmlspecialchars($u['username']); ?><?php echo $roleBadge; ?></span>
                             </div>
                         <?php endforeach; ?>
+
+                        <?php if (count($allUsers) > $displayLimit): ?>
+                            <button id="btnShowAllPresence" class="btn btn-outline-primary btn-sm rounded-pill px-3 border-dashed fw-bold" style="border-style: dashed !important;">
+                                <i class="fas fa-plus me-1"></i> View All Users
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -331,6 +342,18 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                         });
                 }
             });
+        });
+
+        // Show All Presence Toggle
+        $('#btnShowAllPresence').on('click', function() {
+            const isShowingAll = $('.presence-extra').first().hasClass('d-none');
+            if (isShowingAll) {
+                $('.presence-extra').removeClass('d-none').addClass('animate__animated animate__fadeIn');
+                $(this).html('<i class="fas fa-minus me-1"></i> Show Less');
+            } else {
+                $('.presence-extra').addClass('d-none');
+                $(this).html('<i class="fas fa-plus me-1"></i> View All Users');
+            }
         });
     });
 </script>
