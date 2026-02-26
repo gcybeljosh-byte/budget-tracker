@@ -1105,7 +1105,7 @@ include '../includes/header.php';
         setTimeout(startTutorial, 1000);
     <?php endif; ?>
 </script>
-</script>
+<?php include '../includes/footer.php'; ?>
 
 <!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -1146,5 +1146,3 @@ include '../includes/header.php';
         });
     });
 </script>
-
-<?php include '../includes/footer.php'; ?>
