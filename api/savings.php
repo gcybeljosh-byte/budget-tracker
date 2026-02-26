@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $stmt = $conn->prepare("UPDATE savings SET amount = ?, date = ?, description = ?, source_type = ? WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("dssii", $amount, $date, $description, $source_type, $id, $user_id);
+                $stmt->bind_param("dsssii", $amount, $date, $description, $source_type, $id, $user_id);
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Savings updated successfully'];
                     logActivity($conn, $user_id, 'savings_edit', "Edited savings ID $id: $description - $amount");
@@ -181,9 +181,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response = ['success' => true, 'data' => $stats];
     } else {
         $sql = "
-            (SELECT id, date, amount, description, 'deposit' as type FROM savings WHERE user_id = ?)
+            (SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ?)
             UNION ALL
-            (SELECT id, date, amount, description, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings')
+            (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings')
             ORDER BY date DESC, id DESC
         ";
         $stmt = $conn->prepare($sql);

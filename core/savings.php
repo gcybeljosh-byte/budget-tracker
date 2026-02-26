@@ -408,6 +408,12 @@ include '../includes/header.php';
                                     });
                                     fetchStats();
                                     fetchSavings();
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Delete Failed',
+                                        text: result.message || 'Unknown error occurred'
+                                    });
                                 }
                             });
                     }
