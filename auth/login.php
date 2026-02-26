@@ -40,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             if ($password === $db_password || password_verify($password, $db_password)) {
                 if ($status === 'inactive') {
                     $error = "Your account is currently inactive. Please contact the administrator.";
-                } else if (isMaintenanceMode($conn) && $role !== 'superadmin') {
-                    $error = "🔧 The system is currently under scheduled maintenance. Only Superadmins can access at this time. Please try again later.";
+                } else if (isMaintenanceMode($conn) && !in_array($role, ['superadmin', 'admin'])) {
+                    $error = "🔧 The system is currently under scheduled maintenance. Only Admins and Superadmins can access at this time. Please try again later.";
                 } else {
                     $_SESSION['id'] = $id;
                     $_SESSION['username'] = $username;
@@ -284,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             Swal.fire({
                 icon: 'warning',
                 title: 'System Maintenance',
-                text: 'The system is currently under scheduled maintenance. Only Superadmins can access at this time.',
+                text: 'The system is currently under scheduled maintenance. Only Admins and Superadmins can access at this time.',
                 confirmButtonColor: '#4f46e5',
                 customClass: {
                     popup: 'rounded-[2rem]',

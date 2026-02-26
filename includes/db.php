@@ -143,8 +143,8 @@ if (!function_exists('isMaintenanceMode')) {
      */
     function isMaintenanceMode($conn)
     {
-        // Superadmins are never blocked by maintenance mode so they can fix things
-        if (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') return false;
+        // Superadmins and Admins are never blocked by maintenance mode so they can fix/test things
+        if (isset($_SESSION['role']) && ($_SESSION['role'] === 'superadmin' || $_SESSION['role'] === 'admin')) return false;
 
         $result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'");
         if ($result && $row = $result->fetch_assoc()) {
