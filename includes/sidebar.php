@@ -1,6 +1,10 @@
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
-            <div class="sidebar-heading pb-2">
+            <?php
+            // Determine dashboard URL based on role
+            $dashUrl = (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') ? SITE_URL . 'admin/dashboard.php' : SITE_URL . 'core/dashboard.php';
+            ?>
+            <a href="<?php echo $dashUrl; ?>" class="sidebar-heading pb-2 text-decoration-none" style="color: inherit; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                 <div class="premium-logo-container me-3" style="width: 40px; height: 40px;">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
@@ -10,7 +14,7 @@
                         Powered By Help Desk
                     </div>
                 </div>
-            </div>
+            </a>
             <div class="list-group list-group-flush mt-3">
                 <?php
                 $currentPage = basename($_SERVER['PHP_SELF']);
