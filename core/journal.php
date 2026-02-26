@@ -70,11 +70,14 @@ include '../includes/header.php';
         border-radius: 50rem !important;
         /* Fully rounded pill */
         color: #1f2937 !important;
-        padding: 0.25rem 0.75rem !important;
+        padding: 0.25rem 0.5rem 0.25rem 0.75rem !important;
+        /* Less padding on right to fit the 'x' natively */
         margin: 0 !important;
         display: flex;
+        flex-direction: row-reverse;
+        /* Put 'x' on the right */
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.35rem;
         font-weight: 500;
         font-size: 0.875rem;
     }
@@ -86,7 +89,7 @@ include '../includes/header.php';
         background: transparent !important;
         font-size: 1.25rem;
         line-height: 1;
-        padding-left: 0.25rem;
+        padding: 0 !important;
     }
 
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover {
