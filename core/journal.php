@@ -70,16 +70,20 @@ include '../includes/header.php';
         border-radius: 50rem !important;
         /* Fully rounded pill */
         color: #1f2937 !important;
-        padding: 0.25rem 0.5rem 0.25rem 0.75rem !important;
-        /* Less padding on right to fit the 'x' natively */
+        padding: 0.25rem 0.75rem !important;
         margin: 0 !important;
         display: flex;
         flex-direction: row-reverse;
         /* Put 'x' on the right */
         align-items: center;
-        gap: 0.35rem;
+        gap: 0.25rem;
         font-weight: 500;
         font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice:hover {
+        padding-right: 0.5rem !important;
     }
 
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
@@ -91,6 +95,16 @@ include '../includes/header.php';
         line-height: 1;
         padding: 0 !important;
         color: transparent !important;
+        width: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: all 0.2s ease;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice:hover .select2-selection__choice__remove {
+        width: auto;
+        opacity: 1;
+        padding-left: 0.25rem !important;
     }
 
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove::after {
@@ -102,7 +116,7 @@ include '../includes/header.php';
         /* Icon size */
         color: #9ca3af !important;
         display: inline-block;
-        transition: color 0.2s ease-in-out;
+        transition: color 0.1s ease-in-out;
     }
 
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover::after {
@@ -1239,7 +1253,7 @@ include '../includes/header.php';
             }
             var color = $(tag.element).data('color');
             var $tag = $(
-                '<span class="d-flex align-items-center"><i class="fas fa-tag me-1" style="color:' + color + '"></i> &nbsp;' + tag.text + '</span>'
+                '<span class="d-flex align-items-center"><i class="fas fa-tag me-1" style="color:' + color + '"></i>' + tag.text + '</span>'
             );
             return $tag;
         }
