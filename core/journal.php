@@ -235,9 +235,8 @@ include '../includes/header.php';
                     $s->bind_param("iss", $uid, $tagName, $tagColor);
                     $s->execute();
                     $s->close();
+                    echo '<script>window.location.href = "journal.php?manage_tags=1";</script>';
                 }
-                header("Location: journal.php?manage_tags=1");
-                exit;
             } elseif ($_POST['action'] === 'edit_tag') {
                 $tagId    = (int)$_POST['tag_id'];
                 $tagName  = trim($_POST['tag_name']);
@@ -247,9 +246,8 @@ include '../includes/header.php';
                     $s->bind_param("ssii", $tagName, $tagColor, $tagId, $uid);
                     $s->execute();
                     $s->close();
+                    echo '<script>window.location.href = "journal.php?manage_tags=1";</script>';
                 }
-                header("Location: journal.php?manage_tags=1");
-                exit;
             } elseif ($_POST['action'] === 'delete_tag') {
                 $tagId = (int)$_POST['tag_id'];
                 if ($tagId > 0) {
@@ -257,9 +255,8 @@ include '../includes/header.php';
                     $s->bind_param("ii", $tagId, $uid);
                     $s->execute();
                     $s->close();
+                    echo '<script>window.location.href = "journal.php?manage_tags=1";</script>';
                 }
-                header("Location: journal.php?manage_tags=1");
-                exit;
             }
         }
 
