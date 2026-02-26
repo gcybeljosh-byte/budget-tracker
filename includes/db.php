@@ -104,6 +104,27 @@ $conn->query("CREATE TABLE IF NOT EXISTS journals (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
+ensureColumnExists($conn, 'journals', 'tags', "VARCHAR(255) NULL");
+
+// Journal Tags Table
+$conn->query("CREATE TABLE IF NOT EXISTS journal_tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    color VARCHAR(20) DEFAULT '#6366f1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_tag (user_id, name),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
+
+// Journal Tag Relations Table (Mapping)
+$conn->query("CREATE TABLE IF NOT EXISTS journal_tag_relations (
+    journal_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (journal_id, tag_id),
+    FOREIGN KEY (journal_id) REFERENCES journals(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES journal_tags(id) ON DELETE CASCADE
+)");
 
 // Journal Lines table (Simplified: Account and Amount)
 $conn->query("CREATE TABLE IF NOT EXISTS journal_lines (

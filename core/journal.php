@@ -25,6 +25,17 @@ include '../includes/header.php';
     .text-orange-subtle {
         color: #ea580c !important;
     }
+
+    /* Tag Checkbox Styling */
+    .journal-tag-checkbox:checked+label {
+        background-color: var(--tag-color, #6366f1) !important;
+        border-color: var(--tag-color, #6366f1) !important;
+    }
+
+    .journal-tag-checkbox:checked+label span,
+    .journal-tag-checkbox:checked+label i {
+        color: white !important;
+    }
 </style>
 
 <!-- Page Content -->
@@ -63,6 +74,19 @@ include '../includes/header.php';
                             }
                         }
                         $lineStmt->close();
+                    }
+
+                    // Handle Tags
+                    if (isset($_POST['journal_tags']) && is_array($_POST['journal_tags'])) {
+                        $tagStmt = $conn->prepare("INSERT IGNORE INTO journal_tag_relations (journal_id, tag_id) VALUES (?, ?)");
+                        foreach ($_POST['journal_tags'] as $tagId) {
+                            $tagId = (int)$tagId;
+                            if ($tagId > 0) {
+                                $tagStmt->bind_param("ii", $journal_id, $tagId);
+                                $tagStmt->execute();
+                            }
+                        }
+                        $tagStmt->close();
                     }
 
                     echo '<script>
@@ -144,6 +168,24 @@ include '../includes/header.php';
                         $lineStmt->close();
                     }
 
+                    // Update Tags
+                    $delTagStmt = $conn->prepare("DELETE FROM journal_tag_relations WHERE journal_id = ?");
+                    $delTagStmt->bind_param("i", $id);
+                    $delTagStmt->execute();
+                    $delTagStmt->close();
+
+                    if (isset($_POST['journal_tags']) && is_array($_POST['journal_tags'])) {
+                        $tagStmt = $conn->prepare("INSERT IGNORE INTO journal_tag_relations (journal_id, tag_id) VALUES (?, ?)");
+                        foreach ($_POST['journal_tags'] as $tagId) {
+                            $tagId = (int)$tagId;
+                            if ($tagId > 0) {
+                                $tagStmt->bind_param("ii", $id, $tagId);
+                                $tagStmt->execute();
+                            }
+                        }
+                        $tagStmt->close();
+                    }
+
                     echo '<script>
                             document.addEventListener("DOMContentLoaded", function() {
                                 Swal.fire({
@@ -180,6 +222,53 @@ include '../includes/header.php';
                 $stmt->close();
             }
         }
+
+        // --- Tag Management Handlers ---
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+            $uid = (int)$_SESSION['id'];
+
+            if ($_POST['action'] === 'add_tag') {
+                $tagName  = trim($_POST['tag_name']);
+                $tagColor = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['tag_color'] ?? '') ? $_POST['tag_color'] : '#6366f1';
+                if (!empty($tagName)) {
+                    $s = $conn->prepare("INSERT IGNORE INTO journal_tags (user_id, name, color) VALUES (?, ?, ?)");
+                    $s->bind_param("iss", $uid, $tagName, $tagColor);
+                    $s->execute();
+                    $s->close();
+                }
+                header("Location: journal.php?manage_tags=1");
+                exit;
+            } elseif ($_POST['action'] === 'edit_tag') {
+                $tagId    = (int)$_POST['tag_id'];
+                $tagName  = trim($_POST['tag_name']);
+                $tagColor = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['tag_color'] ?? '') ? $_POST['tag_color'] : '#6366f1';
+                if ($tagId > 0 && !empty($tagName)) {
+                    $s = $conn->prepare("UPDATE journal_tags SET name=?, color=? WHERE id=? AND user_id=?");
+                    $s->bind_param("ssii", $tagName, $tagColor, $tagId, $uid);
+                    $s->execute();
+                    $s->close();
+                }
+                header("Location: journal.php?manage_tags=1");
+                exit;
+            } elseif ($_POST['action'] === 'delete_tag') {
+                $tagId = (int)$_POST['tag_id'];
+                if ($tagId > 0) {
+                    $s = $conn->prepare("DELETE FROM journal_tags WHERE id=? AND user_id=?");
+                    $s->bind_param("ii", $tagId, $uid);
+                    $s->execute();
+                    $s->close();
+                }
+                header("Location: journal.php?manage_tags=1");
+                exit;
+            }
+        }
+
+        // --- Fetch user's tags for use in forms & filter ---
+        $userTagsResult = $conn->prepare("SELECT * FROM journal_tags WHERE user_id=? ORDER BY name ASC");
+        $userTagsResult->bind_param("i", $_SESSION['id']);
+        $userTagsResult->execute();
+        $allUserTags = $userTagsResult->get_result()->fetch_all(MYSQLI_ASSOC);
+        $userTagsResult->close();
 
         // Fetch Current Budget Goal
         $budgetGoal = 0;
@@ -229,6 +318,32 @@ include '../includes/header.php';
         ?>
 
         <div class="d-flex justify-content-end mb-4">
+            <?php if (!empty($allUserTags)): ?>
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-primary rounded-pill btn-sm px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter me-2"></i><?php echo isset($_GET['tag']) ? 'Filtered' : 'Filter by Tag'; ?>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0 rounded-3">
+                        <li><a class="dropdown-item" href="journal.php">All Entries</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <?php foreach ($allUserTags as $tag): ?>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="journal.php?tag=<?php echo $tag['id']; ?>">
+                                    <i class="fas fa-circle me-2" style="color: <?php echo $tag['color']; ?>; font-size: 0.6em;"></i>
+                                    <?php echo htmlspecialchars($tag['name']); ?>
+                                    <?php if (isset($_GET['tag']) && $_GET['tag'] == $tag['id']) echo '<i class="fas fa-check ms-auto text-primary"></i>'; ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <button class="btn btn-outline-secondary rounded-pill btn-sm px-3 me-3" data-bs-toggle="modal" data-bs-target="#manageTagsModal">
+                <i class="fas fa-tags me-2"></i>Manage Tags
+            </button>
             <?php if ($budgetGoal > 0): ?>
                 <div class="bg-white rounded-pill px-3 py-1 shadow-sm border d-flex align-items-center" role="button" data-bs-toggle="modal" data-bs-target="#budgetGoalModal">
                     <i class="fas fa-bullseye text-primary me-2"></i>
@@ -251,22 +366,34 @@ include '../includes/header.php';
                 echo '<div class="col-12"><div class="alert alert-warning">Please login to view your journal.</div></div>';
             } else {
                 $user_id = $_SESSION['id'];
-                // Pagination Setup
+
+                // Pagination & Filter Setup
                 $limit = 9; // Cards per page
                 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                 $offset = ($page - 1) * $limit;
+                $filterTagId = isset($_GET['tag']) ? (int)$_GET['tag'] : 0;
 
                 // Count Total
-                $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM journals WHERE user_id = ?");
-                $countStmt->bind_param("i", $user_id);
+                if ($filterTagId > 0) {
+                    $countStmt = $conn->prepare("SELECT COUNT(DISTINCT j.id) as total FROM journals j JOIN journal_tag_relations tr ON j.id = tr.journal_id WHERE j.user_id = ? AND tr.tag_id = ?");
+                    $countStmt->bind_param("ii", $user_id, $filterTagId);
+                } else {
+                    $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM journals WHERE user_id = ?");
+                    $countStmt->bind_param("i", $user_id);
+                }
                 $countStmt->execute();
                 $totalRows = $countStmt->get_result()->fetch_assoc()['total'];
                 $totalPages = ceil($totalRows / $limit);
                 $countStmt->close();
 
                 // Fetch Entries
-                $stmt = $conn->prepare("SELECT * FROM journals WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT ? OFFSET ?");
-                $stmt->bind_param("iii", $user_id, $limit, $offset);
+                if ($filterTagId > 0) {
+                    $stmt = $conn->prepare("SELECT j.* FROM journals j JOIN journal_tag_relations tr ON j.id = tr.journal_id WHERE j.user_id = ? AND tr.tag_id = ? ORDER BY j.date DESC, j.created_at DESC LIMIT ? OFFSET ?");
+                    $stmt->bind_param("iiii", $user_id, $filterTagId, $limit, $offset);
+                } else {
+                    $stmt = $conn->prepare("SELECT * FROM journals WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT ? OFFSET ?");
+                    $stmt->bind_param("iii", $user_id, $limit, $offset);
+                }
                 $stmt->execute();
                 $result = $stmt->get_result();
 
@@ -329,6 +456,13 @@ include '../includes/header.php';
                         $linesResult = $linesStmt->get_result();
                         $lines = $linesResult->fetch_all(MYSQLI_ASSOC);
                         $linesStmt->close();
+
+                        // Fetch Journal Tags
+                        $tagsStmt = $conn->prepare("SELECT t.id, t.name, t.color FROM journal_tag_relations tr JOIN journal_tags t ON tr.tag_id = t.id WHERE tr.journal_id = ? ORDER BY t.name ASC");
+                        $tagsStmt->bind_param("i", $row['id']);
+                        $tagsStmt->execute();
+                        $entryTags = $tagsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                        $tagsStmt->close();
             ?>
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-lift transition-all">
@@ -371,6 +505,15 @@ include '../includes/header.php';
                                 </div>
                                 <div class="card-body px-4 pt-3 pb-4">
                                     <h5 class="card-title fw-bold mb-2 text-primary"><?php echo htmlspecialchars($row['title']); ?></h5>
+                                    <?php if (!empty($entryTags)): ?>
+                                        <div class="mb-2 d-flex flex-wrap gap-1">
+                                            <?php foreach ($entryTags as $t): ?>
+                                                <span class="badge rounded-pill" style="background-color: <?php echo htmlspecialchars($t['color']); ?>; font-weight: 500;">
+                                                    <i class="fas fa-tag me-1" style="font-size: 0.7em;"></i><?php echo htmlspecialchars($t['name']); ?>
+                                                </span>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
                                     <p class="card-text text-secondary small" style="display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
                                         <?php echo nl2br(htmlspecialchars($row['notes'])); ?>
                                     </p>
@@ -402,6 +545,15 @@ include '../includes/header.php';
                                             <?php echo $warningBadge; ?>
                                         </div>
                                         <h3 class="fw-bold mb-3"><?php echo htmlspecialchars($row['title']); ?></h3>
+                                        <?php if (!empty($entryTags)): ?>
+                                            <div class="mb-4 d-flex flex-wrap gap-2">
+                                                <?php foreach ($entryTags as $t): ?>
+                                                    <span class="badge rounded-pill px-3 py-2" style="background-color: <?php echo htmlspecialchars($t['color']); ?>; font-size: 0.85rem; font-weight: 500;">
+                                                        <i class="fas fa-tag me-2"></i><?php echo htmlspecialchars($t['name']); ?>
+                                                    </span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
                                         <div class="text-secondary" style="line-height: 1.8;">
                                             <?php echo nl2br(htmlspecialchars($row['notes'])); ?>
                                         </div>
@@ -470,6 +622,24 @@ include '../includes/header.php';
                                             <div class="mb-3">
                                                 <label class="form-label small fw-bold text-secondary text-uppercase">Title</label>
                                                 <input type="text" class="form-control rounded-3" name="title" required value="<?php echo htmlspecialchars($row['title']); ?>">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-secondary text-uppercase">Tags</label>
+                                                <?php $currentTagIds = array_column($entryTags, 'id'); ?>
+                                                <div class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border">
+                                                    <?php foreach ($allUserTags as $tag): ?>
+                                                        <div class="form-check form-check-inline m-0">
+                                                            <input class="form-check-input d-none journal-tag-checkbox" type="checkbox" name="journal_tags[]" id="editTag<?php echo $row['id'] . '_' . $tag['id']; ?>" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTagIds) ? 'checked' : ''; ?>>
+                                                            <label class="form-check-label badge rounded-pill px-3 py-2 border" for="editTag<?php echo $row['id'] . '_' . $tag['id']; ?>" style="cursor: pointer; transition: all 0.2s;">
+                                                                <i class="fas fa-tag me-1" style="color: <?php echo $tag['color']; ?>;"></i> <span class="text-dark"><?php echo htmlspecialchars($tag['name']); ?></span>
+                                                            </label>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                    <?php if (empty($allUserTags)): ?>
+                                                        <span class="text-muted small">No tags available.</span>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
 
                                             <div class="row mb-3">
@@ -614,6 +784,23 @@ include '../includes/header.php';
                         <input type="text" class="form-control rounded-3" name="title" required placeholder="e.g., Weekly Summary">
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Tags</label>
+                        <div class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border">
+                            <?php foreach ($allUserTags as $tag): ?>
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input d-none journal-tag-checkbox" type="checkbox" name="journal_tags[]" id="addTag_<?php echo $tag['id']; ?>" value="<?php echo $tag['id']; ?>">
+                                    <label class="form-check-label badge rounded-pill px-3 py-2 border" for="addTag_<?php echo $tag['id']; ?>" style="cursor: pointer; transition: all 0.2s;">
+                                        <i class="fas fa-tag me-1" style="color: <?php echo $tag['color']; ?>;"></i> <span class="text-dark"><?php echo htmlspecialchars($tag['name']); ?></span>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if (empty($allUserTags)): ?>
+                                <span class="text-muted small">No tags available. Manage Tags to add some!</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label small fw-bold text-secondary text-uppercase">From Date</label>
@@ -722,7 +909,81 @@ include '../includes/header.php';
     </div>
 </div>
 
+<!-- Manage Tags Modal -->
+<div class="modal fade" id="manageTagsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Manage Journal Tags</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Add New Tag Form -->
+                <form action="journal.php" method="POST" class="mb-5 bg-light p-3 rounded-3 border">
+                    <input type="hidden" name="action" value="add_tag">
+                    <h6 class="fw-bold text-secondary mb-3 small text-uppercase">Create New Tag</h6>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-8 col-sm-6">
+                            <input type="text" class="form-control rounded-pill" name="tag_name" required placeholder="Tag name (e.g. Travel, Urgent)">
+                        </div>
+                        <div class="col-4 col-sm-3">
+                            <input type="color" class="form-control form-control-color w-100 rounded-pill" name="tag_color" value="#6366f1" title="Choose your color">
+                        </div>
+                        <div class="col-12 col-sm-3">
+                            <button type="submit" class="btn btn-primary rounded-pill w-100"><i class="fas fa-plus me-2"></i>Add</button>
+                        </div>
+                    </div>
+                </form>
 
+                <hr class="text-muted opacity-25">
+
+                <!-- Existing Tags List -->
+                <h6 class="fw-bold text-secondary mb-3 mt-4 small text-uppercase">Your Tags</h6>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <tbody>
+                            <?php foreach ($allUserTags as $tag): ?>
+                                <tr>
+                                    <td style="width: 20%;">
+                                        <span class="badge rounded-pill px-3 py-2" style="background-color: <?php echo htmlspecialchars($tag['color']); ?>; font-weight: 500;">
+                                            <i class="fas fa-tag me-2"></i><?php echo htmlspecialchars($tag['name']); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form action="journal.php" method="POST" class="d-flex align-items-center gap-2 m-0 justify-content-end">
+                                            <input type="hidden" name="action" value="edit_tag">
+                                            <input type="hidden" name="tag_id" value="<?php echo $tag['id']; ?>">
+                                            <input type="text" class="form-control form-control-sm rounded-pill" name="tag_name" required value="<?php echo htmlspecialchars($tag['name']); ?>" style="max-width: 150px;">
+                                            <input type="color" class="form-control form-control-color form-control-sm rounded-pill p-1" name="tag_color" value="<?php echo htmlspecialchars($tag['color']); ?>" style="width: 40px; height: 30px;">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Update</button>
+
+                                        </form>
+                                    </td>
+                                    <td class="text-end" style="width: 1%;">
+                                        <form action="journal.php" method="POST" class="m-0" onsubmit="return confirm('Delete this tag?');">
+                                            <input type="hidden" name="action" value="delete_tag">
+                                            <input type="hidden" name="tag_id" value="<?php echo $tag['id']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"><i class="fas fa-trash-alt"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            <?php if (empty($allUserTags)): ?>
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">No tags created yet.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Hidden Form for Deletion -->
 <form id="deleteJournalForm" action="journal.php" method="POST" style="display:none;">
@@ -758,6 +1019,18 @@ include '../includes/header.php';
         });
         return false;
     }
+
+    // --- Auto Open Manage Tags Modal ---
+    <?php if (isset($_GET['manage_tags']) && $_GET['manage_tags'] == '1'): ?>
+        document.addEventListener("DOMContentLoaded", function() {
+            var manageTagsModal = new bootstrap.Modal(document.getElementById('manageTagsModal'));
+            manageTagsModal.show();
+            // Clean URL after opening
+            const currentUrl = window.location.href;
+            const cleanUrl = currentUrl.replace('?manage_tags=1', '').replace('&manage_tags=1', '');
+            window.history.replaceState({}, document.title, cleanUrl);
+        });
+    <?php endif; ?>
 
     // --- Page Tutorial ---
     <?php if (!isset($seen_tutorials['journal.php'])): ?>
