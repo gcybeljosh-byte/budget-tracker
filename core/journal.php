@@ -40,6 +40,76 @@ include '../includes/header.php';
     .journal-tag-checkbox:checked+label i {
         color: white !important;
     }
+
+    /* Modern Select2 Styling overrides */
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 0.75rem !important;
+        /* rounded-3 equivalent / pill-like */
+        padding: 0.375rem 0.75rem !important;
+        min-height: 48px;
+        box-shadow: none !important;
+    }
+
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+    .select2-container--bootstrap-5.select2-container--open .select2-selection {
+        border-color: #86b7fe !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered {
+        gap: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        padding-top: 0.1rem;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+        background-color: #fafafa !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 50rem !important;
+        /* Fully rounded pill */
+        color: #1f2937 !important;
+        padding: 0.25rem 0.75rem !important;
+        margin: 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
+        color: #9ca3af !important;
+        margin-right: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        font-size: 1.25rem;
+        line-height: 1;
+        padding-left: 0.25rem;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #ef4444 !important;
+    }
+
+    .select2-container--bootstrap-5 .select2-dropdown {
+        border-color: #dee2e6 !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+
+    .select2-container--bootstrap-5 .select2-results__option {
+        padding: 0.5rem 1rem !important;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .select2-container--bootstrap-5 .select2-results__option[aria-selected="true"] {
+        background-color: #f8f9fa !important;
+        color: #6c757d !important;
+    }
 </style>
 
 <!-- Page Content -->
