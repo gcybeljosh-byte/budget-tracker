@@ -22,14 +22,17 @@
         session_start();
     }
 
-    // Redirect if not logged in
     if (!isset($_SESSION['id'])) {
         header("Location: " . SITE_URL . "auth/login.php");
         exit;
     }
 
-    // Onboarding Guard
+    // Maintenance Guard
     include __DIR__ . '/db.php';
+    if (isMaintenanceMode($conn)) {
+        header("Location: " . SITE_URL . "auth/logout.php?maintenance=1");
+        exit;
+    }
     $user_id = $_SESSION['id'];
     $stmt = $conn->prepare("SELECT onboarding_completed, page_tutorials_json FROM users WHERE id = ?");
     $stmt->bind_param("i", $user_id);

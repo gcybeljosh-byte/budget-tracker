@@ -19,14 +19,21 @@ include '../includes/header.php';
 
                 <!-- Settings Navigation Buttons -->
                 <div class="row g-3 mb-4 text-center">
-                    <div class="<?php echo ($_SESSION['role'] === 'superadmin') ? 'col-6' : 'col-4'; ?>">
+                    <div class="col-4">
                         <button class="btn btn-primary text-white w-100 py-3 rounded-4 shadow-sm fw-bold border-0 d-flex flex-column align-items-center justify-content-center h-100 transition-all hover-lift" id="btnSecurity">
                             <i class="fas fa-shield-alt mb-2 fs-4"></i>
                             <span class="small" style="font-size: 0.7rem;">Security</span>
                         </button>
                     </div>
 
-                    <?php if ($_SESSION['role'] !== 'superadmin'): ?>
+                    <?php if ($_SESSION['role'] === 'superadmin'): ?>
+                        <div class="col-4">
+                            <button class="btn btn-light w-100 py-3 rounded-4 shadow-sm fw-bold border-0 d-flex flex-column align-items-center justify-content-center h-100 transition-all toggle-btn-inactive hover-lift" id="btnSystem">
+                                <i class="fas fa-cogs mb-2 fs-4"></i>
+                                <span class="small" style="font-size: 0.7rem;">System</span>
+                            </button>
+                        </div>
+                    <?php else: ?>
                         <div class="col-4">
                             <button class="btn btn-light w-100 py-3 rounded-4 shadow-sm fw-bold border-0 d-flex flex-column align-items-center justify-content-center h-100 transition-all toggle-btn-inactive hover-lift" id="btnPreferences">
                                 <i class="fas fa-sliders-h mb-2 fs-4"></i>
@@ -35,7 +42,7 @@ include '../includes/header.php';
                         </div>
                     <?php endif; ?>
 
-                    <div class="<?php echo ($_SESSION['role'] === 'superadmin') ? 'col-6' : 'col-4'; ?>">
+                    <div class="col-4">
                         <button class="btn btn-light w-100 py-3 rounded-4 shadow-sm fw-bold border-0 d-flex flex-column align-items-center justify-content-center h-100 transition-all toggle-btn-inactive hover-lift" id="btnAbout">
                             <i class="fas fa-info-circle mb-2 fs-4"></i>
                             <span class="small" style="font-size: 0.7rem;">About</span>
@@ -291,6 +298,40 @@ include '../includes/header.php';
                     </div>
                 <?php endif; ?>
 
+                <?php if ($_SESSION['role'] === 'superadmin'): ?>
+                    <!-- System Management Section -->
+                    <div id="systemSection" class="settings-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center px-4">
+                                <div>
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-cogs me-2 text-primary"></i>System Management</h5>
+                                    <p class="text-muted small mb-0">Control global system settings and maintenance.</p>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Maintenance Mode Toggle -->
+                                <div class="card border-0 bg-light rounded-4 p-4 mb-3 border-start border-warning border-4">
+                                    <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <h6 class="fw-bold text-dark mb-0">Maintenance Mode</h6>
+                                                <span id="maintenanceStatusBadge" class="badge rounded-pill bg-success small">Live</span>
+                                            </div>
+                                            <p class="text-muted small mb-0">When enabled, regular users and admins cannot login. Superadmins retain access.</p>
+                                        </div>
+                                        <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="maintenanceToggle" style="width: 3rem; height: 1.5rem;">
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info rounded-4 border-0 small">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Enabling maintenance mode will log out all currently active users (except yourself) upon their next request.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- About System Section -->
                 <div id="aboutSection" class="settings-section">
                     <div class="card border-0 shadow-lg rounded-4 mb-4 overflow-hidden" style="background: #ffffff;">
@@ -467,14 +508,16 @@ include '../includes/header.php';
             // Section Toggling Logic
             const btnSecurity = document.getElementById('btnSecurity');
             const btnPreferences = document.getElementById('btnPreferences');
+            const btnSystem = document.getElementById('btnSystem');
             const btnAbout = document.getElementById('btnAbout');
             const securitySection = document.getElementById('securitySection');
             const preferencesSection = document.getElementById('preferencesSection');
+            const systemSection = document.getElementById('systemSection');
             const aboutSection = document.getElementById('aboutSection');
 
             function setActiveSection(btn, section) {
-                const sections = [securitySection, preferencesSection, aboutSection].filter(Boolean);
-                const buttons = [btnSecurity, btnPreferences, btnAbout].filter(Boolean);
+                const sections = [securitySection, preferencesSection, systemSection, aboutSection].filter(Boolean);
+                const buttons = [btnSecurity, btnPreferences, btnSystem, btnAbout].filter(Boolean);
 
                 sections.forEach(s => s.classList.add('d-none'));
                 buttons.forEach(b => {
@@ -498,6 +541,8 @@ include '../includes/header.php';
                 setActiveSection(btnAbout, aboutSection);
             } else if (activeSectionParam === 'security') {
                 setActiveSection(btnSecurity, securitySection);
+            } else if (activeSectionParam === 'system') {
+                setActiveSection(btnSystem, systemSection);
             } else if (userRole === 'superadmin') {
                 // Superadmins default to security
                 setActiveSection(btnSecurity, securitySection);
@@ -564,6 +609,7 @@ include '../includes/header.php';
             });
 
             if (btnPreferences) btnPreferences.addEventListener('click', () => setActiveSection(btnPreferences, preferencesSection));
+            if (btnSystem) btnSystem.addEventListener('click', () => setActiveSection(btnSystem, systemSection));
             if (btnAbout) btnAbout.addEventListener('click', () => setActiveSection(btnAbout, aboutSection));
 
             // 1. Initial Data Load (Profile + Preferences)
@@ -715,6 +761,86 @@ include '../includes/header.php';
                         }
                     });
             });
+
+            // 7. System Management Logic (Superadmin)
+            if (systemSection) {
+                const maintenanceToggle = document.getElementById('maintenanceToggle');
+                const statusBadge = document.getElementById('maintenanceStatusBadge');
+
+                // Initial Load
+                const fetchStatus = () => {
+                    const formData = new FormData();
+                    formData.append('action', 'get_status');
+                    fetch('<?php echo SITE_URL; ?>api/admin_system.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(result => {
+                            if (result.success) {
+                                const isMaint = result.status === 'true';
+                                maintenanceToggle.checked = isMaint;
+                                updateBadge(isMaint);
+                            }
+                        });
+                };
+
+                const updateBadge = (isMaint) => {
+                    if (isMaint) {
+                        statusBadge.textContent = 'Under Maintenance';
+                        statusBadge.classList.replace('bg-success', 'bg-warning');
+                        statusBadge.classList.add('text-dark');
+                    } else {
+                        statusBadge.textContent = 'Live';
+                        statusBadge.classList.replace('bg-warning', 'bg-success');
+                        statusBadge.classList.remove('text-dark');
+                    }
+                };
+
+                maintenanceToggle.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    Swal.fire({
+                        title: isChecked ? 'Enable Maintenance Mode?' : 'Disable Maintenance Mode?',
+                        text: isChecked ?
+                            'This will block all Admins and Regular Users from accessing the system.' : 'All users will be able to access the system again.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Proceed',
+                        confirmButtonColor: '#6366f1'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const formData = new FormData();
+                            formData.append('action', 'toggle_maintenance');
+                            formData.append('status', isChecked ? 'true' : 'false');
+
+                            fetch('<?php echo SITE_URL; ?>api/admin_system.php', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                .then(res => res.json())
+                                .then(result => {
+                                    if (result.success) {
+                                        updateBadge(isChecked);
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Status Updated',
+                                            text: result.message,
+                                            timer: 2000,
+                                            showConfirmButton: false
+                                        });
+                                    } else {
+                                        this.checked = !isChecked; // Revert toggle
+                                        showAlert(result.message, 'error');
+                                    }
+                                });
+                        } else {
+                            this.checked = !isChecked; // Revert toggle
+                        }
+                    });
+                });
+
+                fetchStatus();
+            }
 
             // 6. Delete Account Logic (Double Confirmation)
             const btnDeleteAccount = document.getElementById('btnDeleteAccount');

@@ -127,6 +127,33 @@ $conn->query("CREATE TABLE IF NOT EXISTS categories (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
 
+// System Settings table (e.g. maintenance mode)
+$conn->query("CREATE TABLE IF NOT EXISTS system_settings (
+    setting_key VARCHAR(50) PRIMARY KEY,
+    setting_value TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)");
+
+// Ensure default settings exist
+$conn->query("INSERT IGNORE INTO system_settings (setting_key, setting_value) VALUES ('maintenance_mode', 'false')");
+
+if (!function_exists('isMaintenanceMode')) {
+    /**
+     * Check if the system is under maintenance
+     */
+    function isMaintenanceMode($conn)
+    {
+        // Superadmins are never blocked by maintenance mode so they can fix things
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') return false;
+
+        $result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'");
+        if ($result && $row = $result->fetch_assoc()) {
+            return $row['setting_value'] === 'true';
+        }
+        return false;
+    }
+}
+
 if (!function_exists('logActivity')) {
     /**
      * Global function to log user activity

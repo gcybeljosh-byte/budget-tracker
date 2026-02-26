@@ -24,40 +24,44 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
-    $first_name = trim($_POST['first_name'] ?? '');
-    $last_name = trim($_POST['last_name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $contact_number = trim($_POST['contact_number'] ?? '');
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-
-    if (empty($first_name) || empty($last_name) || empty($email) || empty($contact_number) || empty($username) || empty($password) || empty($confirm_password)) {
-        $error = "Please fill in all fields.";
-    } elseif ($password !== $confirm_password) {
-        $error = "Passwords do not match.";
-    } elseif (strlen($password) < 8 || !preg_match("/[0-9]/", $password) || !preg_match("/[^a-zA-Z0-9]/", $password)) {
-        $error = "Password must be at least 8 characters with a number and special character.";
+    if (isMaintenanceMode($conn)) {
+        $error = "🔧 The system is currently under scheduled maintenance. Registrations are temporarily disabled. Please try again later.";
     } else {
-        $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->bind_param("ss", $username, $email);
-        $stmt->execute();
-        $stmt->store_result();
+        $first_name = trim($_POST['first_name'] ?? '');
+        $last_name = trim($_POST['last_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $contact_number = trim($_POST['contact_number'] ?? '');
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
 
-        if ($stmt->num_rows > 0) {
-            $error = "Username or email already exists.";
+        if (empty($first_name) || empty($last_name) || empty($email) || empty($contact_number) || empty($username) || empty($password) || empty($confirm_password)) {
+            $error = "Please fill in all fields.";
+        } elseif ($password !== $confirm_password) {
+            $error = "Passwords do not match.";
+        } elseif (strlen($password) < 8 || !preg_match("/[0-9]/", $password) || !preg_match("/[^a-zA-Z0-9]/", $password)) {
+            $error = "Password must be at least 8 characters with a number and special character.";
         } else {
-            $stmt_insert = $conn->prepare("INSERT INTO users (username, password, first_name, last_name, email, contact_number, auth_method, plaintext_password) VALUES (?, ?, ?, ?, ?, ?, 'Local', ?)");
-            $stmt_insert->bind_param("sssssss", $username, $password, $first_name, $last_name, $email, $contact_number, $password);
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $stmt->bind_param("ss", $username, $email);
+            $stmt->execute();
+            $stmt->store_result();
 
-            if ($stmt_insert->execute()) {
-                $success = "Registration successful! You can now login.";
+            if ($stmt->num_rows > 0) {
+                $error = "Username or email already exists.";
             } else {
-                $error = "Registration failed. Please try again.";
+                $stmt_insert = $conn->prepare("INSERT INTO users (username, password, first_name, last_name, email, contact_number, auth_method, plaintext_password) VALUES (?, ?, ?, ?, ?, ?, 'Local', ?)");
+                $stmt_insert->bind_param("sssssss", $username, $password, $first_name, $last_name, $email, $contact_number, $password);
+
+                if ($stmt_insert->execute()) {
+                    $success = "Registration successful! You can now login.";
+                } else {
+                    $error = "Registration failed. Please try again.";
+                }
+                $stmt_insert->close();
             }
-            $stmt_insert->close();
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
 ?>

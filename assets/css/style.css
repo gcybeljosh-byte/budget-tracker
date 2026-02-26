@@ -307,7 +307,8 @@ body {
 .bg-gradient-primary:hover,
 .bg-gradient-danger:hover,
 .bg-gradient-success:hover,
-.bg-gradient-warning:hover {
+.bg-gradient-warning:hover,
+.bg-gradient-info:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
@@ -327,6 +328,10 @@ body {
 
 .bg-gradient-warning {
     background: linear-gradient(135deg, #ffbd40 0%, #ff9500 60%, #e07b00 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4adede 0%, #00b4d8 60%, #0077b6 100%) !important;
 }
 
 .text-white .card-title {

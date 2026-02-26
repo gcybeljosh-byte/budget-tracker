@@ -70,6 +70,21 @@ $stmt->close();
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <?php
+                $isMaintAcrossSafe = false;
+                $maintResult = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'");
+                if ($maintResult && $row = $maintResult->fetch_assoc()) {
+                    $isMaintAcrossSafe = ($row['setting_value'] === 'true');
+                }
+                ?>
+                <div class="card h-100 <?php echo $isMaintAcrossSafe ? 'bg-gradient-warning' : 'bg-gradient-info'; ?> text-white border-0 shadow-sm rounded-4 transition-all">
+                    <div class="card-body p-4">
+                        <h5 class="card-title text-opacity-75 mb-3"><i class="fas fa-tools me-2"></i>System Status</h5>
+                        <h2 class="display-5 fw-bold mb-0"><?php echo $isMaintAcrossSafe ? 'Maintenance' : 'Live'; ?></h2>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Users Search -->
