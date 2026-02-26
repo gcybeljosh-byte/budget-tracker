@@ -9,6 +9,9 @@ include '../includes/header.php';
 
 <?php include '../includes/sidebar.php'; ?>
 
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <style>
     .bg-orange {
         background-color: #f97316 !important;
@@ -621,24 +624,6 @@ include '../includes/header.php';
                                                 <input type="text" class="form-control rounded-3" name="title" required value="<?php echo htmlspecialchars($row['title']); ?>">
                                             </div>
 
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-bold text-secondary text-uppercase">Tags</label>
-                                                <?php $currentTagIds = array_column($entryTags, 'id'); ?>
-                                                <div class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border">
-                                                    <?php foreach ($allUserTags as $tag): ?>
-                                                        <div class="form-check form-check-inline m-0">
-                                                            <input class="form-check-input d-none journal-tag-checkbox" type="checkbox" name="journal_tags[]" id="editTag<?php echo $row['id'] . '_' . $tag['id']; ?>" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTagIds) ? 'checked' : ''; ?>>
-                                                            <label class="form-check-label badge rounded-pill px-3 py-2 border" for="editTag<?php echo $row['id'] . '_' . $tag['id']; ?>" style="cursor: pointer; transition: all 0.2s;">
-                                                                <i class="fas fa-tag me-1" style="color: <?php echo $tag['color']; ?>;"></i> <span class="text-dark"><?php echo htmlspecialchars($tag['name']); ?></span>
-                                                            </label>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                    <?php if (empty($allUserTags)): ?>
-                                                        <span class="text-muted small">No tags available.</span>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-
                                             <div class="row mb-3">
                                                 <div class="col-6">
                                                     <label class="form-label small fw-bold text-secondary text-uppercase">From Date</label>
@@ -714,6 +699,21 @@ include '../includes/header.php';
                                             </div>
 
                                             <div class="mb-3">
+                                                <label class="form-label small fw-bold text-secondary text-uppercase">Tags</label>
+                                                <?php $currentTagIds = array_column($entryTags, 'id'); ?>
+                                                <select class="form-select select2-tags rounded-3" name="journal_tags[]" multiple="multiple" data-placeholder="Select tags...">
+                                                    <?php foreach ($allUserTags as $tag): ?>
+                                                        <option value="<?php echo $tag['id']; ?>" data-color="<?php echo htmlspecialchars($tag['color']); ?>" <?php echo in_array($tag['id'], $currentTagIds) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($tag['name']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <?php if (empty($allUserTags)): ?>
+                                                    <div class="form-text small text-muted mt-1">No tags available. <a href="#" data-bs-toggle="modal" data-bs-target="#manageTagsModal">Manage Tags</a> to add some!</div>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <div class="mb-3">
                                                 <label class="form-label small fw-bold text-secondary text-uppercase">Reflections / Notes</label>
                                                 <textarea class="form-control rounded-3" name="notes" rows="4"><?php echo htmlspecialchars($row['notes']); ?></textarea>
                                             </div>
@@ -781,23 +781,6 @@ include '../includes/header.php';
                         <input type="text" class="form-control rounded-3" name="title" required placeholder="e.g., Weekly Summary">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Tags</label>
-                        <div class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border">
-                            <?php foreach ($allUserTags as $tag): ?>
-                                <div class="form-check form-check-inline m-0">
-                                    <input class="form-check-input d-none journal-tag-checkbox" type="checkbox" name="journal_tags[]" id="addTag_<?php echo $tag['id']; ?>" value="<?php echo $tag['id']; ?>">
-                                    <label class="form-check-label badge rounded-pill px-3 py-2 border" for="addTag_<?php echo $tag['id']; ?>" style="cursor: pointer; transition: all 0.2s;">
-                                        <i class="fas fa-tag me-1" style="color: <?php echo $tag['color']; ?>;"></i> <span class="text-dark"><?php echo htmlspecialchars($tag['name']); ?></span>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                            <?php if (empty($allUserTags)): ?>
-                                <span class="text-muted small">No tags available. Manage Tags to add some!</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
                     <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label small fw-bold text-secondary text-uppercase">From Date</label>
@@ -853,6 +836,20 @@ include '../includes/header.php';
                         <div class="form-text small text-<?php echo $statusClass; ?> fw-bold mt-1">
                             <i class="fas fa-robot me-1"></i> Automated based on your monthly spending.
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Tags</label>
+                        <select class="form-select select2-tags rounded-3" name="journal_tags[]" multiple="multiple" data-placeholder="Select tags...">
+                            <?php foreach ($allUserTags as $tag): ?>
+                                <option value="<?php echo $tag['id']; ?>" data-color="<?php echo htmlspecialchars($tag['color']); ?>">
+                                    <?php echo htmlspecialchars($tag['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (empty($allUserTags)): ?>
+                            <div class="form-text small text-muted mt-1">No tags available. <a href="#" data-bs-toggle="modal" data-bs-target="#manageTagsModal">Manage Tags</a> to add some!</div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="mb-3">
@@ -1107,6 +1104,47 @@ include '../includes/header.php';
         }
         setTimeout(startTutorial, 1000);
     <?php endif; ?>
+</script>
+</script>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function formatTag(tag) {
+            if (!tag.id) {
+                return tag.text;
+            }
+            var color = $(tag.element).data('color');
+            var $tag = $(
+                '<span><i class="fas fa-tag me-2" style="color:' + color + '"></i>' + tag.text + '</span>'
+            );
+            return $tag;
+        }
+
+        function formatTagSelection(tag) {
+            if (!tag.id) {
+                return tag.text;
+            }
+            var color = $(tag.element).data('color');
+            var $tag = $(
+                '<span class="d-flex align-items-center"><i class="fas fa-tag me-1" style="color:' + color + '"></i> &nbsp;' + tag.text + '</span>'
+            );
+            return $tag;
+        }
+
+        $('.select2-tags').each(function() {
+            var $this = $(this);
+            $this.select2({
+                placeholder: "Select tags...",
+                allowClear: true,
+                templateResult: formatTag,
+                templateSelection: formatTagSelection,
+                width: '100%',
+                dropdownParent: $this.closest('.modal-content')
+            });
+        });
+    });
 </script>
 
 <?php include '../includes/footer.php'; ?>
