@@ -204,7 +204,7 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
 
         let currentUserModalId = null;
 
-        $('.view-logs').on('click', function() {
+        $(document).on('click', '.view-logs', function() {
             const userId = $(this).data('id');
             const userName = $(this).data('name');
             currentUserModalId = userId;
