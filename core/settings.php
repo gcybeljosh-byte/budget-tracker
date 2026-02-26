@@ -317,7 +317,7 @@ include '../includes/header.php';
                                                 <h6 class="fw-bold text-dark mb-0">Maintenance Mode</h6>
                                                 <span id="maintenanceStatusBadge" class="badge rounded-pill bg-success small">Live</span>
                                             </div>
-                                            <p class="text-muted small mb-0">When enabled, regular users cannot login. Admins and Superadmins retain access.</p>
+                                            <p class="text-muted small mb-0">When enabled, regular users cannot login. Please ensure all maintenance tasks are completed before disabling.</p>
                                         </div>
                                         <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="maintenanceToggle" style="width: 3rem; height: 1.5rem;">
                                     </div>
@@ -802,7 +802,7 @@ include '../includes/header.php';
                     Swal.fire({
                         title: isChecked ? 'Enable Maintenance Mode?' : 'Disable Maintenance Mode?',
                         text: isChecked ?
-                            'This will block all Regular Users from accessing the system. Admins and Superadmins will retain access.' : 'All users will be able to access the system again.',
+                            'This will block all Regular Users from accessing the system until maintenance is completed.' : 'All users will be able to access the system again.',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Yes, Proceed',

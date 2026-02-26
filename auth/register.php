@@ -25,7 +25,7 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     if (isMaintenanceMode($conn)) {
-        $error = "🔧 The system is currently under scheduled maintenance. Registrations are temporarily disabled. Please try again later.";
+        $error = "🔧 The system is currently under scheduled maintenance. Please try again later.";
     } else {
         $first_name = trim($_POST['first_name'] ?? '');
         $last_name = trim($_POST['last_name'] ?? '');
