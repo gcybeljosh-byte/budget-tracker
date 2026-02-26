@@ -93,22 +93,45 @@ include '../includes/header.php';
         color: #ef4444 !important;
     }
 
+    .select2-container--bootstrap-5 .select2-selection__clear {
+        background: transparent !important;
+        float: right;
+        margin-right: 0.5rem;
+        margin-top: 0.3rem;
+    }
+
     .select2-container--bootstrap-5 .select2-dropdown {
-        border-color: #dee2e6 !important;
-        border-radius: 0.75rem !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-        margin-top: 0.5rem;
-        overflow: hidden;
+        border-color: #93c5fd !important;
+        border-radius: 0 0 0.5rem 0.5rem !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        border-top: none !important;
+    }
+
+    .select2-container--bootstrap-5.select2-container--open .select2-selection {
+        border-bottom-color: transparent !important;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-color: #93c5fd !important;
+        box-shadow: none !important;
     }
 
     .select2-container--bootstrap-5 .select2-results__option {
-        padding: 0.5rem 1rem !important;
+        padding: 0.75rem 1rem !important;
         border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        color: #1f2937;
     }
 
     .select2-container--bootstrap-5 .select2-results__option[aria-selected="true"] {
-        background-color: #f8f9fa !important;
-        color: #6c757d !important;
+        background-color: #f1f5f9 !important;
+        color: #64748b !important;
+    }
+
+    .select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
     }
 </style>
 
