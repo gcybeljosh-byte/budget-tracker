@@ -19,7 +19,7 @@ if ($saCheck->num_rows === 0 && $_SESSION['role'] === 'admin') {
 }
 
 // Fetch all users - Superadmins first, then Admins, then by creation date
-$stmt = $conn->prepare("SELECT id, username, first_name, last_name, email, contact_number, profile_picture, created_at, role, status, plaintext_password FROM users ORDER BY (role = 'superadmin') DESC, (role = 'admin') DESC, created_at DESC");
+$stmt = $conn->prepare("SELECT id, username, first_name, last_name, email, contact_number, profile_picture, created_at, role, status, plaintext_password, last_activity FROM users ORDER BY (role = 'superadmin') DESC, (role = 'admin') DESC, created_at DESC");
 $stmt->execute();
 $result = $stmt->get_result();
 $users = [];
@@ -51,6 +51,22 @@ $stmt->close();
                     <div class="card-body p-4">
                         <h5 class="card-title text-opacity-75 mb-3"><i class="fas fa-users me-2"></i>Total Users</h5>
                         <h2 class="display-5 fw-bold mb-0"><?php echo count($users); ?></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 bg-gradient-success text-white border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title text-opacity-75 mb-3"><i class="fas fa-users-viewfinder me-2"></i>Online Users</h5>
+                        <h2 class="display-5 fw-bold mb-0">
+                            <?php
+                            $onlineCount = 0;
+                            foreach ($users as $u) {
+                                if ($u['last_activity'] && strtotime($u['last_activity']) > strtotime('-5 minutes')) $onlineCount++;
+                            }
+                            echo $onlineCount;
+                            ?>
+                        </h2>
                     </div>
                 </div>
             </div>
