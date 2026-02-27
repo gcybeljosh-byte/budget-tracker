@@ -75,6 +75,11 @@
         $stmt_update->close();
     }
     ?>
+    <!-- PWA Support -->
+    <link rel="manifest" href="<?php echo SITE_URL; ?>manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
+
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' . $appName : $appName; ?></title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -104,6 +109,15 @@
                     }
                     return data;
                 });
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('<?php echo SITE_URL; ?>sw.js')
+                    .then(reg => console.log('PWA: Service Worker Registered', reg))
+                    .catch(err => console.log('PWA: Service Worker Registration Failed', err));
+            });
         }
     </script>
     <!-- DataTables CSS -->
