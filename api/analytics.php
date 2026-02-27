@@ -11,6 +11,8 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 $action  = $_GET['action'] ?? 'trends';
+$group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
+$groupFilter = $group_id ? " AND group_id = ?" : " AND (group_id IS NULL OR group_id = 0)";
 
 if ($action === 'trends') {
     // Last 6 months — total spending per category per month
@@ -28,12 +30,17 @@ if ($action === 'trends') {
     $stmt = $conn->prepare("
         SELECT DATE_FORMAT(date, '%Y-%m') as month, category, SUM(amount) as total
         FROM expenses
-        WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') IN ($placeholders)
+        WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') IN ($placeholders) $groupFilter
         GROUP BY month, category
         ORDER BY month ASC, total DESC
     ");
-    $params = array_merge([$user_id], $months);
-    $stmt->bind_param("i" . $types, ...$params);
+    if ($group_id) {
+        $params = array_merge([$user_id], $months, [$group_id]);
+        $stmt->bind_param("i" . $types . "i", ...$params);
+    } else {
+        $params = array_merge([$user_id], $months);
+        $stmt->bind_param("i" . $types, ...$params);
+    }
     $stmt->execute();
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
@@ -69,10 +76,14 @@ if ($action === 'trends') {
     $stmt = $conn->prepare("
         SELECT date, SUM(amount) as total
         FROM expenses
-        WHERE user_id = ? AND date BETWEEN ? AND ?
+        WHERE user_id = ? AND date BETWEEN ? AND ? $groupFilter
         GROUP BY date
     ");
-    $stmt->bind_param("iss", $user_id, $monthStart, $monthEnd);
+    if ($group_id) {
+        $stmt->bind_param("issi", $user_id, $monthStart, $monthEnd, $group_id);
+    } else {
+        $stmt->bind_param("iss", $user_id, $monthStart, $monthEnd);
+    }
     $stmt->execute();
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
@@ -87,9 +98,9 @@ if ($action === 'trends') {
     $balanceHelper = new BalanceHelper($conn);
 
     // Current balance (Consolidated: Cash + Digital + Savings)
-    $cash    = $balanceHelper->getCashBalance($user_id);
-    $digital = $balanceHelper->getDigitalBalance($user_id);
-    $savings = $balanceHelper->getTotalSavings($user_id);
+    $cash    = $balanceHelper->getCashBalance($user_id, false, null, $group_id);
+    $digital = $balanceHelper->getDigitalBalance($user_id, false, null, $group_id);
+    $savings = $balanceHelper->getTotalSavings($user_id, false, null, $group_id);
     $currentBalance = $cash + $digital + $savings;
 
     // Daily average spending this month
@@ -97,8 +108,12 @@ if ($action === 'trends') {
     $monthStart = date('Y-m-01');
     $today      = date('Y-m-d');
 
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? AND expense_source = 'Allowance'");
-    $stmt->bind_param("iss", $user_id, $monthStart, $today);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? AND expense_source = 'Allowance' $groupFilter");
+    if ($group_id) {
+        $stmt->bind_param("issi", $user_id, $monthStart, $today, $group_id);
+    } else {
+        $stmt->bind_param("iss", $user_id, $monthStart, $today);
+    }
     $stmt->execute();
     $monthlySpent = (float)$stmt->get_result()->fetch_row()[0];
     $stmt->close();
@@ -112,8 +127,12 @@ if ($action === 'trends') {
     // Month-on-month comparison
     $lastMonthStart = date('Y-m-01', strtotime('-1 month'));
     $lastMonthEnd   = date('Y-m-t',  strtotime('-1 month'));
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ?");
-    $stmt->bind_param("iss", $user_id, $lastMonthStart, $lastMonthEnd);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? $groupFilter");
+    if ($group_id) {
+        $stmt->bind_param("issi", $user_id, $lastMonthStart, $lastMonthEnd, $group_id);
+    } else {
+        $stmt->bind_param("iss", $user_id, $lastMonthStart, $lastMonthEnd);
+    }
     $stmt->execute();
     $lastMonthTotal = (float)$stmt->get_result()->fetch_row()[0];
     $stmt->close();

@@ -81,7 +81,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE group_id = ?");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND group_id IS NULL");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND (group_id IS NULL OR group_id = 0)");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -94,7 +94,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE group_id = ?");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND group_id IS NULL");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0)");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -123,7 +123,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE group_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND group_id IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -137,7 +137,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -164,7 +164,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
+    $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -182,7 +182,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -195,7 +195,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -223,7 +223,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' GROUP BY date ORDER BY total DESC LIMIT 1");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' GROUP BY date ORDER BY total DESC LIMIT 1");
+    $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND expense_source = 'Allowance' GROUP BY date ORDER BY total DESC LIMIT 1");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -303,7 +303,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE group_id = ? AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND group_id IS NULL AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
+    $stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -376,11 +376,11 @@ if ($group_id) {
     $stmt->bind_param("iii", $group_id, $group_id, $group_id);
 } else {
     $sql = "
-        (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE user_id = ? AND group_id IS NULL)
+        (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE user_id = ? AND (group_id IS NULL OR group_id = 0))
         UNION ALL
-        (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE user_id = ? AND group_id IS NULL)
+        (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0))
         UNION ALL
-        (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE user_id = ? AND group_id IS NULL)
+        (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE user_id = ? AND (group_id IS NULL OR group_id = 0))
         ORDER BY date DESC, id DESC
         LIMIT 10
     ";
@@ -401,7 +401,7 @@ if ($group_id) {
     $stmt = $conn->prepare("SELECT date, description, amount, category FROM expenses WHERE group_id = ? ORDER BY date DESC LIMIT 100");
     $stmt->bind_param("i", $group_id);
 } else {
-    $stmt = $conn->prepare("SELECT date, description, amount, category FROM expenses WHERE user_id = ? AND group_id IS NULL ORDER BY date DESC LIMIT 100");
+    $stmt = $conn->prepare("SELECT date, description, amount, category FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) ORDER BY date DESC LIMIT 100");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {

@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $history = [];
 
         // 1. Get Allowances
-        $sql1 = $group_id ? "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND group_id IS NULL";
+        $sql1 = $group_id ? "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND (group_id IS NULL OR group_id = 0)";
         $stmt = $conn->prepare($sql1);
         if ($group_id) {
             $stmt->bind_param("isi", $user_id, $source, $group_id);
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // 2. Get Expenses (from Allowance source)
-        $sql2 = $group_id ? "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND group_id = ?" : "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND group_id IS NULL";
+        $sql2 = $group_id ? "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND group_id = ?" : "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND (group_id IS NULL OR group_id = 0)";
         $stmt = $conn->prepare($sql2);
         if ($group_id) {
             $stmt->bind_param("isi", $user_id, $source, $group_id);
@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // 3. Get Savings Transfers (Expenses that are technically deductions from Allowance)
-        $sql3 = $group_id ? "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND group_id IS NULL";
+        $sql3 = $group_id ? "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND (group_id IS NULL OR group_id = 0)";
         $stmt = $conn->prepare($sql3);
         if ($group_id) {
             $stmt->bind_param("isi", $user_id, $source, $group_id);

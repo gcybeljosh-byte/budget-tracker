@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("SELECT * FROM expenses WHERE group_id = ? ORDER BY date DESC");
         $stmt->bind_param("i", $group_id);
     } else {
-        $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? AND group_id IS NULL ORDER BY date DESC");
+        $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) ORDER BY date DESC");
         $stmt->bind_param("i", $user_id);
     }
 
