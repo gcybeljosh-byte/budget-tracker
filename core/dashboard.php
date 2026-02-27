@@ -199,22 +199,21 @@ include '../includes/header.php';
                 <!-- Balanced Metrics Below Chart -->
                 <div class="row g-4 mb-4">
                     <!-- Financial Streaks Card -->
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="card h-100 border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-danger border-4" id="streakCard">
                             <div class="card-body p-4">
                                 <div class="d-flex align-items-center mb-2">
                                     <div class="rounded-circle bg-danger-subtle p-2 me-2 text-danger">
                                         <i class="fas fa-fire-alt small streak-pulse"></i>
                                     </div>
-                                    <h6 class="text-secondary small fw-bold text-uppercase mb-0">No-Spend Streak</h6>
+                                    <h6 class="text-secondary small fw-bold text-uppercase mb-0">Streak</h6>
                                 </div>
-                                <h2 class="fw-bold mb-0 text-dark"><span id="dashStreakCount">0</span> Days</h2>
-                                <div class="extra-small text-muted mt-1" id="dashStreakMax">Best: 0 days</div>
+                                <h2 class="fw-bold mb-0 text-dark" style="font-size: 1.5rem;"><span id="dashStreakCount">0</span> Days</h2>
                             </div>
                         </div>
                     </div>
                     <!-- Safe-to-Spend Card -->
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="card h-100 border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-info border-4" id="safeToSpendCard">
                             <div class="card-body p-4">
                                 <div class="d-flex align-items-center mb-2">
@@ -223,8 +222,20 @@ include '../includes/header.php';
                                     </div>
                                     <h6 class="text-secondary small fw-bold text-uppercase mb-0">Safe-to-Spend</h6>
                                 </div>
-                                <h2 class="fw-bold mb-0 text-dark" id="dashSafeToSpend"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
-                                <div class="extra-small text-muted mt-1" id="safeToSpendDays">Calculating...</div>
+                                <h2 class="fw-bold mb-0 text-dark" style="font-size: 1.5rem;" id="dashSafeToSpend"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Daily Insights Widget (Moved from sidebar) -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 bg-dark text-white p-4 transition-all hover-lift position-relative overflow-hidden">
+                            <div style="position:absolute; top:-5px; right:-5px; opacity:0.1; font-size: 3rem;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h6 class="small fw-bold text-uppercase text-white text-opacity-50 mb-2" style="font-size: 0.55rem;">Daily Avg</h6>
+                            <h3 class="fw-bold mb-2" style="font-size: 1.5rem;" id="dashDailyAvg"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h3>
+                            <div class="progress rounded-pill bg-white bg-opacity-10" style="height: 4px;">
+                                <div id="dashUtilBar" class="progress-bar bg-info" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
@@ -257,22 +268,6 @@ include '../includes/header.php';
                             <div class="p-4 text-center text-muted small">Loading bills...</div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Daily Insights Widget -->
-                <div class="card border-0 shadow-sm rounded-4 bg-dark text-white p-4 mb-4 position-relative overflow-hidden">
-                    <div style="position:absolute; top:-10px; right:-10px; opacity:0.1; font-size: 5rem;">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h6 class="small fw-bold text-uppercase text-white text-opacity-50 mb-3" style="font-size: 0.65rem;">Daily Spending Insight</h6>
-                    <div class="d-flex align-items-end mb-3">
-                        <h3 class="fw-bold mb-0 me-2" id="dashDailyAvg"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h3>
-                        <span class="small text-white text-opacity-50 pb-1">/ avg day</span>
-                    </div>
-                    <div class="progress rounded-pill bg-white bg-opacity-10 mb-2" style="height: 6px;">
-                        <div id="dashUtilBar" class="progress-bar bg-info" style="width: 0%"></div>
-                    </div>
-                    <div class="extra-small text-white text-opacity-75" id="dashUtilText" style="font-size: 0.6rem;">0% spent</div>
                 </div>
             </div>
         </div>
