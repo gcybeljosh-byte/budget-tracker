@@ -300,6 +300,31 @@ if ($stmt->execute()) {
 $stmt->close();
 $response['upcoming_bills'] = $upcoming_bills;
 
+// 4.10 Shared Wallets Summary (Only for Personal Dashboard)
+$response['shared_wallets'] = [];
+if (!$group_id) {
+    $stmt = $conn->prepare("
+        SELECT sg.id, sg.name, sg.description, 
+               (SELECT COUNT(*) FROM shared_group_members WHERE group_id = sg.id AND status = 'active') as member_count,
+               sgm.role
+        FROM shared_groups sg
+        JOIN shared_group_members sgm ON sg.id = sgm.group_id
+        WHERE sgm.user_id = ? AND sgm.status = 'active'
+        LIMIT 5
+    ");
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            // Get balance for each group
+            $room_balance = $balanceHelper->getCashBalance($user_id, false, $row['id']) + $balanceHelper->getDigitalBalance($user_id, false, $row['id']);
+            $row['balance'] = $room_balance;
+            $response['shared_wallets'][] = $row;
+        }
+    }
+    $stmt->close();
+}
+
 // 4.9 Safe-to-Spend Calculation
 $remaining_days = (int)date('t') - (int)date('j') + 1;
 $safe_to_spend = ($response['balance'] - $total_unpaid_bills) / $remaining_days;

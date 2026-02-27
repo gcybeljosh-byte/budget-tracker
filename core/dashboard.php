@@ -195,6 +195,24 @@ include '../includes/header.php';
                         <canvas id="dashboardChart"></canvas>
                     </div>
                 </div>
+
+                <!-- Shared Wallets Overview (Personal Context Only) -->
+                <?php if (!isset($_GET['group_id'])): ?>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" id="sharedWalletsWidget">
+                        <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">Shared Wallets <span class="badge bg-primary-subtle text-primary rounded-pill small ms-2" style="font-size: 0.7rem;">BETA</span></h5>
+                            <a href="collaborative.php" class="text-primary small fw-bold text-decoration-none">Manage All</a>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <div id="sharedWalletsContainer" class="row g-3">
+                                <!-- Shared wallets will be injected here -->
+                                <div class="col-12 text-center py-4">
+                                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <!-- Sidebar column -->
@@ -465,6 +483,10 @@ include '../includes/header.php';
             renderDashboardChart(data.category_spending);
             renderRecentTransactions(data.recent_transactions);
 
+            if (data.shared_wallets) {
+                renderSharedWallets(data.shared_wallets);
+            }
+
             // --- Gamification Logic ---
             fetch('<?php echo SITE_URL; ?>api/gamification.php')
                 .then(res => res.json())
@@ -556,6 +578,47 @@ include '../includes/header.php';
                 <div class="fw-bold text-primary small">${formatCurrency(bill.amount)}</div>
             `;
                 list.appendChild(item);
+            });
+        }
+
+        function renderSharedWallets(wallets) {
+            const container = document.getElementById('sharedWalletsContainer');
+            if (!container) return;
+
+            if (wallets.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-4 bg-light rounded-4 border border-dashed">
+                        <div class="text-muted small mb-2">No shared wallets yet</div>
+                        <a href="collaborative.php" class="btn btn-primary btn-sm rounded-pill px-3">Create First Group</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            wallets.forEach(wallet => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6';
+                col.innerHTML = `
+                    <div class="card border border-light shadow-none rounded-4 h-100 transition-all hover-lift" onclick="location.href='dashboard.php?group_id=${wallet.id}'" style="cursor: pointer;">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rounded-circle bg-primary-subtle p-2 me-2 text-primary">
+                                    <i class="fas fa-users fa-xs"></i>
+                                </div>
+                                <div class="small fw-bold text-dark text-truncate">${wallet.name}</div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <div>
+                                    <div class="extra-small text-muted">${wallet.member_count} members</div>
+                                    <div class="fw-bold text-primary">${formatCurrency(wallet.balance)}</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-light fa-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
             });
         }
 

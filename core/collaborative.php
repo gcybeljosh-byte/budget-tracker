@@ -17,7 +17,7 @@ include '../includes/header.php';
     <div class="container py-4">
         <!-- Header Section -->
         <div class="mb-4">
-            <h2 class="fw-bold mb-1">Shared Wallets <span class="badge bg-primary-subtle text-primary rounded-pill align-middle ms-2" style="font-size: 0.8rem; vertical-align: middle;">BETA</span></h2>
+            <h2 class="fw-bold mb-1">Shared Wallets</h2>
             <p class="text-secondary small mb-0">Manage collaborative budgets with household or couples.</p>
         </div>
 
@@ -75,6 +75,33 @@ include '../includes/header.php';
         </div>
     </div>
 
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Edit Shared Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editGroupForm">
+                        <input type="hidden" name="action" value="update_group">
+                        <input type="hidden" name="group_id" id="editGroupId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Group Name</label>
+                            <input type="text" name="name" id="editGroupName" class="form-control rounded-3" placeholder="e.g. Household, Travel Fund" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Description (Optional)</label>
+                            <textarea name="description" id="editGroupDesc" class="form-control rounded-3" rows="2" placeholder="What is this group for?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold mt-2">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Invite Member Modal -->
     <div class="modal fade" id="inviteMemberModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -117,6 +144,26 @@ include '../includes/header.php';
                             Swal.fire('Success', data.message, 'success');
                             bootstrap.Modal.getInstance(document.getElementById('createGroupModal')).hide();
                             this.reset();
+                            loadMyGroups();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    });
+            });
+
+            // Edit Group
+            document.getElementById('editGroupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('../api/collaborative.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Success', data.message, 'success');
+                            bootstrap.Modal.getInstance(document.getElementById('editGroupModal')).hide();
                             loadMyGroups();
                         } else {
                             Swal.fire('Error', data.message, 'error');
@@ -184,12 +231,19 @@ include '../includes/header.php';
                                 <h5 class="fw-bold mb-1">${group.name}</h5>
                                 <p class="text-secondary small mb-3 text-truncate">${group.description || 'Shared budget group'}</p>
                                 <div class="d-flex gap-2">
-                                <div class="d-flex gap-2">
                                     <button onclick="peekWallet(${group.id}, '${group.name.replace(/'/g, "\\'")}')" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold flex-grow-1">View Wallet</button>
                                     ${group.role === 'admin' ? `
-                                        <button onclick="openInviteModal(${group.id})" class="btn btn-outline-primary btn-sm rounded-circle" title="Invite User">
-                                            <i class="fas fa-user-plus"></i>
-                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm rounded-circle" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                                <li><a class="dropdown-item small" href="javascript:void(0)" onclick="openInviteModal(${group.id})"><i class="fas fa-user-plus me-2"></i>Invite Member</a></li>
+                                                <li><a class="dropdown-item small" href="javascript:void(0)" onclick="openEditModal(${group.id}, '${group.name.replace(/'/g, "\\'")}', '${(group.description || '').replace(/'/g, "\\'")}')"><i class="fas fa-edit me-2"></i>Edit Wallet</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item small text-danger" href="javascript:void(0)" onclick="deleteGroup(${group.id}, '${group.name.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt me-2"></i>Delete Wallet</a></li>
+                                            </ul>
+                                        </div>
                                     ` : ''}
                                 </div>
                             </div>
@@ -223,6 +277,44 @@ include '../includes/header.php';
         function openInviteModal(groupId) {
             document.getElementById('inviteGroupId').value = groupId;
             new bootstrap.Modal(document.getElementById('inviteMemberModal')).show();
+        }
+
+        function openEditModal(id, name, desc) {
+            document.getElementById('editGroupId').value = id;
+            document.getElementById('editGroupName').value = name;
+            document.getElementById('editGroupDesc').value = desc;
+            new bootstrap.Modal(document.getElementById('editGroupModal')).show();
+        }
+
+        function deleteGroup(id, name) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete "${name}". All shared history for this group will be permanently removed.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('action', 'delete_group');
+                    formData.append('group_id', id);
+
+                    fetch('../api/collaborative.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire('Deleted!', data.message, 'success');
+                                loadMyGroups();
+                            } else {
+                                Swal.fire('Error', data.message, 'error');
+                            }
+                        });
+                }
+            });
         }
 
         function respondInvite(inviteId, status) {

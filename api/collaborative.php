@@ -2,6 +2,8 @@
 session_start();
 header("Content-Type: application/json");
 require_once '../includes/db.php';
+require_once '../includes/NotificationHelper.php';
+$notificationHelper = new NotificationHelper($conn);
 
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
@@ -40,6 +42,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             break;
 
+        case 'update_group':
+            $group_id = intval($_POST['group_id'] ?? 0);
+            $name = trim($_POST['name'] ?? '');
+            $desc = trim($_POST['description'] ?? '');
+
+            // Verify ownership/admin
+            $stmt = $conn->prepare("SELECT id FROM shared_group_members WHERE group_id = ? AND user_id = ? AND role = 'admin' AND status = 'active'");
+            $stmt->bind_param("ii", $group_id, $user_id);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows === 0) {
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                exit;
+            }
+            $stmt->close();
+
+            if ($name) {
+                $stmt = $conn->prepare("UPDATE shared_groups SET name = ?, description = ? WHERE id = ?");
+                $stmt->bind_param("ssi", $name, $desc, $group_id);
+                if ($stmt->execute()) {
+                    $response = ['success' => true, 'message' => 'Group updated successfully'];
+                    logActivity($conn, $user_id, 'group_update', "Updated shared group: $name");
+                } else {
+                    $response = ['success' => false, 'message' => 'Database error'];
+                }
+                $stmt->close();
+            }
+            break;
+
+        case 'delete_group':
+            $group_id = intval($_POST['group_id'] ?? 0);
+
+            // Only owner can delete (owner_id in shared_groups)
+            $stmt = $conn->prepare("SELECT id FROM shared_groups WHERE id = ? AND owner_id = ?");
+            $stmt->bind_param("ii", $group_id, $user_id);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows === 0) {
+                echo json_encode(['success' => false, 'message' => 'Only the group owner can delete the group']);
+                exit;
+            }
+            $stmt->close();
+
+            $stmt = $conn->prepare("DELETE FROM shared_groups WHERE id = ?");
+            $stmt->bind_param("i", $group_id);
+            if ($stmt->execute()) {
+                $response = ['success' => true, 'message' => 'Group deleted successfully'];
+                logActivity($conn, $user_id, 'group_delete', "Deleted shared group ID: $group_id");
+            } else {
+                $response = ['success' => false, 'message' => 'Database error'];
+            }
+            $stmt->close();
+            break;
+
         case 'invite_member':
             $group_id = $_POST['group_id'] ?? 0;
             $email = trim($_POST['email'] ?? '');
@@ -72,6 +126,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 $response = ['success' => true, 'message' => 'Invitation sent'];
                 logActivity($conn, $user_id, 'group_invite', "Invited $email to group ID $group_id");
+
+                // Get Group Name for notification
+                $group_stmt = $conn->prepare("SELECT name FROM shared_groups WHERE id = ?");
+                $group_stmt->bind_param("i", $group_id);
+                $group_stmt->execute();
+                $group_name = $group_stmt->get_result()->fetch_assoc()['name'] ?? 'a Shared Wallet';
+                $group_stmt->close();
+
+                // Get Inviter Name
+                $inviter_stmt = $conn->prepare("SELECT first_name FROM users WHERE id = ?");
+                $inviter_stmt->bind_param("i", $user_id);
+                $inviter_stmt->execute();
+                $inviter_name = $inviter_stmt->get_result()->fetch_assoc()['first_name'] ?? 'Someone';
+                $inviter_stmt->close();
+
+                $notificationHelper->addNotification(
+                    $target_user_id,
+                    'group_invitation',
+                    "📩 $inviter_name invited you to join '$group_name'. Check Collaborative page to respond."
+                );
             } else {
                 $response = ['success' => false, 'message' => 'User is already a member or invited'];
             }
