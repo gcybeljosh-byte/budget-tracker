@@ -10,6 +10,23 @@
                         <h2 class="navbar-page-title m-0">
                             <?php echo isset($pageHeader) ? $pageHeader : 'Dashboard Overview'; ?>
                         </h2>
+                        <?php if (isset($_GET['group_id'])):
+                            require_once '../includes/db.php';
+                            $stmt = $conn->prepare("SELECT name FROM shared_groups WHERE id = ?");
+                            $gid = intval($_GET['group_id']);
+                            $stmt->bind_param("i", $gid);
+                            $stmt->execute();
+                            $gname = $stmt->get_result()->fetch_assoc()['name'] ?? 'Shared Group';
+                            $stmt->close();
+                        ?>
+                            <div class="badge bg-primary rounded-pill px-3 py-2 ms-2 d-none d-md-flex align-items-center extra-small shadow-sm">
+                                <i class="fas fa-users-viewfinder me-2"></i>
+                                <span>Shared: <strong><?php echo htmlspecialchars($gname); ?></strong></span>
+                                <a href="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="ms-2 text-white opacity-75 hover-opacity-100 text-decoration-none border-start ps-2">
+                                    <i class="fas fa-times-circle"></i>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- RIGHT (always visible on all sizes): Notifications + Profile -->

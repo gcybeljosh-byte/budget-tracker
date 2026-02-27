@@ -13,6 +13,19 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 
+$group_id = isset($_GET['group_id']) ? (int)$_GET['group_id'] : (isset($_POST['group_id']) ? (int)$_POST['group_id'] : null);
+if ($group_id) {
+    // Basic membership check
+    $stmt = $conn->prepare("SELECT role FROM shared_group_members WHERE group_id = ? AND user_id = ? AND status = 'active'");
+    $stmt->bind_param("ii", $group_id, $user_id);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => 'Unauthorized access to this group']);
+        exit;
+    }
+    $stmt->close();
+}
+
 // --- Auto-Migration: Ensure necessary columns exist ---
 $conn->query("CREATE TABLE IF NOT EXISTS savings (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,11 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = $_POST['description'] ?? 'Savings';
             $amount = $_POST['amount'] ?? 0;
             $source_type = $_POST['source_type'] ?? 'Cash';
+            $group_id = !empty($_POST['group_id']) ? intval($_POST['group_id']) : null;
 
             if ($amount > 0) {
                 // Balance Validation: Ensure the source has enough allowance to be moved to savings
                 $balanceHelper = new BalanceHelper($conn);
-                $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type);
+                $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type, $group_id);
                 $currentBalance = $balanceDetails['balance'];
 
                 if ($amount > $currentBalance) {
@@ -61,14 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
 
-                $stmt = $conn->prepare("INSERT INTO savings (user_id, date, amount, description, source_type) VALUES (?, ?, ?, ?, ?)");
-                $stmt->bind_param("isdss", $user_id, $date, $amount, $description, $source_type);
+                $stmt = $conn->prepare("INSERT INTO savings (user_id, group_id, date, amount, description, source_type) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("iisdss", $user_id, $group_id, $date, $amount, $description, $source_type);
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Savings added successfully'];
 
                     // Achievement Check: Savings Starter (₱1,000)
                     $balanceHelper = new BalanceHelper($conn);
-                    if ($balanceHelper->getTotalSavings($user_id, false) >= 1000) {
+                    if ($balanceHelper->getTotalSavings($user_id, false, null, $group_id) >= 1000) {
                         $achievementHelper->unlockBySlug($user_id, 'savings_starter');
                     }
 
@@ -85,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'delete':
             $id = $_POST['id'] ?? 0;
 
-            $stmt = $conn->prepare("DELETE FROM savings WHERE id = ? AND user_id = ?");
-            $stmt->bind_param("ii", $id, $user_id);
+            $stmt = $conn->prepare("DELETE FROM savings WHERE id = ? AND (user_id = ? OR group_id IN (SELECT group_id FROM shared_group_members WHERE user_id = ? AND status = 'active' AND role = 'admin'))");
+            $stmt->bind_param("iii", $id, $user_id, $user_id);
             if ($stmt->execute()) {
                 $response = ['success' => true, 'message' => 'Savings deleted successfully'];
                 logActivity($conn, $user_id, 'savings_delete', "Deleted savings ID $id");
@@ -102,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $date = $_POST['date'] ?? date('Y-m-d');
             $description = $_POST['description'] ?? 'Savings';
             $source_type = $_POST['source_type'] ?? 'Cash';
+            $group_id = !empty($_POST['group_id']) ? intval($_POST['group_id']) : null;
 
             if ($id > 0 && $amount > 0) {
                 // Balance Validation for Edit
@@ -115,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $oldStmt->close();
 
                 if ($oldData) {
-                    $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type);
+                    $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type, $group_id);
                     $currentBalance = $balanceDetails['balance'];
 
                     if ($oldData['source_type'] === $source_type) {
@@ -129,8 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                $stmt = $conn->prepare("UPDATE savings SET amount = ?, date = ?, description = ?, source_type = ? WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("dsssii", $amount, $date, $description, $source_type, $id, $user_id);
+                $stmt = $conn->prepare("UPDATE savings SET amount = ?, date = ?, description = ?, source_type = ?, group_id = ? WHERE id = ? AND (user_id = ? OR group_id IN (SELECT group_id FROM shared_group_members WHERE user_id = ? AND status = 'active'))");
+                $stmt->bind_param("dsssiiii", $amount, $date, $description, $source_type, $group_id, $id, $user_id, $user_id);
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Savings updated successfully'];
                     logActivity($conn, $user_id, 'savings_edit', "Edited savings ID $id: $description - $amount");
@@ -150,6 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $today = date('Y-m-d');
         $thisMonth = date('Y-m');
         $thisYear = date('Y');
+        $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
 
         $stats = [
             'total' => 0,
@@ -157,46 +173,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'yearly' => 0
         ];
 
+        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
+
         // Total (Lifetime) - Net of Expenses
         $stmt = $conn->prepare("
-            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ?) - 
-                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings') as total
+            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $groupFilter) - 
+                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $groupFilter) as total
         ");
-        $stmt->bind_param("ii", $user_id, $user_id);
+        if ($group_id) {
+            $stmt->bind_param("iiii", $user_id, $group_id, $user_id, $group_id);
+        } else {
+            $stmt->bind_param("ii", $user_id, $user_id);
+        }
         $stmt->execute();
         $stats['total'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
 
         // Monthly - Net of Expenses
         $stmt = $conn->prepare("
-            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?) - 
-                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND DATE_FORMAT(date, '%Y-%m') = ?) as total
+            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ? $groupFilter) - 
+                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND DATE_FORMAT(date, '%Y-%m') = ? $groupFilter) as total
         ");
-        $stmt->bind_param("isis", $user_id, $thisMonth, $user_id, $thisMonth);
+        if ($group_id) {
+            $stmt->bind_param("isisis", $user_id, $thisMonth, $group_id, $user_id, $thisMonth, $group_id);
+        } else {
+            $stmt->bind_param("isis", $user_id, $thisMonth, $user_id, $thisMonth);
+        }
         $stmt->execute();
         $stats['monthly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
 
         // Yearly - Net of Expenses
         $stmt = $conn->prepare("
-            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ?) - 
-                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND YEAR(date) = ?) as total
+            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ? $groupFilter) - 
+                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND YEAR(date) = ? $groupFilter) as total
         ");
-        $stmt->bind_param("isis", $user_id, $thisYear, $user_id, $thisYear);
+        if ($group_id) {
+            $stmt->bind_param("isisis", $user_id, $thisYear, $group_id, $user_id, $thisYear, $group_id);
+        } else {
+            $stmt->bind_param("isis", $user_id, $thisYear, $user_id, $thisYear);
+        }
         $stmt->execute();
         $stats['yearly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
 
         $response = ['success' => true, 'data' => $stats];
     } else {
+        $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
+        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
+
         $sql = "
-            (SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ?)
+            (SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ? $groupFilter)
             UNION ALL
-            (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings')
+            (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $groupFilter)
             ORDER BY date DESC, id DESC
         ";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $user_id, $user_id);
+        if ($group_id) {
+            $stmt->bind_param("iiii", $user_id, $group_id, $user_id, $group_id);
+        } else {
+            $stmt->bind_param("ii", $user_id, $user_id);
+        }
         $stmt->execute();
         $result = $stmt->get_result();
         $savings = [];

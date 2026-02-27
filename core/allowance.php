@@ -86,6 +86,7 @@ include '../includes/db.php';
             </div>
             <div class="modal-body p-4 pt-4">
                 <form id="allowanceForm">
+                    <input type="hidden" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="allowanceDate" required>
@@ -131,6 +132,7 @@ include '../includes/db.php';
             <div class="modal-body p-4 pt-4">
                 <form id="editAllowanceForm">
                     <input type="hidden" id="editAllowanceId">
+                    <input type="hidden" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="editAllowanceDate" required>
@@ -201,6 +203,10 @@ include '../includes/db.php';
         const allowanceForm = document.getElementById('allowanceForm');
         const editAllowanceForm = document.getElementById('editAllowanceForm');
 
+        // URL Context
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeGroupId = urlParams.get('group_id');
+
         // Initial Load
         fetchAllowances();
         fetchDashboardStats();
@@ -215,7 +221,8 @@ include '../includes/db.php';
         // --- Functions ---
 
         function fetchAllowances() {
-            fetch('<?php echo SITE_URL; ?>api/allowance.php?mode=sources&t=' + new Date().getTime())
+            const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+            fetch('<?php echo SITE_URL; ?>api/allowance.php?mode=sources&t=' + new Date().getTime() + query)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && Array.isArray(data.data)) {
@@ -299,7 +306,8 @@ include '../includes/db.php';
             const modal = new bootstrap.Modal(document.getElementById('sourceHistoryModal'));
             modal.show();
 
-            fetch(`<?php echo SITE_URL; ?>api/allowance.php?mode=history&source=${source}&t=` + new Date().getTime())
+            const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+            fetch(`<?php echo SITE_URL; ?>api/allowance.php?mode=history&source=${source}&t=` + new Date().getTime() + query)
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
@@ -381,7 +389,8 @@ include '../includes/db.php';
         }
 
         function fetchDashboardStats() {
-            fetch('<?php echo SITE_URL; ?>api/dashboard.php?t=' + new Date().getTime())
+            const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+            fetch('<?php echo SITE_URL; ?>api/dashboard.php?t=' + new Date().getTime() + query)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -404,6 +413,9 @@ include '../includes/db.php';
             formData.append('description', document.getElementById('allowanceDesc').value);
             formData.append('amount', document.getElementById('allowanceAmount').value);
             formData.append('source_type', document.getElementById('allowanceSourceType').value);
+            if (activeGroupId) {
+                formData.append('group_id', activeGroupId);
+            }
 
             fetch('<?php echo SITE_URL; ?>api/allowance.php', {
                     method: 'POST',

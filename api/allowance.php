@@ -15,6 +15,19 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 
+$group_id = isset($_GET['group_id']) ? (int)$_GET['group_id'] : (isset($_POST['group_id']) ? (int)$_POST['group_id'] : null);
+if ($group_id) {
+    // Basic membership check
+    $stmt = $conn->prepare("SELECT role FROM shared_group_members WHERE group_id = ? AND user_id = ? AND status = 'active'");
+    $stmt->bind_param("ii", $group_id, $user_id);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => 'Unauthorized access to this group']);
+        exit;
+    }
+    $stmt->close();
+}
+
 // --- Auto-Migration: Add source_type column if it doesn't exist ---
 $checkColumn = $conn->query("SHOW COLUMNS FROM allowances LIKE 'source_type'");
 if ($checkColumn->num_rows == 0) {
@@ -32,10 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = $_POST['description'] ?? '';
             $amount = $_POST['amount'] ?? '';
             $source_type = $_POST['source_type'] ?? 'Cash';
+            $group_id = !empty($_POST['group_id']) ? intval($_POST['group_id']) : null;
 
             if ($date && $description && $amount) {
-                $stmt = $conn->prepare("INSERT INTO allowances (user_id, date, description, amount, source_type) VALUES (?, ?, ?, ?, ?)");
-                $stmt->bind_param("issds", $user_id, $date, $description, $amount, $source_type);
+                $stmt = $conn->prepare("INSERT INTO allowances (user_id, group_id, date, description, amount, source_type) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("iissds", $user_id, $group_id, $date, $description, $amount, $source_type);
 
                 if ($stmt->execute()) {
                     require_once '../includes/CurrencyHelper.php';
@@ -59,10 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = $_POST['description'] ?? '';
             $amount = $_POST['amount'] ?? '';
             $source_type = $_POST['source_type'] ?? 'Cash';
+            $group_id = !empty($_POST['group_id']) ? intval($_POST['group_id']) : null;
 
             if ($id && $date && $description && $amount) {
-                $stmt = $conn->prepare("UPDATE allowances SET date = ?, description = ?, amount = ?, source_type = ? WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("ssdsii", $date, $description, $amount, $source_type, $id, $user_id);
+                $stmt = $conn->prepare("UPDATE allowances SET date = ?, description = ?, amount = ?, source_type = ?, group_id = ? WHERE id = ? AND (user_id = ? OR group_id IN (SELECT group_id FROM shared_group_members WHERE user_id = ? AND status = 'active'))");
+                $stmt->bind_param("ssdsiiii", $date, $description, $amount, $source_type, $group_id, $id, $user_id, $user_id);
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Allowance updated successfully'];
@@ -81,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? '';
 
             if ($id) {
-                $stmt = $conn->prepare("DELETE FROM allowances WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("ii", $id, $user_id);
+                $stmt = $conn->prepare("DELETE FROM allowances WHERE id = ? AND (user_id = ? OR group_id IN (SELECT group_id FROM shared_group_members WHERE user_id = ? AND status = 'active' AND role = 'admin'))");
+                $stmt->bind_param("iii", $id, $user_id, $user_id);
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Allowance deleted successfully'];
@@ -105,10 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($mode === 'sources') {
         // Fetch aggregated balances for all sources
-        $sources = $balanceHelper->getBalancesByAllSources($user_id);
+        $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
+        $sources = $balanceHelper->getBalancesByAllSources($user_id, $group_id);
         $response = ['success' => true, 'data' => $sources];
     } elseif ($mode === 'history') {
         $source = $_GET['source'] ?? '';
+        $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
         if (!$source) {
             echo json_encode(['success' => false, 'message' => 'Source is required']);
             exit;
@@ -118,8 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $history = [];
 
         // 1. Get Allowances
-        $stmt = $conn->prepare("SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? ORDER BY date DESC");
-        $stmt->bind_param("is", $user_id, $source);
+        $sql1 = $group_id ? "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND group_id IS NULL";
+        $stmt = $conn->prepare($sql1);
+        if ($group_id) {
+            $stmt->bind_param("isi", $user_id, $source, $group_id);
+        } else {
+            $stmt->bind_param("is", $user_id, $source);
+        }
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
@@ -128,8 +150,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // 2. Get Expenses (from Allowance source)
-        $stmt = $conn->prepare("SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' ORDER BY date DESC");
-        $stmt->bind_param("is", $user_id, $source);
+        $sql2 = $group_id ? "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND group_id = ?" : "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND group_id IS NULL";
+        $stmt = $conn->prepare($sql2);
+        if ($group_id) {
+            $stmt->bind_param("isi", $user_id, $source, $group_id);
+        } else {
+            $stmt->bind_param("is", $user_id, $source);
+        }
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
@@ -138,8 +165,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // 3. Get Savings Transfers (Expenses that are technically deductions from Allowance)
-        $stmt = $conn->prepare("SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? ORDER BY date DESC");
-        $stmt->bind_param("is", $user_id, $source);
+        $sql3 = $group_id ? "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND group_id IS NULL";
+        $stmt = $conn->prepare($sql3);
+        if ($group_id) {
+            $stmt->bind_param("isi", $user_id, $source, $group_id);
+        } else {
+            $stmt->bind_param("is", $user_id, $source);
+        }
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {

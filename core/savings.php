@@ -121,6 +121,7 @@ include '../includes/header.php';
             <div class="modal-body p-4 pt-4">
                 <form id="savingsForm">
                     <input type="hidden" name="action" value="add">
+                    <input type="hidden" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" name="date" value="<?php echo date('Y-m-d'); ?>" required>
@@ -167,6 +168,7 @@ include '../includes/header.php';
                 <form id="editSavingsForm">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" id="editSavingsId">
+                    <input type="hidden" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" name="date" id="editSavingsDate" required>
@@ -207,6 +209,10 @@ include '../includes/header.php';
     document.addEventListener('DOMContentLoaded', function() {
         let table;
 
+        // URL Context
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeGroupId = urlParams.get('group_id');
+
         function initTable() {
             if (table) table.destroy();
             table = $('#savingsTable').DataTable({
@@ -227,7 +233,8 @@ include '../includes/header.php';
         }
 
         function fetchStats() {
-            fetch('<?php echo SITE_URL; ?>api/savings.php?action=stats')
+            const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+            fetch('<?php echo SITE_URL; ?>api/savings.php?action=stats' + query)
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
@@ -241,7 +248,8 @@ include '../includes/header.php';
         }
 
         function fetchSavings() {
-            fetch('<?php echo SITE_URL; ?>api/savings.php')
+            const query = activeGroupId ? `?group_id=${activeGroupId}` : '';
+            fetch('<?php echo SITE_URL; ?>api/savings.php' + query)
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
@@ -301,6 +309,9 @@ include '../includes/header.php';
         document.getElementById('savingsForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
+            if (activeGroupId) {
+                formData.append('group_id', activeGroupId);
+            }
 
             fetch('<?php echo SITE_URL; ?>api/savings.php', {
                     method: 'POST',

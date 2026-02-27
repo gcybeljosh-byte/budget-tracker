@@ -95,6 +95,7 @@ include '../includes/header.php';
             </div>
             <div class="modal-body p-4 pt-4">
                 <form id="expenseForm">
+                    <input type="hidden" id="expenseGroupId" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="expenseDate" required>
@@ -161,6 +162,7 @@ include '../includes/header.php';
             <div class="modal-body p-4 pt-4">
                 <form id="editExpenseForm">
                     <input type="hidden" id="editExpenseId">
+                    <input type="hidden" id="editExpenseGroupId" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="editExpenseDate" required>
@@ -304,6 +306,10 @@ include '../includes/header.php';
     let expenseTableBody, expenseForm, editExpenseForm;
     window.currentExpenses = []; // Global storage for fetched data
 
+    // URL Context
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeGroupId = urlParams.get('group_id');
+
     // --- Core Functions (Global Scope) ---
 
     function fetchCategories() {
@@ -376,7 +382,8 @@ include '../includes/header.php';
 
     function fetchExpenses() {
         const baseUrl = window.SITE_URL || '';
-        fetch(baseUrl + 'api/expenses.php?t=' + new Date().getTime())
+        const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+        fetch(baseUrl + 'api/expenses.php?t=' + new Date().getTime() + query)
             .then(response => response.json())
             .then(data => {
                 if (data.success && Array.isArray(data.data)) {
@@ -399,7 +406,8 @@ include '../includes/header.php';
 
     function fetchDashboardStats() {
         const baseUrl = window.SITE_URL || '';
-        fetch(baseUrl + 'api/dashboard.php?t=' + new Date().getTime())
+        const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+        fetch(baseUrl + 'api/dashboard.php?t=' + new Date().getTime() + query)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -485,6 +493,7 @@ include '../includes/header.php';
         document.getElementById('editExpenseAmount').value = item.amount;
         document.getElementById('editExpenseSourceType').value = item.source_type || 'Cash';
         document.getElementById('editExpenseSource').value = item.expense_source || 'Allowance';
+        document.getElementById('editExpenseGroupId').value = item.group_id || '';
 
         const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
         modal.show();
@@ -719,6 +728,10 @@ include '../includes/header.php';
         editExpenseForm = document.getElementById('editExpenseForm');
 
         // Initial Load
+        if (activeGroupId) {
+            const gidInput = document.getElementById('expenseGroupId');
+            if (gidInput) gidInput.value = activeGroupId;
+        }
         fetchCategories();
         fetchExpenses();
         fetchDashboardStats();
@@ -797,6 +810,9 @@ include '../includes/header.php';
             formData.append('amount', document.getElementById('expenseAmount').value);
             formData.append('source_type', document.getElementById('expenseSourceType').value);
             formData.append('expense_source', document.getElementById('expenseSource').value);
+            if (activeGroupId) {
+                formData.append('group_id', activeGroupId);
+            }
 
             fetch('<?php echo SITE_URL; ?>api/expenses.php', {
                     method: 'POST',

@@ -9,52 +9,75 @@ class BalanceHelper
         $this->conn = $db_connection;
     }
 
-    public function getCashBalance($user_id, $monthOnly = false)
+    public function getCashBalance($user_id, $monthOnly = false, $group_id = null)
     {
         $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
-        $stmt = $this->conn->prepare("
-            SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) = 'Cash' $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = 'Cash' AND expense_source = 'Allowance' $dateFilter) -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = 'Cash' $dateFilter) as balance
-        ");
-        $stmt->bind_param("iii", $user_id, $user_id, $user_id);
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
-        return (float)($res['balance'] ?? 0);
-    }
-
-    public function getDigitalBalance($user_id, $monthOnly = false)
-    {
-        $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
-        $stmt = $this->conn->prepare("
-            SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) IN ('GCash', 'Maya', 'Bank', 'Electronic') AND expense_source = 'Allowance' $dateFilter) -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter) as balance
-        ");
-        $stmt->bind_param("iii", $user_id, $user_id, $user_id);
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
-        return (float)($res['balance'] ?? 0);
-    }
-
-    public function getTotalSavings($user_id, $monthOnly = false, $source_type = null)
-    {
-        $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
-        $sourceFilter = $source_type ? " AND TRIM(source_type) = TRIM(?)" : "";
+        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
 
         $sql = "
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $sourceFilter $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $sourceFilter $dateFilter) as total
+                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) = 'Cash' $dateFilter $groupFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = 'Cash' AND expense_source = 'Allowance' $dateFilter $groupFilter) -
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = 'Cash' $dateFilter $groupFilter) as balance
         ";
 
         $stmt = $this->conn->prepare($sql);
-        if ($source_type) {
+        if ($group_id) {
+            $stmt->bind_param("iiiiii", $user_id, $group_id, $user_id, $group_id, $user_id, $group_id);
+        } else {
+            $stmt->bind_param("iii", $user_id, $user_id, $user_id);
+        }
+
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (float)($res['balance'] ?? 0);
+    }
+
+    public function getDigitalBalance($user_id, $monthOnly = false, $group_id = null)
+    {
+        $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
+        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
+
+        $sql = "
+            SELECT 
+                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter $groupFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) IN ('GCash', 'Maya', 'Bank', 'Electronic') AND expense_source = 'Allowance' $dateFilter $groupFilter) -
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter $groupFilter) as balance
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        if ($group_id) {
+            $stmt->bind_param("iiiiii", $user_id, $group_id, $user_id, $group_id, $user_id, $group_id);
+        } else {
+            $stmt->bind_param("iii", $user_id, $user_id, $user_id);
+        }
+
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (float)($res['balance'] ?? 0);
+    }
+
+    public function getTotalSavings($user_id, $monthOnly = false, $source_type = null, $group_id = null)
+    {
+        $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
+        $sourceFilter = $source_type ? " AND TRIM(source_type) = TRIM(?)" : "";
+        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
+
+        $sql = "
+            SELECT 
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $sourceFilter $dateFilter $groupFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $sourceFilter $dateFilter $groupFilter) as total
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        if ($source_type && $group_id) {
+            $stmt->bind_param("isisis", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
+        } elseif ($source_type) {
             $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
+        } elseif ($group_id) {
+            $stmt->bind_param("iiii", $user_id, $group_id, $user_id, $group_id);
         } else {
             $stmt->bind_param("ii", $user_id, $user_id);
         }
@@ -66,31 +89,37 @@ class BalanceHelper
         return (float)($res['total'] ?? 0);
     }
 
-    public function getBalanceBySource($user_id, $expense_source, $source_type)
+    public function getBalanceBySource($user_id, $expense_source, $source_type, $group_id = null)
     {
         // For real-time balance validation (e.g. adding expenses), we use LIFETIME balance
         if ($expense_source === 'Savings') {
-            return $this->getTotalSavings($user_id, false, $source_type);
+            return $this->getTotalSavings($user_id, false, $source_type, $group_id);
         } else {
             if ($source_type === 'Cash') {
-                return $this->getCashBalance($user_id, false);
+                return $this->getCashBalance($user_id, false, $group_id);
             } else {
-                return $this->getDigitalBalance($user_id, false);
+                return $this->getDigitalBalance($user_id, false, $group_id);
             }
         }
     }
 
-    public function getBalanceDetails($user_id, $expense_source, $source_type)
+    public function getBalanceDetails($user_id, $expense_source, $source_type, $group_id = null)
     {
         $dateFilter = ""; // Lifetime
+        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
 
         if ($expense_source === 'Savings') {
-            $stmt = $this->conn->prepare("
+            $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = TRIM(?) $dateFilter) as total_saved,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = TRIM(?) AND expense_source = 'Savings' $dateFilter) as total_spent
-            ");
-            $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = TRIM(?) $dateFilter $groupFilter) as total_saved,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = TRIM(?) AND expense_source = 'Savings' $dateFilter $groupFilter) as total_spent
+            ";
+            $stmt = $this->conn->prepare($sql);
+            if ($group_id) {
+                $stmt->bind_param("isisisis", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
+            } else {
+                $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
+            }
             $stmt->execute();
             $res = $stmt->get_result()->fetch_assoc();
             $stmt->close();
@@ -102,13 +131,18 @@ class BalanceHelper
                 'balance' => (float)$res['total_saved'] - (float)$res['total_spent']
             ];
         } else {
-            $stmt = $this->conn->prepare("
+            $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) = TRIM(?) $dateFilter) as total_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = TRIM(?) AND expense_source = 'Allowance' $dateFilter) as total_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = TRIM(?) $dateFilter) as total_savings
-            ");
-            $stmt->bind_param("isisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND TRIM(source_type) = TRIM(?) $dateFilter $groupFilter) as total_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND TRIM(source_type) = TRIM(?) AND expense_source = 'Allowance' $dateFilter $groupFilter) as total_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND TRIM(source_type) = TRIM(?) $dateFilter $groupFilter) as total_savings
+            ";
+            $stmt = $this->conn->prepare($sql);
+            if ($group_id) {
+                $stmt->bind_param("isisisisis", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
+            } else {
+                $stmt->bind_param("isisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
+            }
             $stmt->execute();
             $res = $stmt->get_result()->fetch_assoc();
             $stmt->close();

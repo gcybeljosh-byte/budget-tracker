@@ -39,10 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amount = $_POST['amount'] ?? '';
             $source_type = $_POST['source_type'] ?? 'Cash';
             $expense_source = $_POST['expense_source'] ?? 'Allowance';
+            $group_id = !empty($_POST['group_id']) ? intval($_POST['group_id']) : null;
 
             if ($date && $category && $description && $amount) {
                 // Balance Validation
-                $balanceDetails = $balanceHelper->getBalanceDetails($user_id, $expense_source, $source_type);
+                $balanceDetails = $balanceHelper->getBalanceDetails($user_id, $expense_source, $source_type, $group_id);
                 $currentBalance = $balanceDetails['balance'];
 
                 if ($amount > $currentBalance) {
@@ -67,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $catStmt->execute();
                 $catStmt->close();
 
-                $stmt = $conn->prepare("INSERT INTO expenses (user_id, date, category, description, amount, source_type, expense_source) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("isssdss", $user_id, $date, $category, $description, $amount, $source_type, $expense_source);
+                $stmt = $conn->prepare("INSERT INTO expenses (user_id, group_id, date, category, description, amount, source_type, expense_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("iisssdss", $user_id, $group_id, $date, $category, $description, $amount, $source_type, $expense_source);
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense added successfully', 'id' => $stmt->insert_id];
@@ -93,22 +94,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amount = $_POST['amount'] ?? '';
             $source_type = $_POST['source_type'] ?? 'Cash';
             $expense_source = $_POST['expense_source'] ?? 'Allowance';
+            $group_id = !empty($_POST['group_id']) ? intval($_POST['group_id']) : null;
 
             if ($id && $date && $category && $description && $amount) {
                 // Balance Validation (Adjustment check)
                 // First, get the old amount and source to "revert" it temporarily for calculation
-                $oldStmt = $conn->prepare("SELECT amount, source_type, expense_source FROM expenses WHERE id = ? AND user_id = ?");
+                $oldStmt = $conn->prepare("SELECT amount, source_type, expense_source, group_id FROM expenses WHERE id = ? AND user_id = ?");
                 $oldStmt->bind_param("ii", $id, $user_id);
                 $oldStmt->execute();
                 $oldData = $oldStmt->get_result()->fetch_assoc();
                 $oldStmt->close();
 
                 if ($oldData) {
-                    $balanceDetails = $balanceHelper->getBalanceDetails($user_id, $expense_source, $source_type);
+                    $balanceDetails = $balanceHelper->getBalanceDetails($user_id, $expense_source, $source_type, $group_id);
                     $currentBalance = $balanceDetails['balance'];
 
-                    // If source is the same, we add back the old amount to the balance before checking
-                    if ($oldData['expense_source'] === $expense_source && $oldData['source_type'] === $source_type) {
+                    // If source and group is the same, we add back the old amount to the balance before checking
+                    if ($oldData['expense_source'] === $expense_source && $oldData['source_type'] === $source_type && $oldData['group_id'] == $group_id) {
                         $currentBalance += $oldData['amount'];
                     }
 
@@ -125,8 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $catStmt->execute();
                 $catStmt->close();
 
-                $stmt = $conn->prepare("UPDATE expenses SET date = ?, category = ?, description = ?, amount = ?, source_type = ?, expense_source = ? WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("sssdssii", $date, $category, $description, $amount, $source_type, $expense_source, $id, $user_id);
+                $stmt = $conn->prepare("UPDATE expenses SET date = ?, category = ?, description = ?, amount = ?, source_type = ?, expense_source = ?, group_id = ? WHERE id = ? AND (user_id = ? OR group_id IN (SELECT group_id FROM shared_group_members WHERE user_id = ? AND status = 'active'))");
+                $stmt->bind_param("sssdssiiii", $date, $category, $description, $amount, $source_type, $expense_source, $group_id, $id, $user_id, $user_id);
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense updated successfully'];
@@ -145,8 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? '';
 
             if ($id) {
-                $stmt = $conn->prepare("DELETE FROM expenses WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("ii", $id, $user_id);
+                $stmt = $conn->prepare("DELETE FROM expenses WHERE id = ? AND (user_id = ? OR group_id IN (SELECT group_id FROM shared_group_members WHERE user_id = ? AND status = 'active' AND role = 'admin'))");
+                $stmt->bind_param("iii", $id, $user_id, $user_id);
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense deleted successfully'];
@@ -164,9 +166,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = ['success' => false, 'message' => 'Unknown action'];
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Fetch all for the user
-    $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC");
-    $stmt->bind_param("i", $user_id);
+    // Fetch all for the user or a group
+    $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
+
+    if ($group_id) {
+        // Verify membership
+        $check = $conn->prepare("SELECT id FROM shared_group_members WHERE group_id = ? AND user_id = ? AND status = 'active'");
+        $check->bind_param("ii", $group_id, $user_id);
+        $check->execute();
+        if ($check->get_result()->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized access to this group']);
+            exit;
+        }
+        $check->close();
+
+        $stmt = $conn->prepare("SELECT * FROM expenses WHERE group_id = ? ORDER BY date DESC");
+        $stmt->bind_param("i", $group_id);
+    } else {
+        $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? AND group_id IS NULL ORDER BY date DESC");
+        $stmt->bind_param("i", $user_id);
+    }
+
     $stmt->execute();
     $result = $stmt->get_result();
 

@@ -374,8 +374,12 @@ include '../includes/header.php';
         // Clean up if navigating away (relevant for SPAs, but good practice)
         window.addEventListener('beforeunload', () => clearInterval(dashboardPolling));
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeGroupId = urlParams.get('group_id');
+
         function fetchDashboardData() {
-            fetch('<?php echo SITE_URL; ?>api/dashboard.php?t=' + new Date().getTime())
+            const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
+            fetch('<?php echo SITE_URL; ?>api/dashboard.php?t=' + new Date().getTime() + query)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -385,6 +389,16 @@ include '../includes/header.php';
                     }
                 })
                 .catch(error => console.error('Error fetching dashboard data:', error));
+        }
+
+        // Initial fetch
+        fetchDashboardData();
+
+        // Initialize Form with Group ID if active
+        if (activeGroupId) {
+            document.querySelectorAll('input[name="group_id"]').forEach(input => {
+                input.value = activeGroupId;
+            });
         }
 
         function updateDashboard(data) {
