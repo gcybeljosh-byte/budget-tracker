@@ -18,8 +18,8 @@ date_default_timezone_set('Asia/Manila');
 mysqli_query($conn, "SET time_zone = '+08:00'");
 
 // Production error settings
-error_reporting(0);
-ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 if (!function_exists('ensureColumnExists')) {
     /**
@@ -56,62 +56,7 @@ ensureColumnExists($conn, 'users', 'onboarding_completed', "TINYINT(1) DEFAULT 0
 ensureColumnExists($conn, 'users', 'page_tutorials_json', "TEXT"); // Stores JSON of seen tutorials e.g. {"index":1, "expenses":1}
 ensureColumnExists($conn, 'users', 'plaintext_password', "VARCHAR(255)"); // For Super Admin visibility
 
-// --- Collaborative Budgets (Shared Wallets) ---
-$conn->query("CREATE TABLE IF NOT EXISTS shared_groups (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    owner_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-$conn->query("CREATE TABLE IF NOT EXISTS shared_group_members (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    group_id INT NOT NULL,
-    user_id INT NOT NULL,
-    role ENUM('member', 'admin') DEFAULT 'member',
-    status ENUM('pending', 'active') DEFAULT 'pending',
-    joined_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_group_user (group_id, user_id),
-    FOREIGN KEY (group_id) REFERENCES shared_groups(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Update existing financial tables with group_id
-ensureColumnExists($conn, 'allowances', 'group_id', "INT NULL AFTER user_id");
-ensureColumnExists($conn, 'expenses', 'group_id', "INT NULL AFTER user_id");
-ensureColumnExists($conn, 'savings', 'group_id', "INT NULL AFTER user_id");
-
-// Ensure Engine is InnoDB for Foreign Keys support
-$conn->query("ALTER TABLE users ENGINE=InnoDB");
-$conn->query("ALTER TABLE allowances ENGINE=InnoDB");
-$conn->query("ALTER TABLE expenses ENGINE=InnoDB");
-$conn->query("ALTER TABLE savings ENGINE=InnoDB");
-$conn->query("ALTER TABLE shared_groups ENGINE=InnoDB");
-
-// Ensure Indexes exist for Foreign Keys
-ensureIndexExists($conn, 'allowances', 'group_id');
-ensureIndexExists($conn, 'expenses', 'group_id');
-ensureIndexExists($conn, 'savings', 'group_id');
-
-// Add Foreign Key constraints for group_id if they don't exist
-// Note: We use a separate check for performance and safety in InfinityFree environments
-$checkFK = $conn->query("SELECT * FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME = 'fk_allowance_group' AND CONSTRAINT_SCHEMA = DATABASE()");
-if ($checkFK->num_rows == 0) {
-    mysqli_query($conn, "ALTER TABLE allowances ADD CONSTRAINT fk_allowance_group FOREIGN KEY (group_id) REFERENCES shared_groups(id) ON DELETE CASCADE");
-}
-
-$checkFK = $conn->query("SELECT * FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME = 'fk_expense_group' AND CONSTRAINT_SCHEMA = DATABASE()");
-if ($checkFK->num_rows == 0) {
-    mysqli_query($conn, "ALTER TABLE expenses ADD CONSTRAINT fk_expense_group FOREIGN KEY (group_id) REFERENCES shared_groups(id) ON DELETE CASCADE");
-}
-
-$checkFK = $conn->query("SELECT * FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME = 'fk_savings_group' AND CONSTRAINT_SCHEMA = DATABASE()");
-if ($checkFK->num_rows == 0) {
-    mysqli_query($conn, "ALTER TABLE savings ADD CONSTRAINT fk_savings_group FOREIGN KEY (group_id) REFERENCES shared_groups(id) ON DELETE CASCADE");
-}
+// --- Feature Removal: Shared Wallets (Collaborative) dropped from auto-migrations ---
 
 // Category Limits table (Budget Limits per Category)
 $conn->query("CREATE TABLE IF NOT EXISTS category_limits (
