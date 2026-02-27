@@ -1,4 +1,10 @@
 <?php
+$pageTitle = 'Shared Wallets';
+$pageHeader = 'Shared Wallets';
+$extraNavContent = '<button class="btn btn-primary rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;" data-bs-toggle="modal" data-bs-target="#createGroupModal" title="New Group">
+    <i class="fas fa-plus fa-lg"></i>
+</button>';
+
 include '../includes/header.php';
 ?>
 <?php include '../includes/sidebar.php'; ?>
@@ -10,14 +16,9 @@ include '../includes/header.php';
 
     <div class="container py-4">
         <!-- Header Section -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-1">Shared Wallets <span class="badge bg-primary-subtle text-primary rounded-pill align-middle ms-2" style="font-size: 0.8rem; vertical-align: middle;">BETA</span></h2>
-                <p class="text-secondary small mb-0">Manage collaborative budgets with household or couples.</p>
-            </div>
-            <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
-                <i class="fas fa-plus me-2"></i>New Group
-            </button>
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">Shared Wallets <span class="badge bg-primary-subtle text-primary rounded-pill align-middle ms-2" style="font-size: 0.8rem; vertical-align: middle;">BETA</span></h2>
+            <p class="text-secondary small mb-0">Manage collaborative budgets with household or couples.</p>
         </div>
 
         <div class="row g-4">
