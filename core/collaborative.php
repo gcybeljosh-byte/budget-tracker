@@ -15,12 +15,6 @@ include '../includes/header.php';
     <?php include '../includes/navbar.php'; ?>
 
     <div class="container py-4">
-        <!-- Header Section -->
-        <div class="mb-4">
-            <h2 class="fw-bold mb-1">Shared Wallets</h2>
-            <p class="text-secondary small mb-0">Manage collaborative budgets with household or couples.</p>
-        </div>
-
         <div class="row g-4">
             <!-- Groups Column -->
             <div class="col-lg-8">

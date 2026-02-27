@@ -13,7 +13,20 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
-$groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
+$groupFilter = $group_id ? " AND group_id = ?" : " AND (group_id IS NULL OR group_id = 0)";
+$group_name = null;
+
+if ($group_id) {
+    $stmt = $conn->prepare("SELECT name FROM shared_groups WHERE id = ?");
+    $stmt->bind_param("i", $group_id);
+    if ($stmt->execute()) {
+        $res = $stmt->get_result();
+        if ($row = $res->fetch_assoc()) {
+            $group_name = $row['name'];
+        }
+    }
+    $stmt->close();
+}
 
 // --- Gamification: Update Streaks ---
 $achievementHelper->updateNoSpendStreak($user_id);
@@ -64,10 +77,11 @@ if ($stmt->execute()) {
 $stmt->close();
 
 $lifetime_allowance = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? $groupFilter");
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE group_id = ?");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND group_id IS NULL");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -76,10 +90,11 @@ if ($stmt->execute()) {
 $stmt->close();
 
 $lifetime_expenses = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? $groupFilter");
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE group_id = ?");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND group_id IS NULL");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -90,6 +105,7 @@ $stmt->close();
 $response = [
     'success' => true,
     'user_name' => $user_name,
+    'group_name' => $group_name,
     'lifetime_allowance' => $lifetime_allowance,
     'lifetime_expenses' => $lifetime_expenses,
     'total_allowance' => 0, // Monthly placeholder
@@ -102,11 +118,12 @@ $response = [
     'recent_transactions' => []
 ];
 
-// 1. Monthly Allowance (For dashboard card labeled as monthly)
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') $groupFilter");
+// 1. Monthly Allowance
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE group_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND group_id IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -115,11 +132,12 @@ if ($stmt->execute()) {
 }
 $stmt->close();
 
-// 2. Monthly Expenses (For dashboard card labeled as monthly)
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') $groupFilter");
+// 2. Monthly Expenses
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -141,11 +159,12 @@ $response['total_savings'] = $balanceHelper->getTotalSavings($user_id, false, nu
 // 3. Balance (Consolidated available spendable funds: Cash + Digital)
 $response['balance'] = $response['cash_balance'] + $response['digital_balance'];
 
-// 4. Category Spending (Current month only, only from Allowance)
-$stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') $groupFilter GROUP BY category");
+// 4. Category Spending
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -159,11 +178,11 @@ $stmt->close();
 // --- Advanced Analytics ---
 
 // 4.1 This Month's Expenses
-$expenses_this_month = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') $groupFilter");
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -172,12 +191,11 @@ if ($stmt->execute()) {
 $stmt->close();
 
 // 4.2 Last Month's Expenses
-$expenses_last_month = 0;
-// Use explicit dates to ensure correct range for last month
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01') $groupFilter");
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -200,12 +218,12 @@ $response['analytics'] = [
     'savings_rate' => ($lifetime_allowance > 0) ? (($response['balance'] / $lifetime_allowance) * 100) : 0
 ];
 
-// 4.4 Peak Spending Day (New Feature)
-$peak_data = null;
-$stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' $groupFilter GROUP BY date ORDER BY total DESC LIMIT 1");
+// 4.4 Peak Spending Day
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE group_id = ? AND expense_source = 'Allowance' GROUP BY date ORDER BY total DESC LIMIT 1");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND group_id IS NULL AND expense_source = 'Allowance' GROUP BY date ORDER BY total DESC LIMIT 1");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -218,7 +236,7 @@ if ($stmt->execute()) {
         $top_items = [];
         $stmt_items = $conn->prepare("SELECT description, amount FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date = ? $groupFilter ORDER BY amount DESC LIMIT 3");
         if ($group_id) {
-            $stmt_items->bind_param("isi", $user_id, $peak_date, $group_id);
+            $stmt_items->bind_param("si", $peak_date, $group_id);
         } else {
             $stmt_items->bind_param("is", $user_id, $peak_date);
         }
@@ -281,13 +299,11 @@ $stmt->close();
 $response['reports_count'] = $reports_count;
 
 // 4.8 Recurring Payments (Bills) Analysis
-$total_unpaid_bills = 0;
-$upcoming_bills = [];
-// Unpaid bills are those due this month
-$stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) $groupFilter ORDER BY due_date ASC");
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE group_id = ? AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND group_id IS NULL AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {
@@ -346,20 +362,29 @@ $response['analytics']['top_category'] = $top_category;
 // 5. Recent Transactions (Union of allowances and expenses)
 // We need to select common columns: type, id, date, description, amount
 // We'll limit to 10 most recent
-$sql = "
-    (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE user_id = ? $groupFilter)
-    UNION ALL
-    (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE user_id = ? $groupFilter)
-    UNION ALL
-    (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE user_id = ? $groupFilter)
-    ORDER BY date DESC, id DESC
-    LIMIT 10
-";
-
-$stmt = $conn->prepare($sql);
 if ($group_id) {
-    $stmt->bind_param("iiiiii", $user_id, $group_id, $user_id, $group_id, $user_id, $group_id);
+    $sql = "
+        (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE group_id = ?)
+        UNION ALL
+        (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE group_id = ?)
+        UNION ALL
+        (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE group_id = ?)
+        ORDER BY date DESC, id DESC
+        LIMIT 10
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $group_id, $group_id, $group_id);
 } else {
+    $sql = "
+        (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE user_id = ? AND group_id IS NULL)
+        UNION ALL
+        (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE user_id = ? AND group_id IS NULL)
+        UNION ALL
+        (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE user_id = ? AND group_id IS NULL)
+        ORDER BY date DESC, id DESC
+        LIMIT 10
+    ";
+    $stmt = $conn->prepare($sql);
     $stmt->bind_param("iii", $user_id, $user_id, $user_id);
 }
 if ($stmt->execute()) {
@@ -370,12 +395,13 @@ if ($stmt->execute()) {
 }
 $stmt->close();
 
-// 6. Full Expense History (For AI Search/Analysis - Limit 100)
+// 6. Full Expense History
 $response['expense_history'] = [];
-$stmt = $conn->prepare("SELECT date, description, amount, category FROM expenses WHERE user_id = ? $groupFilter ORDER BY date DESC LIMIT 100");
 if ($group_id) {
-    $stmt->bind_param("ii", $user_id, $group_id);
+    $stmt = $conn->prepare("SELECT date, description, amount, category FROM expenses WHERE group_id = ? ORDER BY date DESC LIMIT 100");
+    $stmt->bind_param("i", $group_id);
 } else {
+    $stmt = $conn->prepare("SELECT date, description, amount, category FROM expenses WHERE user_id = ? AND group_id IS NULL ORDER BY date DESC LIMIT 100");
     $stmt->bind_param("i", $user_id);
 }
 if ($stmt->execute()) {

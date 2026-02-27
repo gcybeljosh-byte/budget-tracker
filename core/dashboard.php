@@ -12,8 +12,8 @@ include '../includes/header.php';
 
         <!-- Personalized Greeting -->
         <div class="mb-4 fade-up">
-            <h4 class="fw-bold mb-1">Hello, <span class="text-primary"><?php echo htmlspecialchars($_SESSION['first_name'] ?? 'Guest'); ?></span>!</h4>
-            <p class="text-secondary small mb-0">Here's your financial status for <?php echo date('F Y'); ?>.</p>
+            <h4 class="fw-bold mb-1" id="dashGreetingHeader">Hello, <span class="text-primary"><?php echo htmlspecialchars($_SESSION['first_name'] ?? 'Guest'); ?></span>!</h4>
+            <p class="text-secondary small mb-0" id="dashGreetingSub">Here's your financial status for <?php echo date('F Y'); ?>.</p>
         </div>
 
         <!-- Alerts/Notifications -->
@@ -322,6 +322,8 @@ include '../includes/header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
         // --- Pulsing Badge Styles ---
         const style = document.createElement('style');
         style.textContent = `
@@ -380,6 +382,9 @@ include '../includes/header.php';
         document.head.appendChild(style);
 
         // --- Dashboard Data Logic ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeGroupId = urlParams.get('group_id');
+
         fetchDashboardData();
 
         // Polling Logic (Every 30 seconds)
@@ -392,8 +397,7 @@ include '../includes/header.php';
         // Clean up if navigating away (relevant for SPAs, but good practice)
         window.addEventListener('beforeunload', () => clearInterval(dashboardPolling));
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const activeGroupId = urlParams.get('group_id');
+        window.addEventListener('beforeunload', () => clearInterval(dashboardPolling));
 
         function fetchDashboardData() {
             const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
@@ -420,6 +424,16 @@ include '../includes/header.php';
         }
 
         function updateDashboard(data) {
+            if (activeGroupId && data.group_name) {
+                updateElement('dashGreetingHeader', `Group: ${data.group_name}`);
+                updateElement('dashGreetingSub', `Collaborative budget overview for ${months[new Date().getMonth()]} ${new Date().getFullYear()}.`);
+                // Hide Shared Wallets widget in Group view
+                const swWidget = document.getElementById('sharedWalletsWidget');
+                if (swWidget) swWidget.style.display = 'none';
+            } else {
+                updateElement('dashGreetingHeader', `Hello, ${data.user_name || 'User'}!`);
+            }
+
             updateElement('dashTotalAllowance', formatCurrency(data.total_allowance));
             updateElement('dashTotalExpenses', formatCurrency(data.total_expenses));
             updateElement('dashBalance', formatCurrency(data.balance));
