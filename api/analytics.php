@@ -11,8 +11,7 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 $action  = $_GET['action'] ?? 'trends';
-$group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
-$groupFilter = $group_id ? " AND group_id = ?" : " AND (group_id IS NULL OR group_id = 0)";
+$groupFilter = " AND (group_id IS NULL OR group_id = 0)";
 
 if ($action === 'trends') {
     // Last 6 months — total spending per category per month
@@ -34,13 +33,8 @@ if ($action === 'trends') {
         GROUP BY month, category
         ORDER BY month ASC, total DESC
     ");
-    if ($group_id) {
-        $params = array_merge([$user_id], $months, [$group_id]);
-        $stmt->bind_param("i" . $types . "i", ...$params);
-    } else {
-        $params = array_merge([$user_id], $months);
-        $stmt->bind_param("i" . $types, ...$params);
-    }
+    $params = array_merge([$user_id], $months);
+    $stmt->bind_param("i" . $types, ...$params);
     $stmt->execute();
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
@@ -79,11 +73,7 @@ if ($action === 'trends') {
         WHERE user_id = ? AND date BETWEEN ? AND ? $groupFilter
         GROUP BY date
     ");
-    if ($group_id) {
-        $stmt->bind_param("issi", $user_id, $monthStart, $monthEnd, $group_id);
-    } else {
-        $stmt->bind_param("iss", $user_id, $monthStart, $monthEnd);
-    }
+    $stmt->bind_param("iss", $user_id, $monthStart, $monthEnd);
     $stmt->execute();
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
@@ -98,9 +88,9 @@ if ($action === 'trends') {
     $balanceHelper = new BalanceHelper($conn);
 
     // Current balance (Consolidated: Cash + Digital + Savings)
-    $cash    = $balanceHelper->getCashBalance($user_id, false, null, $group_id);
-    $digital = $balanceHelper->getDigitalBalance($user_id, false, null, $group_id);
-    $savings = $balanceHelper->getTotalSavings($user_id, false, null, $group_id);
+    $cash    = $balanceHelper->getCashBalance($user_id);
+    $digital = $balanceHelper->getDigitalBalance($user_id);
+    $savings = $balanceHelper->getTotalSavings($user_id);
     $currentBalance = $cash + $digital + $savings;
 
     // Daily average spending this month
@@ -109,11 +99,7 @@ if ($action === 'trends') {
     $today      = date('Y-m-d');
 
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? AND expense_source = 'Allowance' $groupFilter");
-    if ($group_id) {
-        $stmt->bind_param("issi", $user_id, $monthStart, $today, $group_id);
-    } else {
-        $stmt->bind_param("iss", $user_id, $monthStart, $today);
-    }
+    $stmt->bind_param("iss", $user_id, $monthStart, $today);
     $stmt->execute();
     $monthlySpent = (float)$stmt->get_result()->fetch_row()[0];
     $stmt->close();
@@ -128,11 +114,7 @@ if ($action === 'trends') {
     $lastMonthStart = date('Y-m-01', strtotime('-1 month'));
     $lastMonthEnd   = date('Y-m-t',  strtotime('-1 month'));
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? $groupFilter");
-    if ($group_id) {
-        $stmt->bind_param("issi", $user_id, $lastMonthStart, $lastMonthEnd, $group_id);
-    } else {
-        $stmt->bind_param("iss", $user_id, $lastMonthStart, $lastMonthEnd);
-    }
+    $stmt->bind_param("iss", $user_id, $lastMonthStart, $lastMonthEnd);
     $stmt->execute();
     $lastMonthTotal = (float)$stmt->get_result()->fetch_row()[0];
     $stmt->close();
@@ -150,7 +132,7 @@ if ($action === 'trends') {
         'runway_days'        => $runwayDays,
         'last_month_total'   => $lastMonthTotal,
         'trend_pct'          => round($trendPct, 1),
-        'is_on_track'        => ($projectedBalance > 0), // If we won't hit zero, we are technically "on track"
+        'is_on_track'        => ($projectedBalance > 0),
         'basis'              => "Current Balance (" . number_format($currentBalance, 2) . ") - (Daily Avg (" . number_format($dailyAvg, 2) . ") * Days Left (" . $daysLeft . "))"
     ]);
 }

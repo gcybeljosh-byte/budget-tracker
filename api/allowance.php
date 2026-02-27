@@ -135,13 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $history = [];
 
         // 1. Get Allowances
-        $sql1 = $group_id ? "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND (group_id IS NULL OR group_id = 0)";
+        $sql1 = "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND (group_id IS NULL OR group_id = 0)";
         $stmt = $conn->prepare($sql1);
-        if ($group_id) {
-            $stmt->bind_param("isi", $user_id, $source, $group_id);
-        } else {
-            $stmt->bind_param("is", $user_id, $source);
-        }
+        $stmt->bind_param("is", $user_id, $source);
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
@@ -150,13 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // 2. Get Expenses (from Allowance source)
-        $sql2 = $group_id ? "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND group_id = ?" : "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND (group_id IS NULL OR group_id = 0)";
+        $sql2 = "SELECT id, date, description, amount, 'Expense' as type FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' AND (group_id IS NULL OR group_id = 0)";
         $stmt = $conn->prepare($sql2);
-        if ($group_id) {
-            $stmt->bind_param("isi", $user_id, $source, $group_id);
-        } else {
-            $stmt->bind_param("is", $user_id, $source);
-        }
+        $stmt->bind_param("is", $user_id, $source);
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
@@ -165,13 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // 3. Get Savings Transfers (Expenses that are technically deductions from Allowance)
-        $sql3 = $group_id ? "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND group_id = ?" : "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND (group_id IS NULL OR group_id = 0)";
+        $sql3 = "SELECT id, date, description, amount, 'Savings' as type FROM savings WHERE user_id = ? AND source_type = ? AND (group_id IS NULL OR group_id = 0)";
         $stmt = $conn->prepare($sql3);
-        if ($group_id) {
-            $stmt->bind_param("isi", $user_id, $source, $group_id);
-        } else {
-            $stmt->bind_param("is", $user_id, $source);
-        }
+        $stmt->bind_param("is", $user_id, $source);
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
