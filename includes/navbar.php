@@ -11,7 +11,9 @@
                             <?php echo isset($pageHeader) ? $pageHeader : 'Dashboard Overview'; ?>
                         </h2>
                         <?php if (isset($_GET['group_id'])):
-                            require_once '../includes/db.php';
+                            if (!isset($conn)) {
+                                require_once __DIR__ . '/db.php';
+                            }
                             $stmt = $conn->prepare("SELECT name FROM shared_groups WHERE id = ?");
                             $gid = intval($_GET['group_id']);
                             $stmt->bind_param("i", $gid);

@@ -116,7 +116,7 @@ class BalanceHelper
             ";
             $stmt = $this->conn->prepare($sql);
             if ($group_id) {
-                $stmt->bind_param("isisisis", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
+                $stmt->bind_param("isiisi", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
             } else {
                 $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
             }
@@ -139,7 +139,7 @@ class BalanceHelper
             ";
             $stmt = $this->conn->prepare($sql);
             if ($group_id) {
-                $stmt->bind_param("isisisisis", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
+                $stmt->bind_param("isiisiisi", $user_id, $source_type, $group_id, $user_id, $source_type, $group_id, $user_id, $source_type, $group_id);
             } else {
                 $stmt->bind_param("isisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
             }
@@ -156,13 +156,13 @@ class BalanceHelper
         }
     }
 
-    public function getBalancesByAllSources($user_id)
+    public function getBalancesByAllSources($user_id, $group_id = null)
     {
         $sources = ['Cash', 'GCash', 'Maya', 'Bank', 'Electronic'];
         $results = [];
 
         foreach ($sources as $source) {
-            $details = $this->getBalanceDetails($user_id, 'Allowance', $source);
+            $details = $this->getBalanceDetails($user_id, 'Allowance', $source, $group_id);
             $results[] = [
                 'source' => $source,
                 'balance' => $details['balance']
