@@ -195,24 +195,44 @@ include '../includes/header.php';
                         <canvas id="dashboardChart"></canvas>
                     </div>
                 </div>
+
+                <!-- Balanced Metrics Below Chart -->
+                <div class="row g-4 mb-4">
+                    <!-- Financial Streaks Card -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-danger border-4" id="streakCard">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="rounded-circle bg-danger-subtle p-2 me-2 text-danger">
+                                        <i class="fas fa-fire-alt small streak-pulse"></i>
+                                    </div>
+                                    <h6 class="text-secondary small fw-bold text-uppercase mb-0">No-Spend Streak</h6>
+                                </div>
+                                <h2 class="fw-bold mb-0 text-dark"><span id="dashStreakCount">0</span> Days</h2>
+                                <div class="extra-small text-muted mt-1" id="dashStreakMax">Best: 0 days</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Safe-to-Spend Card -->
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-info border-4" id="safeToSpendCard">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="rounded-circle bg-info-subtle p-2 me-2 text-info" id="safeToSpendIcon">
+                                        <i class="fas fa-shield-halved small"></i>
+                                    </div>
+                                    <h6 class="text-secondary small fw-bold text-uppercase mb-0">Safe-to-Spend</h6>
+                                </div>
+                                <h2 class="fw-bold mb-0 text-dark" id="dashSafeToSpend"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
+                                <div class="extra-small text-muted mt-1" id="safeToSpendDays">Calculating...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Sidebar column -->
             <div class="col-lg-4">
-                <!-- Financial Streaks Card -->
-                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-danger border-4 mb-4" id="streakCard">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="rounded-circle bg-danger-subtle p-2 me-2 text-danger">
-                                <i class="fas fa-fire-alt small streak-pulse"></i>
-                            </div>
-                            <h6 class="text-secondary small fw-bold text-uppercase mb-0">No-Spend Streak</h6>
-                        </div>
-                        <h2 class="fw-bold mb-0 text-dark"><span id="dashStreakCount">0</span> Days</h2>
-                        <div class="extra-small text-muted mt-1" id="dashStreakMax">Best: 0 days</div>
-                    </div>
-                </div>
-
                 <!-- Achievements Widget -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
@@ -253,20 +273,6 @@ include '../includes/header.php';
                         <div id="dashUtilBar" class="progress-bar bg-info" style="width: 0%"></div>
                     </div>
                     <div class="extra-small text-white text-opacity-75" id="dashUtilText" style="font-size: 0.6rem;">0% spent</div>
-                </div>
-
-                <!-- Safe-to-Spend Card (Moved to sidebar) -->
-                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-info border-4 mb-4" id="safeToSpendCard">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="rounded-circle bg-info-subtle p-2 me-2 text-info" id="safeToSpendIcon">
-                                <i class="fas fa-shield-halved small"></i>
-                            </div>
-                            <h6 class="text-secondary small fw-bold text-uppercase mb-0">Safe-to-Spend</h6>
-                        </div>
-                        <h2 class="fw-bold mb-0 text-dark" id="dashSafeToSpend"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
-                        <div class="extra-small text-muted mt-1" id="safeToSpendDays">Calculating...</div>
-                    </div>
                 </div>
             </div>
         </div>
