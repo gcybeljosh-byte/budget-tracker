@@ -64,6 +64,14 @@
                         <i class="fas fa-bullseye me-2" style="width: 20px;"></i> Goals
                     </a>
 
+                    <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Collaboration</div>
+                    <a href="<?php echo SITE_URL; ?>core/collaborative.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'collaborative.php') ? 'active' : ''; ?>">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div><i class="fas fa-users-cog me-2" style="width: 20px;"></i> Shared Wallets</div>
+                            <span class="badge bg-primary-subtle text-primary extra-small rounded-pill" style="font-size: 0.5rem; padding: 0.2rem 0.5rem;">BETA</span>
+                        </div>
+                    </a>
+
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Analysis</div>
                     <a href="<?php echo SITE_URL; ?>core/reports.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'reports.php') ? 'active' : ''; ?>">
                         <i class="fas fa-chart-line me-2" style="width: 20px;"></i> Reports
@@ -73,11 +81,6 @@
                     </a>
                     <a href="<?php echo SITE_URL; ?>core/history_log.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
                         <i class="fas fa-history me-2" style="width: 20px;"></i> Chat History
-                    </a>
-
-                    <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Collaboration</div>
-                    <a href="<?php echo SITE_URL; ?>core/collaborative.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'collaborative.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-users-cog me-2" style="width: 20px;"></i> Shared Wallets
                     </a>
                 <?php endif; ?>
             </div>

@@ -7,8 +7,17 @@
                         <button class="navbar-burger-btn" id="menu-toggle" aria-label="Toggle sidebar">
                             <i class="fas fa-bars"></i>
                         </button>
-                        <h2 class="navbar-page-title m-0">
+                        <h2 class="h5 fw-bold mb-0 text-dark d-flex align-items-center">
                             <?php echo isset($pageHeader) ? $pageHeader : 'Dashboard Overview'; ?>
+                            <?php if (basename($_SERVER['PHP_SELF']) == 'collaborative.php'): ?>
+                                <button class="btn btn-primary btn-sm rounded-circle ms-2 p-0 d-flex align-items-center justify-content-center"
+                                    style="width: 24px; height: 24px;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#createGroupModal"
+                                    title="New Group">
+                                    <i class="fas fa-plus extra-small"></i>
+                                </button>
+                            <?php endif; ?>
                         </h2>
                         <?php if (isset($_GET['group_id'])):
                             if (!isset($conn)) {
