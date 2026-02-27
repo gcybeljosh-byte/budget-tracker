@@ -1,7 +1,8 @@
 <?php
 // includes/db.php
-error_reporting(0);
-ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $host = "sql312.infinityfree.com";
 $user = "if0_41223873";
 $pass = "Cybs1203";
@@ -13,12 +14,12 @@ if (!$conn) {
 }
 
 // After establishing the database connection
-date_default_timezone_set('Asia/Manila');
-mysqli_query($conn, "SET time_zone = '+08:00'");
+// date_default_timezone_set('Asia/Manila');
+// mysqli_query($conn, "SET time_zone = '+08:00'");
 
 // Production error settings
-error_reporting(0);
-ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 if (!function_exists('ensureColumnExists')) {
     /**

@@ -18,7 +18,9 @@
                             $gid = intval($_GET['group_id']);
                             $stmt->bind_param("i", $gid);
                             $stmt->execute();
-                            $gname = $stmt->get_result()->fetch_assoc()['name'] ?? 'Shared Group';
+                            $result = $stmt->get_result();
+                            $row = $result->fetch_assoc();
+                            $gname = $row ? ($row['name'] ?? 'Shared Group') : 'Shared Group';
                             $stmt->close();
                         ?>
                             <div class="badge bg-primary rounded-pill px-3 py-2 ms-2 d-none d-md-flex align-items-center extra-small shadow-sm">
