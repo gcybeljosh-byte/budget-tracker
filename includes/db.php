@@ -36,6 +36,21 @@ if (!function_exists('ensureColumnExists')) {
     }
 }
 
+if (!function_exists('ensureIndexExists')) {
+    /**
+     * Helper to add an index if it doesn't exist
+     */
+    function ensureIndexExists($conn, $table, $column)
+    {
+        $check = mysqli_query($conn, "SHOW INDEX FROM `$table` WHERE Column_name = '$column'");
+        if (!$check || mysqli_num_rows($check) == 0) {
+            $sql = "ALTER TABLE `$table` ADD INDEX (`$column`)";
+            return mysqli_query($conn, $sql);
+        }
+        return true;
+    }
+}
+
 // Auto-migrations
 ensureColumnExists($conn, 'users', 'onboarding_completed', "TINYINT(1) DEFAULT 0");
 ensureColumnExists($conn, 'users', 'page_tutorials_json', "TEXT"); // Stores JSON of seen tutorials e.g. {"index":1, "expenses":1}
@@ -68,6 +83,18 @@ $conn->query("CREATE TABLE IF NOT EXISTS shared_group_members (
 ensureColumnExists($conn, 'allowances', 'group_id', "INT NULL AFTER user_id");
 ensureColumnExists($conn, 'expenses', 'group_id', "INT NULL AFTER user_id");
 ensureColumnExists($conn, 'savings', 'group_id', "INT NULL AFTER user_id");
+
+// Ensure Engine is InnoDB for Foreign Keys support
+$conn->query("ALTER TABLE users ENGINE=InnoDB");
+$conn->query("ALTER TABLE allowances ENGINE=InnoDB");
+$conn->query("ALTER TABLE expenses ENGINE=InnoDB");
+$conn->query("ALTER TABLE savings ENGINE=InnoDB");
+$conn->query("ALTER TABLE shared_groups ENGINE=InnoDB");
+
+// Ensure Indexes exist for Foreign Keys
+ensureIndexExists($conn, 'allowances', 'group_id');
+ensureIndexExists($conn, 'expenses', 'group_id');
+ensureIndexExists($conn, 'savings', 'group_id');
 
 // Add Foreign Key constraints for group_id if they don't exist
 // Note: We use a separate check for performance and safety in InfinityFree environments
