@@ -5,14 +5,6 @@ require_once '../includes/db.php';
 require_once '../includes/BalanceHelper.php';
 require_once '../includes/NotificationHelper.php';
 
-function logActivity($conn, $userId, $action, $details)
-{
-    $stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)");
-    $stmt->bind_param("iss", $userId, $action, $details);
-    $stmt->execute();
-    $stmt->close();
-}
-
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit;
@@ -133,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Fetch all for the user
-    $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? AND (group_id IS NULL OR group_id = 0) ORDER BY date DESC");
+    $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC");
     $stmt->bind_param("i", $user_id);
 
     $stmt->execute();

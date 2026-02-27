@@ -4,7 +4,9 @@ header("Content-Type: application/json");
 require_once '../includes/db.php';
 require_once '../includes/BalanceHelper.php';
 require_once '../includes/AchievementHelper.php';
+
 $achievementHelper = new AchievementHelper($conn);
+$balanceHelper = new BalanceHelper($conn);
 
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
@@ -12,31 +14,6 @@ if (!isset($_SESSION['id'])) {
 }
 
 $user_id = $_SESSION['id'];
-
-// --- Auto-Migration: Ensure necessary columns exist ---
-$conn->query("CREATE TABLE IF NOT EXISTS savings (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    date DATE NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    description TEXT,
-    source_type VARCHAR(50) DEFAULT 'Cash',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Ensure source_type exists if table already created
-$checkCol = $conn->query("SHOW COLUMNS FROM savings LIKE 'source_type'");
-if ($checkCol->num_rows == 0) {
-    $conn->query("ALTER TABLE savings ADD COLUMN source_type VARCHAR(50) DEFAULT 'Cash' AFTER description");
-}
-
-// Ensure expense_source exists in expenses table as it's used in stats
-$checkSource = $conn->query("SHOW COLUMNS FROM expenses LIKE 'expense_source'");
-if ($checkSource->num_rows == 0) {
-    $conn->query("ALTER TABLE expenses ADD COLUMN expense_source VARCHAR(50) DEFAULT 'Allowance'");
-}
-
 $response = ['success' => false, 'message' => 'Invalid request'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -50,14 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $source_type = $_POST['source_type'] ?? 'Cash';
 
             if ($amount > 0) {
-                // Balance Validation: Ensure the source has enough allowance to be moved to savings
-                $balanceHelper = new BalanceHelper($conn);
                 $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type);
                 $currentBalance = $balanceDetails['balance'];
 
                 if ($amount > $currentBalance) {
-                    $response = ['success' => false, 'message' => "Insufficient $source_type Allowance to move to Savings. Available: " . number_format($currentBalance, 2)];
-                    echo json_encode($response);
+                    echo json_encode(['success' => false, 'message' => "Insufficient $source_type Allowance to move to Savings. Available: " . number_format($currentBalance, 2)]);
                     exit;
                 }
 
@@ -65,13 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param("isdss", $user_id, $date, $amount, $description, $source_type);
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Savings added successfully'];
-
-                    // Achievement Check: Savings Starter (₱1,000)
-                    $balanceHelper = new BalanceHelper($conn);
-                    if ($balanceHelper->getTotalSavings($user_id, false, null) >= 1000) {
+                    if ($balanceHelper->getTotalSavings($user_id) >= 1000) {
                         $achievementHelper->unlockBySlug($user_id, 'savings_starter');
                     }
-
                     logActivity($conn, $user_id, 'savings_add', "Added savings: $description - $amount");
                 } else {
                     $response = ['success' => false, 'message' => 'Database error adding savings'];
@@ -84,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'delete':
             $id = $_POST['id'] ?? 0;
-
             $stmt = $conn->prepare("DELETE FROM savings WHERE id = ? AND user_id = ?");
             $stmt->bind_param("ii", $id, $user_id);
             if ($stmt->execute()) {
@@ -104,10 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $source_type = $_POST['source_type'] ?? 'Cash';
 
             if ($id > 0 && $amount > 0) {
-                // Balance Validation for Edit
-                $balanceHelper = new BalanceHelper($conn);
-
-                // Get old amount to add it back for validation
                 $oldStmt = $conn->prepare("SELECT amount, source_type FROM savings WHERE id = ? AND user_id = ?");
                 $oldStmt->bind_param("ii", $id, $user_id);
                 $oldStmt->execute();
@@ -116,15 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($oldData) {
                     $balanceDetails = $balanceHelper->getBalanceDetails($user_id, 'Allowance', $source_type);
-                    $currentBalance = $balanceDetails['balance'];
+                    $totalAvailable = $balanceDetails['balance'] + ($oldData['source_type'] === $source_type ? $oldData['amount'] : 0);
 
-                    if ($oldData['source_type'] === $source_type) {
-                        $currentBalance += $oldData['amount'];
-                    }
-
-                    if ($amount > $currentBalance) {
-                        $response = ['success' => false, 'message' => "Insufficient $source_type Allowance for update. Available: " . number_format($currentBalance, 2)];
-                        echo json_encode($response);
+                    if ($amount > $totalAvailable) {
+                        echo json_encode(['success' => false, 'message' => "Insufficient $source_type Allowance for update. Available: " . number_format($totalAvailable, 2)]);
                         exit;
                     }
                 }
@@ -147,77 +107,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_GET['action'] ?? 'fetch';
 
     if ($action === 'stats') {
-        $today = date('Y-m-d');
         $thisMonth = date('Y-m');
         $thisYear = date('Y');
+        $stats = ['total' => $balanceHelper->getTotalSavings($user_id)];
 
-        $stats = [
-            'total' => 0,
-            'monthly' => 0,
-            'yearly' => 0
-        ];
-
-        // Total (Lifetime) - Net of Expenses
-        $stmt = $conn->prepare("
-            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ?) - 
-                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings') as total
-        ");
-        $stmt->bind_param("ii", $user_id, $user_id);
-        $stmt->execute();
-        $stats['total'] = (float)$stmt->get_result()->fetch_assoc()['total'];
-        $stmt->close();
-
-        // Monthly - Net of Expenses
-        $stmt = $conn->prepare("
-            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ? $groupFilter) - 
-                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND DATE_FORMAT(date, '%Y-%m') = ? $groupFilter) as total
-        ");
-        if ($group_id) {
-            $stmt->bind_param("isisis", $user_id, $thisMonth, $group_id, $user_id, $thisMonth, $group_id);
-        } else {
-            $stmt->bind_param("isis", $user_id, $thisMonth, $user_id, $thisMonth);
-        }
+        // Monthly
+        $stmt = $conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND DATE_FORMAT(date, '%Y-%m') = ?) as total");
+        $stmt->bind_param("isis", $user_id, $thisMonth, $user_id, $thisMonth);
         $stmt->execute();
         $stats['monthly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
 
-        // Yearly - Net of Expenses
-        $stmt = $conn->prepare("
-            SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ? $groupFilter) - 
-                   (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND YEAR(date) = ? $groupFilter) as total
-        ");
-        if ($group_id) {
-            $stmt->bind_param("isisis", $user_id, $thisYear, $group_id, $user_id, $thisYear, $group_id);
-        } else {
-            $stmt->bind_param("isis", $user_id, $thisYear, $user_id, $thisYear);
-        }
+        // Yearly
+        $stmt = $conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ?) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND YEAR(date) = ?) as total");
+        $stmt->bind_param("iiii", $user_id, $thisYear, $user_id, $thisYear);
         $stmt->execute();
         $stats['yearly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
 
         $response = ['success' => true, 'data' => $stats];
     } else {
-        $group_id = !empty($_GET['group_id']) ? intval($_GET['group_id']) : null;
-        $groupFilter = $group_id ? " AND group_id = ?" : " AND group_id IS NULL";
-
-        $sql = "
-            (SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ? $groupFilter)
-            UNION ALL
-            (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $groupFilter)
-            ORDER BY date DESC, id DESC
-        ";
+        $sql = "(SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ?) UNION ALL (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings') ORDER BY date DESC, id DESC";
         $stmt = $conn->prepare($sql);
-        if ($group_id) {
-            $stmt->bind_param("iiii", $user_id, $group_id, $user_id, $group_id);
-        } else {
-            $stmt->bind_param("ii", $user_id, $user_id);
-        }
+        $stmt->bind_param("ii", $user_id, $user_id);
         $stmt->execute();
-        $result = $stmt->get_result();
-        $savings = [];
-        while ($row = $result->fetch_assoc()) {
-            $savings[] = $row;
-        }
+        $savings = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
         $response = ['success' => true, 'data' => $savings];
     }

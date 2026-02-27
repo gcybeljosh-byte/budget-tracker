@@ -12,7 +12,7 @@ if (!isset($_SESSION['id'])) {
 }
 
 $user_id = $_SESSION['id'];
-$groupFilter = " AND (group_id IS NULL OR group_id = 0)";
+$groupFilter = "";
 
 // --- Gamification: Update Streaks ---
 $achievementHelper->updateNoSpendStreak($user_id);
@@ -54,7 +54,7 @@ if ($stmt->execute()) {
 $stmt->close();
 
 $lifetime_allowance = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND (group_id IS NULL OR group_id = 0)");
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 if ($stmt->execute()) {
     $lifetime_allowance = (float)$stmt->get_result()->fetch_row()[0];

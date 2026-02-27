@@ -300,7 +300,6 @@ class AiHelper
         }
         $prompt .= "```json\n" . ($jsonContext ?: "{}") . "\n```\n\n";
 
-        $prompt .= "# CRITICAL RULES (EXPERT DOMAIN)\n";
         $prompt .= "1. CAPABILITIES: You can ONLY perform these actions: `add_expense`, `add_allowance`, `add_savings`, `create_goal`, `add_bill`.\n";
         $prompt .= "2. NO JOURNALS: You CANNOT generate or add journals. Journals are manual-only on the Journal page. If asked, guide the user to that page.\n";
         $prompt .= "3. ALLOWANCE SOURCE: If a user asks to add an allowance, you MUST ensure they specify the source (Cash or Bank). If they don't, you MUST ask for it before processing the action.\n";

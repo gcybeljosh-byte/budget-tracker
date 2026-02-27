@@ -1,240 +1,44 @@
 <?php
 // includes/db.php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Optimized for InfinityFree - Zero auto-migrations to prevent 502 timeouts
 
 $host = "sql312.infinityfree.com";
 $user = "if0_41223873";
 $pass = "Cybs1203";
 $dbname = "if0_41223873_budget_tracker";
 
+// Establish connection
 $conn = mysqli_connect($host, $user, $pass, $dbname);
 if (!$conn) {
     die("Database connection failed: " . mysqli_connect_error());
 }
 
-// After establishing the database connection
+// Set Timezone
 date_default_timezone_set('Asia/Manila');
 mysqli_query($conn, "SET time_zone = '+08:00'");
 
-// Production error settings
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Production Error Handling - SET TO 0 IN PRODUCTION
+error_reporting(0);
+ini_set('display_errors', 0);
 
+// Helper Functions (Kept for compatibility, but stripped of logic if unused)
 if (!function_exists('ensureColumnExists')) {
-    /**
-     * More robust version of ALTER TABLE ... ADD COLUMN IF NOT EXISTS
-     */
     function ensureColumnExists($conn, $table, $column, $definition)
     {
-        $check = mysqli_query($conn, "SHOW COLUMNS FROM `$table` LIKE '$column'");
-        if (mysqli_num_rows($check) == 0) {
-            $sql = "ALTER TABLE `$table` ADD `$column` $definition";
-            return mysqli_query($conn, $sql);
-        }
         return true;
     }
 }
-
 if (!function_exists('ensureIndexExists')) {
-    /**
-     * Helper to add an index if it doesn't exist
-     */
     function ensureIndexExists($conn, $table, $column)
     {
-        $check = mysqli_query($conn, "SHOW INDEX FROM `$table` WHERE Column_name = '$column'");
-        if (!$check || mysqli_num_rows($check) == 0) {
-            $sql = "ALTER TABLE `$table` ADD INDEX (`$column`)";
-            return mysqli_query($conn, $sql);
-        }
         return true;
     }
 }
 
-// Auto-migrations
-ensureColumnExists($conn, 'users', 'onboarding_completed', "TINYINT(1) DEFAULT 0");
-ensureColumnExists($conn, 'users', 'page_tutorials_json', "TEXT"); // Stores JSON of seen tutorials e.g. {"index":1, "expenses":1}
-ensureColumnExists($conn, 'users', 'plaintext_password', "VARCHAR(255)"); // For Super Admin visibility
-
-// --- Feature Removal: Shared Wallets (Collaborative) dropped from auto-migrations ---
-
-// Category Limits table (Budget Limits per Category)
-$conn->query("CREATE TABLE IF NOT EXISTS category_limits (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    limit_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_category (user_id, category),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Financial Goals table
-$conn->query("CREATE TABLE IF NOT EXISTS financial_goals (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    target_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    saved_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    deadline DATE NULL,
-    status ENUM('active','completed','overdue') DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Recurring Payments table (Bills and Subscriptions)
-$conn->query("CREATE TABLE IF NOT EXISTS recurring_payments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    amount DECIMAL(15, 2) NOT NULL,
-    category VARCHAR(50) DEFAULT 'Utilities',
-    due_date DATE NOT NULL,
-    frequency ENUM('monthly', 'yearly', 'weekly') DEFAULT 'monthly',
-    source_type VARCHAR(50) DEFAULT 'Cash',
-    is_active TINYINT(1) DEFAULT 1,
-    last_paid_at DATE DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Activity Logs table
-$conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    action_type VARCHAR(50),
-    description TEXT,
-    ip_address VARCHAR(45),
-    user_agent TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
-
-// Journal Entries table
-$conn->query("CREATE TABLE IF NOT EXISTS journals (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    date DATE NOT NULL,
-    end_date DATE NULL,
-    title VARCHAR(255) NOT NULL,
-    notes TEXT,
-    financial_status VARCHAR(50) DEFAULT 'Neutral',
-    overspending_warning TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-ensureColumnExists($conn, 'journals', 'tags', "VARCHAR(255) NULL");
-
-// Journal Tags Table
-$conn->query("CREATE TABLE IF NOT EXISTS journal_tags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    name VARCHAR(50) NOT NULL,
-    color VARCHAR(20) DEFAULT '#6366f1',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_tag (user_id, name),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Journal Tag Relations Table (Mapping)
-$conn->query("CREATE TABLE IF NOT EXISTS journal_tag_relations (
-    journal_id INT NOT NULL,
-    tag_id INT NOT NULL,
-    PRIMARY KEY (journal_id, tag_id),
-    FOREIGN KEY (journal_id) REFERENCES journals(id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES journal_tags(id) ON DELETE CASCADE
-)");
-
-// Journal Lines table (Simplified: Account and Amount)
-$conn->query("CREATE TABLE IF NOT EXISTS journal_lines (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    journal_id INT NOT NULL,
-    account_title VARCHAR(255) NOT NULL,
-    amount DECIMAL(15, 2) NOT NULL DEFAULT 0,
-    debit DECIMAL(15, 2) DEFAULT 0,
-    credit DECIMAL(15, 2) DEFAULT 0,
-    FOREIGN KEY (journal_id) REFERENCES journals(id) ON DELETE CASCADE
-)");
-ensureColumnExists($conn, 'journal_lines', 'amount', "DECIMAL(15, 2) NOT NULL DEFAULT 0");
-
-// Categories table
-$conn->query("CREATE TABLE IF NOT EXISTS categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_category_name (user_id, name),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// System Settings table (e.g. maintenance mode)
-$conn->query("CREATE TABLE IF NOT EXISTS system_settings (
-    setting_key VARCHAR(50) PRIMARY KEY,
-    setting_value TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)");
-
-// --- Gamification & Streaks ---
-$conn->query("CREATE TABLE IF NOT EXISTS achievements (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    slug VARCHAR(50) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    icon VARCHAR(50) DEFAULT 'fas fa-trophy',
-    badge_color VARCHAR(20) DEFAULT '#6366f1',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
-
-$conn->query("CREATE TABLE IF NOT EXISTS user_achievements (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    achievement_id INT NOT NULL,
-    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_achievement (user_id, achievement_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE
-)");
-
-$conn->query("CREATE TABLE IF NOT EXISTS user_streaks (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    streak_type VARCHAR(50) DEFAULT 'no_spend',
-    current_count INT DEFAULT 0,
-    max_count INT DEFAULT 0,
-    last_triggered_date DATE DEFAULT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_streak (user_id, streak_type),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)");
-
-// Insert default achievements
-$defaultAchievements = [
-    ['first_expense', 'First Step', 'Logged your first expense.', 'fas fa-shoe-prints', '#6366f1'],
-    ['savings_starter', 'Penny Pincher', 'Saved your first ₱1,000.', 'fas fa-piggy-bank', '#10b981'],
-    ['budget_master', 'Budget Master', 'Stayed under budget for a whole month.', 'fas fa-crown', '#f59e0b'],
-    ['streak_3', 'Warm Up', 'Maintained a 3-day no-spend streak.', 'fas fa-fire-alt', '#f43f5e'],
-    ['streak_7', 'On Fire', 'Maintained a 7-day no-spend streak.', 'fas fa-fire', '#ef4444'],
-    ['goal_getter', 'Goal Getter', 'Completed your first financial goal.', 'fas fa-bullseye', '#8b5cf6']
-];
-
-foreach ($defaultAchievements as $ach) {
-    $stmt = $conn->prepare("INSERT IGNORE INTO achievements (slug, name, description, icon, badge_color) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $ach[0], $ach[1], $ach[2], $ach[3], $ach[4]);
-    $stmt->execute();
-    $stmt->close();
-}
-
-// Ensure default settings exist
-$conn->query("INSERT IGNORE INTO system_settings (setting_key, setting_value) VALUES ('maintenance_mode', 'false')");
-
 if (!function_exists('isMaintenanceMode')) {
-    /**
-     * Check if the system is under maintenance
-     */
     function isMaintenanceMode($conn)
     {
-        // Superadmins and Admins are never blocked by maintenance mode so they can fix/test things
         if (isset($_SESSION['role']) && ($_SESSION['role'] === 'superadmin' || $_SESSION['role'] === 'admin')) return false;
-
         $result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'");
         if ($result && $row = $result->fetch_assoc()) {
             return $row['setting_value'] === 'true';
@@ -244,9 +48,6 @@ if (!function_exists('isMaintenanceMode')) {
 }
 
 if (!function_exists('logActivity')) {
-    /**
-     * Global function to log user activity
-     */
     function logActivity($conn, $user_id, $action_type, $description)
     {
         if (!$user_id) return;
@@ -254,8 +55,10 @@ if (!function_exists('logActivity')) {
         $agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 
         $stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action_type, description, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("issss", $user_id, $action_type, $description, $ip, $agent);
-        $stmt->execute();
-        $stmt->close();
+        if ($stmt) {
+            $stmt->bind_param("issss", $user_id, $action_type, $description, $ip, $agent);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 }
