@@ -17,40 +17,16 @@ if (!$conn) {
 date_default_timezone_set('Asia/Manila');
 mysqli_query($conn, "SET time_zone = '+08:00'");
 
-// Production Error Handling - SET TO 0 IN PRODUCTION
-error_reporting(0);
-ini_set('display_errors', 0);
+// Production Error Handling - SET TO 1 FOR DEBUGGING
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Helper Functions (Kept for compatibility, but stripped of logic if unused)
-if (!function_exists('ensureColumnExists')) {
-    function ensureColumnExists($conn, $table, $column, $definition)
-    {
-        return true;
-    }
-}
-if (!function_exists('ensureIndexExists')) {
-    function ensureIndexExists($conn, $table, $column)
-    {
-        return true;
-    }
-}
-
-if (!function_exists('isMaintenanceMode')) {
-    function isMaintenanceMode($conn)
-    {
-        if (isset($_SESSION['role']) && ($_SESSION['role'] === 'superadmin' || $_SESSION['role'] === 'admin')) return false;
-        $result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'");
-        if ($result && $row = $result->fetch_assoc()) {
-            return $row['setting_value'] === 'true';
-        }
-        return false;
-    }
-}
-
+// Helper Functions
 if (!function_exists('logActivity')) {
     function logActivity($conn, $user_id, $action_type, $description)
     {
-        if (!$user_id) return;
+        if (!$conn || !$user_id) return;
+
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 
@@ -59,6 +35,28 @@ if (!function_exists('logActivity')) {
             $stmt->bind_param("issss", $user_id, $action_type, $description, $ip, $agent);
             $stmt->execute();
             $stmt->close();
+        } else {
+            // Fallback for older schema
+            $stmt2 = $conn->prepare("INSERT INTO activity_logs (user_id, action, details) VALUES (?, ?, ?)");
+            if ($stmt2) {
+                $stmt2->bind_param("iss", $user_id, $action_type, $description);
+                $stmt2->execute();
+                $stmt2->close();
+            }
         }
+    }
+}
+
+if (!function_exists('isMaintenanceMode')) {
+    function isMaintenanceMode($conn)
+    {
+        if (!$conn) return false;
+        if (isset($_SESSION['role']) && ($_SESSION['role'] === 'superadmin' || $_SESSION['role'] === 'admin')) return false;
+
+        $result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'maintenance_mode'");
+        if ($result && $row = $result->fetch_assoc()) {
+            return $row['setting_value'] === 'true';
+        }
+        return false;
     }
 }

@@ -1,80 +1,79 @@
+<?php
+// includes/header.php
+require_once __DIR__ . '/config.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Enforce HTTPS Redirect (InfinityFree / Render)
+$is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+if (!$is_https && strpos($_SERVER['HTTP_HOST'], 'localhost') === false) {
+    $https_url = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    header("Location: " . $https_url);
+    exit;
+}
+
+if (!isset($_SESSION['id'])) {
+    header("Location: " . SITE_URL . "auth/login.php");
+    exit;
+}
+
+// Maintenance Guard
+include __DIR__ . '/db.php';
+if (isMaintenanceMode($conn)) {
+    header("Location: " . SITE_URL . "auth/logout.php?maintenance=1");
+    exit;
+}
+
+$user_id = $_SESSION['id'];
+$stmt = $conn->prepare("SELECT onboarding_completed, page_tutorials_json FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($onboarding_completed, $page_tutorials_json);
+$stmt->fetch();
+$stmt->close();
+
+$seen_tutorials = json_decode($page_tutorials_json, true) ?: [];
+
+$currentPage = basename($_SERVER['PHP_SELF']);
+$role = $_SESSION['role'] ?? 'user';
+if ($onboarding_completed == 0 && !in_array($role, ['superadmin', 'admin']) && $currentPage !== 'onboarding.php' && $currentPage !== 'logout.php') {
+    header("Location: " . SITE_URL . "core/onboarding.php");
+    exit;
+}
+
+if (!isset($appName)) {
+    $appName = defined('APP_NAME') ? APP_NAME : 'Budget Tracker';
+}
+
+// --- Theme Persistence Fallback ---
+if (!isset($_SESSION['theme'])) {
+    $themeStmt = $conn->prepare("SELECT theme FROM users WHERE id = ?");
+    $themeStmt->bind_param("i", $_SESSION['id']);
+    $themeStmt->execute();
+    $themeResult = $themeStmt->get_result();
+    if ($themeRow = $themeResult->fetch_assoc()) {
+        $_SESSION['theme'] = $themeRow['theme'] ?? 'light';
+    }
+    $themeStmt->close();
+}
+
+// Update last activity for logged in users
+if (isset($_SESSION['id'])) {
+    $current_time = date('Y-m-d H:i:s');
+    $stmt_update = $conn->prepare("UPDATE users SET last_activity = ? WHERE id = ?");
+    $stmt_update->bind_param("si", $current_time, $_SESSION['id']);
+    $stmt_update->execute();
+    $stmt_update->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <?php
-    // Enforce HTTPS Redirect (InfinityFree / Render)
-    $is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
-        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-
-    if (!$is_https && strpos($_SERVER['HTTP_HOST'], 'localhost') === false) {
-        $https_url = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        header("Location: " . $https_url);
-        exit;
-    }
-    ?>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <?php
-    require_once __DIR__ . '/config.php';
-
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    if (!isset($_SESSION['id'])) {
-        header("Location: " . SITE_URL . "auth/login.php");
-        exit;
-    }
-
-    // Maintenance Guard
-    include __DIR__ . '/db.php';
-    if (isMaintenanceMode($conn)) {
-        header("Location: " . SITE_URL . "auth/logout.php?maintenance=1");
-        exit;
-    }
-    $user_id = $_SESSION['id'];
-    $stmt = $conn->prepare("SELECT onboarding_completed, page_tutorials_json FROM users WHERE id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $stmt->bind_result($onboarding_completed, $page_tutorials_json);
-    $stmt->fetch();
-    $stmt->close();
-
-    $seen_tutorials = json_decode($page_tutorials_json, true) ?: [];
-
-    $currentPage = basename($_SERVER['PHP_SELF']);
-    $role = $_SESSION['role'] ?? 'user';
-    if ($onboarding_completed == 0 && !in_array($role, ['superadmin', 'admin']) && $currentPage !== 'onboarding.php' && $currentPage !== 'logout.php') {
-        header("Location: " . SITE_URL . "core/onboarding.php");
-        exit;
-    }
-
-    if (!isset($appName)) {
-        $appName = defined('APP_NAME') ? APP_NAME : 'Budget Tracker';
-    }
-
-    // --- Theme Persistence Fallback ---
-    if (!isset($_SESSION['theme'])) {
-        $themeStmt = $conn->prepare("SELECT theme FROM users WHERE id = ?");
-        $themeStmt->bind_param("i", $_SESSION['id']);
-        $themeStmt->execute();
-        $themeResult = $themeStmt->get_result();
-        if ($themeRow = $themeResult->fetch_assoc()) {
-            $_SESSION['theme'] = $themeRow['theme'] ?? 'light';
-        }
-        $themeStmt->close();
-    }
-
-    // Update last activity for logged in users
-    if (isset($_SESSION['id'])) {
-        $current_time = date('Y-m-d H:i:s');
-        $stmt_update = $conn->prepare("UPDATE users SET last_activity = ? WHERE id = ?");
-        $stmt_update->bind_param("si", $current_time, $_SESSION['id']);
-        $stmt_update->execute();
-        $stmt_update->close();
-    }
-    ?>
     <!-- PWA Support -->
     <link rel="manifest" href="<?php echo SITE_URL; ?>manifest.json">
     <meta name="theme-color" content="#6366f1">

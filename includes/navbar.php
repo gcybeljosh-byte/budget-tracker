@@ -56,9 +56,14 @@
                             $notificationHelper = new NotificationHelper($conn);
 
                             if ($_SESSION['role'] !== 'superadmin') {
-                                $notificationHelper->checkScheduledReminders($_SESSION['id']);
-                                $notificationHelper->checkLowAllowance($_SESSION['id']);
-                                $notificationHelper->checkBillDeadlines($_SESSION['id']);
+                                // Throttle: Only check every 1 minute to save DB resources
+                                $lastCheck = $_SESSION['last_notif_check'] ?? 0;
+                                if (time() - $lastCheck > 60) {
+                                    $notificationHelper->checkScheduledReminders($_SESSION['id']);
+                                    $notificationHelper->checkLowAllowance($_SESSION['id']);
+                                    $notificationHelper->checkBillDeadlines($_SESSION['id']);
+                                    $_SESSION['last_notif_check'] = time();
+                                }
                             }
 
                             $unreadNotifications = $notificationHelper->getUnreadNotifications($_SESSION['id'], $_SESSION['role']);

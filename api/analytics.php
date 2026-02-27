@@ -23,10 +23,14 @@ if ($action === 'trends') {
 
     $placeholders = implode(',', array_fill(0, count($months), '?'));
     $stmt = $conn->prepare("SELECT DATE_FORMAT(date, '%Y-%m') as month, category, SUM(amount) as total FROM expenses WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') IN ($placeholders) GROUP BY month, category ORDER BY month ASC, total DESC");
-    $stmt->bind_param("i" . str_repeat('s', count($months)), $user_id, ...$months);
-    $stmt->execute();
-    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    if ($stmt) {
+        $stmt->bind_param("i" . str_repeat('s', count($months)), $user_id, ...$months);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+    } else {
+        $rows = [];
+    }
 
     $categories = array_unique(array_column($rows, 'category'));
     $datasets = [];
@@ -53,32 +57,40 @@ if ($action === 'trends') {
     $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? GROUP BY date");
     $start = date('Y-m-01');
     $end = date('Y-m-t');
-    $stmt->bind_param("iss", $user_id, $start, $end);
-    $stmt->execute();
     $data = [];
-    foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $r) $data[$r['date']] = (float)$r['total'];
-    $stmt->close();
+    if ($stmt) {
+        $stmt->bind_param("iss", $user_id, $start, $end);
+        $stmt->execute();
+        foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $r) $data[$r['date']] = (float)$r['total'];
+        $stmt->close();
+    }
     echo json_encode(['success' => true, 'data' => $data, 'month' => date('Y-m'), 'days_in_month' => (int)date('t')]);
 } elseif ($action === 'forecast') {
     $balanceHelper = new BalanceHelper($conn);
     $currentBalance = $balanceHelper->getCashBalance($user_id) + $balanceHelper->getDigitalBalance($user_id) + $balanceHelper->getTotalSavings($user_id);
 
     $day = (int)date('j');
+    $spent = 0;
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? AND expense_source = 'Allowance'");
-    $start = date('Y-m-01');
-    $today = date('Y-m-d');
-    $stmt->bind_param("iss", $user_id, $start, $today);
-    $stmt->execute();
-    $spent = (float)$stmt->get_result()->fetch_row()[0];
-    $stmt->close();
+    if ($stmt) {
+        $start = date('Y-m-01');
+        $today = date('Y-m-d');
+        $stmt->bind_param("iss", $user_id, $start, $today);
+        $stmt->execute();
+        $spent = (float)$stmt->get_result()->fetch_row()[0];
+        $stmt->close();
+    }
 
+    $lastMonth = 0;
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ?");
-    $lStart = date('Y-m-01', strtotime('-1 month'));
-    $lEnd = date('Y-m-t', strtotime('-1 month'));
-    $stmt->bind_param("iss", $user_id, $lStart, $lEnd);
-    $stmt->execute();
-    $lastMonth = (float)$stmt->get_result()->fetch_row()[0];
-    $stmt->close();
+    if ($stmt) {
+        $lStart = date('Y-m-01', strtotime('-1 month'));
+        $lEnd = date('Y-m-t', strtotime('-1 month'));
+        $stmt->bind_param("iss", $user_id, $lStart, $lEnd);
+        $stmt->execute();
+        $lastMonth = (float)$stmt->get_result()->fetch_row()[0];
+        $stmt->close();
+    }
 
     $dailyAvg = $day > 0 ? ($spent / $day) : 0;
     $daysLeft = (int)date('t') - $day;

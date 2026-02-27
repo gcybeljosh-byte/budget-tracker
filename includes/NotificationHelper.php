@@ -10,228 +10,223 @@ class NotificationHelper
         $this->conn = $conn;
     }
 
-    /**
-     * Add a new notification for a user
-     */
     public function addNotification($user_id, $type, $message)
     {
+        if (!$this->conn) return false;
         $stmt = $this->conn->prepare("INSERT INTO notifications (user_id, type, message) VALUES (?, ?, ?)");
-        $stmt->bind_param("iss", $user_id, $type, $message);
-        $success = $stmt->execute();
-        $stmt->close();
-        return $success;
+        if ($stmt) {
+            $stmt->bind_param("iss", $user_id, $type, $message);
+            $success = $stmt->execute();
+            $stmt->close();
+            return $success;
+        }
+        return false;
     }
 
-    /**
-     * Get unread notifications for a user
-     */
     public function getUnreadNotifications($user_id, $role = 'user')
     {
+        if (!$this->conn) return [];
         $query = "SELECT id, type, message, created_at FROM notifications WHERE user_id = ? AND is_read = 0";
-
-        // Superadmin only sees new_user notifications
         if ($role === 'superadmin') {
             $query .= " AND type = 'new_user'";
         }
-
         $query .= " ORDER BY created_at DESC";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $notifications = [];
-        while ($row = $result->fetch_assoc()) {
-            $notifications[] = $row;
+        if ($stmt) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $notifications = [];
+            while ($row = $result->fetch_assoc()) {
+                $notifications[] = $row;
+            }
+            $stmt->close();
+            return $notifications;
         }
-        $stmt->close();
-        return $notifications;
+        return [];
     }
 
-    /**
-     * Mark all notifications as read for a user
-     */
     public function markAllAsRead($user_id)
     {
+        if (!$this->conn) return false;
         $stmt = $this->conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $success = $stmt->execute();
-        $stmt->close();
-        return $success;
+        if ($stmt) {
+            $stmt->bind_param("i", $user_id);
+            $success = $stmt->execute();
+            $stmt->close();
+            return $success;
+        }
+        return false;
     }
 
-    /**
-     * Check and trigger scheduled reminders (10am, 5pm, 9pm)
-     */
     public function checkScheduledReminders($user_id)
     {
-        $now = new DateTime('now', new DateTimeZone('Asia/Manila'));
+        if (!$this->conn) return;
+        try {
+            $now = new DateTime('now', new DateTimeZone('Asia/Manila'));
+        } catch (Exception $e) {
+            $now = new DateTime('now');
+        }
         $currentHour = (int)$now->format('H');
         $today = $now->format('Y-m-d');
-
-        // Target hours for reminders
-        $targetHours = [10, 17, 21]; // 10am, 5pm, 9pm
+        $targetHours = [10, 17, 21];
 
         foreach ($targetHours as $hour) {
             if ($currentHour >= $hour) {
-                // Check user preference
                 $prefStmt = $this->conn->prepare("SELECT notif_budget FROM users WHERE id = ?");
-                $prefStmt->bind_param("i", $user_id);
-                $prefStmt->execute();
-                $pref = $prefStmt->get_result()->fetch_assoc();
-                $prefStmt->close();
+                if ($prefStmt) {
+                    $prefStmt->bind_param("i", $user_id);
+                    $prefStmt->execute();
+                    $pref = $prefStmt->get_result()->fetch_assoc();
+                    $prefStmt->close();
+                    if (($pref['notif_budget'] ?? 1) == 0) continue;
+                }
 
-                if (($pref['notif_budget'] ?? 1) == 0) continue;
-
-                // Check if a reminder for this specific hour has already been sent today
                 $type = "reminder_$hour";
                 $checkStmt = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
-                $checkStmt->bind_param("iss", $user_id, $type, $today);
-                $checkStmt->execute();
-                $checkResult = $checkStmt->get_result();
-
-                if ($checkResult->num_rows == 0) {
-                    $message = $this->getReminderMessage($hour, $user_id);
-                    $this->addNotification($user_id, $type, $message);
+                if ($checkStmt) {
+                    $checkStmt->bind_param("iss", $user_id, $type, $today);
+                    $checkStmt->execute();
+                    $checkResult = $checkStmt->get_result();
+                    if ($checkResult->num_rows == 0) {
+                        $message = $this->getReminderMessage($hour, $user_id);
+                        $this->addNotification($user_id, $type, $message);
+                    }
+                    $checkStmt->close();
                 }
-                $checkStmt->close();
             }
         }
     }
 
-    /**
-     * Check if monthly spending exceeds or nears the budget goal
-     */
     public function checkBudgetLimit($user_id)
     {
-        // 1. Fetch budget goal and currency
+        if (!$this->conn) return;
         $stmt = $this->conn->prepare("SELECT monthly_budget_goal, preferred_currency, first_name FROM users WHERE id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $user = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
+        if ($stmt) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $user = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
 
-        $goal = (float)($user['monthly_budget_goal'] ?? 0);
-        if ($goal <= 0) return; // No goal set
+            $goal = (float)($user['monthly_budget_goal'] ?? 0);
+            if ($goal <= 0) return;
 
-        $currency = $user['preferred_currency'] ?? 'PHP';
-        $firstName = $user['first_name'] ?? 'User';
-        require_once __DIR__ . '/CurrencyHelper.php';
-        $symbol = CurrencyHelper::getSymbol($currency);
+            $currency = $user['preferred_currency'] ?? 'PHP';
+            $firstName = $user['first_name'] ?? 'User';
+            require_once __DIR__ . '/CurrencyHelper.php';
+            $symbol = CurrencyHelper::getSymbol($currency);
 
-        // 2. Calculate current month's expenses (sourced from Allowance)
-        $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $totalSpent = (float)$stmt->get_result()->fetch_assoc()['total'];
-        $stmt->close();
+            $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+            if ($stmt) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $totalSpent = (float)$stmt->get_result()->fetch_assoc()['total'];
+                $stmt->close();
 
-        $today = date('Y-m-d');
-        $formattedGoal = number_format($goal, 2);
-        $formattedSpent = number_format($totalSpent, 2);
+                $today = date('Y-m-d');
+                $formattedGoal = number_format($goal, 2);
+                $formattedSpent = number_format($totalSpent, 2);
 
-        // 3. Logic for Exceeded (100%)
-        if ($totalSpent >= $goal) {
-            $type = 'budget_exceeded';
-            // Prevent multiple "exceeded" alerts on the same day if amount hasn't changed significantly or just once a day
-            $check = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
-            $check->bind_param("iss", $user_id, $type, $today);
-            $check->execute();
-            if ($check->get_result()->num_rows == 0) {
-                $this->addNotification($user_id, $type, "🚨 Attention {$firstName}! You have exceeded your monthly budget of {$symbol}{$formattedGoal}. Current spending: {$symbol}{$formattedSpent}.");
+                if ($totalSpent >= $goal) {
+                    $type = 'budget_exceeded';
+                    $check = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
+                    if ($check) {
+                        $check->bind_param("iss", $user_id, $type, $today);
+                        $check->execute();
+                        if ($check->get_result()->num_rows == 0) {
+                            $this->addNotification($user_id, $type, "🚨 Attention {$firstName}! You have exceeded your monthly budget of {$symbol}{$formattedGoal}. Current spending: {$symbol}{$formattedSpent}.");
+                        }
+                        $check->close();
+                    }
+                } elseif ($totalSpent >= ($goal * 0.9)) {
+                    $type = 'budget_near';
+                    $check = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
+                    if ($check) {
+                        $check->bind_param("iss", $user_id, $type, $today);
+                        $check->execute();
+                        if ($check->get_result()->num_rows == 0) {
+                            $this->addNotification($user_id, $type, "⚠️ Warning {$firstName}! You've used 90%+ of your monthly budget ({$symbol}{$formattedSpent} / {$symbol}{$formattedGoal}).");
+                        }
+                        $check->close();
+                    }
+                }
             }
-            $check->close();
-        }
-        // 4. Logic for Near (90%)
-        elseif ($totalSpent >= ($goal * 0.9)) {
-            $type = 'budget_near';
-            $check = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
-            $check->bind_param("iss", $user_id, $type, $today);
-            $check->execute();
-            if ($check->get_result()->num_rows == 0) {
-                $this->addNotification($user_id, $type, "⚠️ Warning {$firstName}! You've used 90%+ of your monthly budget ({$symbol}{$formattedSpent} / {$symbol}{$formattedGoal}).");
-            }
-            $check->close();
         }
     }
 
-    /**
-     * Check if balance is low (below ₱500)
-     */
     public function checkLowAllowance($user_id)
     {
-        // Check user preference
+        if (!$this->conn) return;
         $prefStmt = $this->conn->prepare("SELECT notif_low_balance, preferred_currency, first_name FROM users WHERE id = ?");
-        $prefStmt->bind_param("i", $user_id);
-        $prefStmt->execute();
-        $pref = $prefStmt->get_result()->fetch_assoc();
-        $prefStmt->close();
+        if ($prefStmt) {
+            $prefStmt->bind_param("i", $user_id);
+            $prefStmt->execute();
+            $pref = $prefStmt->get_result()->fetch_assoc();
+            $prefStmt->close();
 
-        if (($pref['notif_low_balance'] ?? 1) == 0) return;
+            if (($pref['notif_low_balance'] ?? 1) == 0) return;
 
-        $currency = $pref['preferred_currency'] ?? 'PHP';
-        $firstName = $pref['first_name'] ?? 'User';
-        require_once __DIR__ . '/CurrencyHelper.php';
-        $symbol = CurrencyHelper::getSymbol($currency);
+            $currency = $pref['preferred_currency'] ?? 'PHP';
+            $firstName = $pref['first_name'] ?? 'User';
+            require_once __DIR__ . '/CurrencyHelper.php';
+            $symbol = CurrencyHelper::getSymbol($currency);
 
-        // Calculate current liquid balance (Total Allowance - Savings transfers - Allowance-based Expenses)
-        $stmt = $this->conn->prepare("
-            SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Allowance') -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ?) as balance
-        ");
-        $stmt->bind_param("iii", $user_id, $user_id, $user_id);
-        $stmt->execute();
-        $balance = (float)$stmt->get_result()->fetch_assoc()['balance'];
-        $stmt->close();
+            $stmt = $this->conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Allowance') - (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ?) as balance");
+            if ($stmt) {
+                $stmt->bind_param("iii", $user_id, $user_id, $user_id);
+                $stmt->execute();
+                $balance = (float)$stmt->get_result()->fetch_assoc()['balance'];
+                $stmt->close();
 
-        // Threshold (₱500 equivalent)
-        $threshold = ($currency === 'USD') ? 10 : 500;
-
-        if ($balance < $threshold) {
-            // Check if a "low_balance" notification was already sent today
-            $today = date('Y-m-d');
-            $type = 'low_balance';
-            $checkStmt = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
-            $checkStmt->bind_param("iss", $user_id, $type, $today);
-            $checkStmt->execute();
-
-            if ($checkStmt->get_result()->num_rows == 0) {
-                $formattedBalance = number_format($balance, 2);
-                $this->addNotification($user_id, $type, "⚠️ Hello {$firstName}! Your balance is now {$symbol}{$formattedBalance}. Please spend wisely!");
+                $threshold = ($currency === 'USD') ? 10 : 500;
+                if ($balance < $threshold) {
+                    $today = date('Y-m-d');
+                    $type = 'low_balance';
+                    $checkStmt = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND DATE(created_at) = ?");
+                    if ($checkStmt) {
+                        $checkStmt->bind_param("iss", $user_id, $type, $today);
+                        $checkStmt->execute();
+                        if ($checkStmt->get_result()->num_rows == 0) {
+                            $formattedBalance = number_format($balance, 2);
+                            $this->addNotification($user_id, $type, "⚠️ Hello {$firstName}! Your balance is now {$symbol}{$formattedBalance}. Please spend wisely!");
+                        }
+                        $checkStmt->close();
+                    }
+                }
             }
-            $checkStmt->close();
         }
     }
 
     private function getDailySpendingSummary($user_id)
     {
+        if (!$this->conn) return "";
+        require_once __DIR__ . '/CurrencyHelper.php';
+        $symbol = CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP');
         $today = date('Y-m-d');
         $currentMonth = date('Y-m');
 
-        // 1. Get total monthly allowance
-        require_once __DIR__ . '/CurrencyHelper.php';
-        $symbol = CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP');
+        $allowance = 0;
+        $stmt = $this->conn->prepare("SELECT SUM(amount) as total FROM allowances WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?");
+        if ($stmt) {
+            $stmt->bind_param("is", $user_id, $currentMonth);
+            $stmt->execute();
+            $allowance = (float)$stmt->get_result()->fetch_assoc()['total'];
+            $stmt->close();
+        }
 
-        $stmt = $this->conn->prepare("SELECT SUM(amount) as total FROM allowances WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = DATE_FORMAT(CURRENT_DATE, '%Y-%m')");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $monthlyAllowance = (float)$stmt->get_result()->fetch_assoc()['total'];
-        $stmt->close();
-
-        // Get monthly expenses
+        $expenses = 0;
         $stmt = $this->conn->prepare("SELECT SUM(amount) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND DATE_FORMAT(date, '%Y-%m') = ?");
-        $stmt->bind_param("is", $user_id, $currentMonth);
-        $stmt->execute();
-        $monthlyExpenses = (float)$stmt->get_result()->fetch_assoc()['total'];
-        $stmt->close();
+        if ($stmt) {
+            $stmt->bind_param("is", $user_id, $currentMonth);
+            $stmt->execute();
+            $expenses = (float)$stmt->get_result()->fetch_assoc()['total'];
+            $stmt->close();
+        }
 
-        $balance = $monthlyAllowance - $monthlyExpenses;
-        $daysInMonth = (int)date('t');
-        $daysRemaining = $daysInMonth - (int)date('j') + 1;
+        $balance = $allowance - $expenses;
+        $daysRemaining = (int)date('t') - (int)date('j') + 1;
         $dailyLimit = ($daysRemaining > 0) ? $balance / $daysRemaining : 0;
-
         return "Daily Limit Info: You have {$symbol}" . number_format($balance, 2) . " remaining for this month. That's approx. {$symbol}" . number_format($dailyLimit, 2) . "/day.";
     }
 
@@ -250,50 +245,40 @@ class NotificationHelper
         }
     }
 
-    /**
-     * Check for bill deadlines (7 days, 3 days, 1 day before, and on the day)
-     */
     public function checkBillDeadlines($user_id)
     {
-        $today = new DateTime('now', new DateTimeZone('Asia/Manila'));
-        $today->setTime(0, 0, 0); // Reset time to compare days correctly
-
-        // Fetch active bills
-        $stmt = $this->conn->prepare("SELECT id, title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND is_active = 1");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        while ($bill = $result->fetch_assoc()) {
-            $dueDate = new DateTime($bill['due_date'], new DateTimeZone('Asia/Manila'));
-            $dueDate->setTime(0, 0, 0);
-
-            $interval = $today->diff($dueDate);
-            $daysLeft = (int)$interval->format('%r%a');
-
-            // We only care about 7, 3, 1, and 0 days
-            $targets = [7, 3, 1, 0];
-
-            if (in_array($daysLeft, $targets)) {
-                $type = "bill_deadline_{$bill['id']}_{$daysLeft}_{$bill['due_date']}";
-
-                // Check if already notified for this specific bill, target day, and due date cycle
-                $checkStmt = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ?");
-                $checkStmt->bind_param("is", $user_id, $type);
-                $checkStmt->execute();
-
-                if ($checkStmt->get_result()->num_rows == 0) {
-                    $msg = "";
-                    if ($daysLeft == 0) {
-                        $msg = "🔔 Bill Due Today: Your bill '{$bill['title']}' (" . number_format($bill['amount'], 2) . ") is due today!";
-                    } else {
-                        $msg = "📅 Bill Reminder: Your bill '{$bill['title']}' (" . number_format($bill['amount'], 2) . ") is due in {$daysLeft} " . ($daysLeft == 1 ? 'day' : 'days') . ".";
-                    }
-                    $this->addNotification($user_id, $type, $msg);
-                }
-                $checkStmt->close();
-            }
+        if (!$this->conn) return;
+        try {
+            $today = new DateTime('now', new DateTimeZone('Asia/Manila'));
+        } catch (Exception $e) {
+            $today = new DateTime('now');
         }
-        $stmt->close();
+        $today->setTime(0, 0, 0);
+
+        $stmt = $this->conn->prepare("SELECT id, title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND is_active = 1");
+        if ($stmt) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            while ($bill = $result->fetch_assoc()) {
+                $dueDate = new DateTime($bill['due_date']);
+                $dueDate->setTime(0, 0, 0);
+                $daysLeft = (int)$today->diff($dueDate)->format('%r%a');
+                if (in_array($daysLeft, [7, 3, 1, 0])) {
+                    $type = "bill_deadline_{$bill['id']}_{$daysLeft}_{$bill['due_date']}";
+                    $checkStmt = $this->conn->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ?");
+                    if ($checkStmt) {
+                        $checkStmt->bind_param("is", $user_id, $type);
+                        $checkStmt->execute();
+                        if ($checkStmt->get_result()->num_rows == 0) {
+                            $msg = ($daysLeft == 0) ? "🔔 Bill Due Today: Your bill '{$bill['title']}' (" . number_format($bill['amount'], 2) . ") is due today!" : "📅 Bill Reminder: Your bill '{$bill['title']}' (" . number_format($bill['amount'], 2) . ") is due in {$daysLeft} days.";
+                            $this->addNotification($user_id, $type, $msg);
+                        }
+                        $checkStmt->close();
+                    }
+                }
+            }
+            $stmt->close();
+        }
     }
 }
