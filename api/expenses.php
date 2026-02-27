@@ -4,8 +4,10 @@ header("Content-Type: application/json");
 require_once '../includes/db.php';
 require_once '../includes/NotificationHelper.php';
 require_once '../includes/BalanceHelper.php';
+require_once '../includes/AchievementHelper.php';
 $notifications = new NotificationHelper($conn);
 $balanceHelper = new BalanceHelper($conn);
+$achievementHelper = new AchievementHelper($conn);
 
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
@@ -72,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $response = ['success' => true, 'message' => 'Expense added successfully', 'id' => $stmt->insert_id];
                     $notifications->checkLowAllowance($user_id);
                     $notifications->checkBudgetLimit($user_id);
+                    $achievementHelper->unlockBySlug($user_id, 'first_expense');
                     logActivity($conn, $user_id, 'expense_add', "Added expense: $description ($category) - $amount");
                 } else {
                     $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];

@@ -155,6 +155,56 @@ $conn->query("CREATE TABLE IF NOT EXISTS system_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )");
 
+// --- Gamification & Streaks ---
+$conn->query("CREATE TABLE IF NOT EXISTS achievements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    icon VARCHAR(50) DEFAULT 'fas fa-trophy',
+    badge_color VARCHAR(20) DEFAULT '#6366f1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+$conn->query("CREATE TABLE IF NOT EXISTS user_achievements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    achievement_id INT NOT NULL,
+    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_achievement (user_id, achievement_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE
+)");
+
+$conn->query("CREATE TABLE IF NOT EXISTS user_streaks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    streak_type VARCHAR(50) DEFAULT 'no_spend',
+    current_count INT DEFAULT 0,
+    max_count INT DEFAULT 0,
+    last_triggered_date DATE DEFAULT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_streak (user_id, streak_type),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)");
+
+// Insert default achievements
+$defaultAchievements = [
+    ['first_expense', 'First Step', 'Logged your first expense.', 'fas fa-shoe-prints', '#6366f1'],
+    ['savings_starter', 'Penny Pincher', 'Saved your first ₱1,000.', 'fas fa-piggy-bank', '#10b981'],
+    ['budget_master', 'Budget Master', 'Stayed under budget for a whole month.', 'fas fa-crown', '#f59e0b'],
+    ['streak_3', 'Warm Up', 'Maintained a 3-day no-spend streak.', 'fas fa-fire-alt', '#f43f5e'],
+    ['streak_7', 'On Fire', 'Maintained a 7-day no-spend streak.', 'fas fa-fire', '#ef4444'],
+    ['goal_getter', 'Goal Getter', 'Completed your first financial goal.', 'fas fa-bullseye', '#8b5cf6']
+];
+
+foreach ($defaultAchievements as $ach) {
+    $stmt = $conn->prepare("INSERT IGNORE INTO achievements (slug, name, description, icon, badge_color) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssss", $ach[0], $ach[1], $ach[2], $ach[3], $ach[4]);
+    $stmt->execute();
+    $stmt->close();
+}
+
 // Ensure default settings exist
 $conn->query("INSERT IGNORE INTO system_settings (setting_key, setting_value) VALUES ('maintenance_mode', 'false')");
 
