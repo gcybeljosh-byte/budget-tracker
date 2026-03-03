@@ -146,13 +146,13 @@ if ($_SESSION['role'] === 'superadmin') {
         .then(r => r.json()).then(d => {
             if (!d.success) return;
             const sym = '₱';
-            const statusColor = d.projected_balance <= 0 ? 'danger' : 'success';
+            const statusColor = d.is_on_track ? 'success' : 'danger';
             const trendBadge = d.is_on_track ?
                 '<span class="badge bg-success-subtle text-success rounded-pill extra-small"><i class="fas fa-check-circle me-1"></i>On Track</span>' :
                 '<span class="badge bg-danger-subtle text-danger rounded-pill extra-small"><i class="fas fa-exclamation-triangle me-1"></i>Over Budget Soon</span>';
 
             const runwayText = d.runway_days === null ? 'More data required' : `${d.runway_days} days`;
-            const runwayColor = (d.runway_days === null) ? 'muted' : (d.runway_days < 7 ? 'danger' : 'success');
+            const runwayColor = (d.runway_days === null) ? 'muted' : (d.runway_days < 7 ? 'danger' : (d.runway_days < 14 ? 'warning' : 'success'));
 
             document.getElementById('forecastStats').innerHTML = `
             <div class="col-md-3">

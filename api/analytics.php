@@ -69,42 +69,60 @@ if ($action === 'trends') {
     $balanceHelper = new BalanceHelper($conn);
     $currentBalance = $balanceHelper->getTotalBalance($user_id, true);
 
+    // 1. Get Monthly Allowance
+    $monthlyAllowance = 0;
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $monthlyAllowance = (float)$stmt->get_result()->fetch_row()[0];
+        $stmt->close();
+    }
+
     $day = (int)date('j');
     $spent = 0;
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? AND expense_source = 'Allowance'");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND expense_source = 'Allowance'");
     if ($stmt) {
-        $start = date('Y-m-01');
-        $today = date('Y-m-d');
-        $stmt->bind_param("iss", $user_id, $start, $today);
+        $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $spent = (float)$stmt->get_result()->fetch_row()[0];
         $stmt->close();
     }
 
-    $lastMonth = 0;
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount),0) FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ?");
+    $lastMonthTotal = 0;
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01') AND expense_source = 'Allowance'");
     if ($stmt) {
-        $lStart = date('Y-m-01', strtotime('-1 month'));
-        $lEnd = date('Y-m-t', strtotime('-1 month'));
-        $stmt->bind_param("iss", $user_id, $lStart, $lEnd);
+        $stmt->bind_param("i", $user_id);
         $stmt->execute();
-        $lastMonth = (float)$stmt->get_result()->fetch_row()[0];
+        $lastMonthTotal = (float)$stmt->get_result()->fetch_row()[0];
         $stmt->close();
     }
 
     $dailyAvg = $day > 0 ? ($spent / $day) : 0;
-    $daysLeft = (int)date('t') - $day;
-    $pSpend = $dailyAvg * $daysLeft;
+    $daysInMonth = (int)date('t');
+    $daysLeft = $daysInMonth - $day;
+    $pSpendRemaining = $dailyAvg * $daysLeft;
+    $totalProjectedSpend = $spent + $pSpendRemaining;
+
+    // Logic: Is on track if total projected spend <= monthly allowance
+    $isOnTrack = ($monthlyAllowance > 0) ? ($totalProjectedSpend <= $monthlyAllowance) : true;
+
+    // Balanced Projection: current wallet balance minus what we PREDICT will be spent from now to end of month
+    $projectedEndOfMonthBalance = $currentBalance - $pSpendRemaining;
+
     echo json_encode([
         'success'           => true,
         'current_balance'   => $currentBalance,
+        'monthly_allowance' => $monthlyAllowance,
         'daily_avg_spend'   => round($dailyAvg, 2),
         'days_left'         => $daysLeft,
-        'projected_spend'   => round($pSpend, 2),
-        'projected_balance' => round(max(0, $currentBalance - $pSpend), 2),
+        'projected_spend'   => round($pSpendRemaining, 2),
+        'total_projected_spend' => round($totalProjectedSpend, 2),
+        'projected_balance' => round(max(0, $projectedEndOfMonthBalance), 2),
         'runway_days'       => $dailyAvg > 0 ? (int)($currentBalance / $dailyAvg) : null,
-        'last_month_total'  => $lastMonth,
-        'trend_pct'         => $lastMonth > 0 ? round((($dailyAvg * (int)date('t') - $lastMonth) / $lastMonth) * 100, 1) : 0
+        'last_month_total'  => $lastMonthTotal,
+        'is_on_track'       => $isOnTrack,
+        'basis'             => 'Daily average run-rate extrapolated to end of month vs monthly allowance budget.'
     ]);
 }
 $conn->close();
