@@ -67,7 +67,7 @@ if ($action === 'trends') {
     echo json_encode(['success' => true, 'data' => $data, 'month' => date('Y-m'), 'days_in_month' => (int)date('t')]);
 } elseif ($action === 'forecast') {
     $balanceHelper = new BalanceHelper($conn);
-    $currentBalance = $balanceHelper->getCashBalance($user_id) + $balanceHelper->getDigitalBalance($user_id) + $balanceHelper->getTotalSavings($user_id);
+    $currentBalance = $balanceHelper->getTotalBalance($user_id, true);
 
     $day = (int)date('j');
     $spent = 0;

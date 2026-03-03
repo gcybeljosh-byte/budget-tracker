@@ -12,12 +12,13 @@ class BalanceHelper
     public function getCashBalance($user_id, $monthOnly = false)
     {
         $dateFilter = $monthOnly ? " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')" : "";
+        $sourcePart = "(source_type = 'Cash' OR source_type = '0' OR source_type IS NULL)";
 
         $sql = "
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = 'Cash' $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = 'Cash' AND expense_source = 'Allowance' $dateFilter) -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = 'Cash' $dateFilter) as balance
+                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND $sourcePart $dateFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND $sourcePart AND expense_source = 'Allowance' $dateFilter) -
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND $sourcePart $dateFilter) as balance
         ";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("iii", $user_id, $user_id, $user_id);
@@ -69,6 +70,23 @@ class BalanceHelper
         $stmt->close();
 
         return (float)($res['total'] ?? 0);
+    }
+
+    public function getTotalBalance($user_id, $includeSavings = false)
+    {
+        $source_balances = $this->getBalancesByAllSources($user_id);
+        $total = 0;
+        foreach ($source_balances as $sb) {
+            if ($sb['source'] !== 'Savings') {
+                $total += $sb['balance'];
+            }
+        }
+
+        if ($includeSavings) {
+            $total += $this->getTotalSavings($user_id);
+        }
+
+        return $total;
     }
 
     public function getBalanceBySource($user_id, $expense_source, $source_type)
