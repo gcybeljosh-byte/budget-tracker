@@ -185,8 +185,11 @@ include '../includes/db.php';
                             <option value="Electronic">Other Electronic</option>
                         </select>
                     </div>
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">Update Allowance</button>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold shadow-sm">Update Allowance</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="deleteAllowanceFromEditModal()">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -212,6 +215,7 @@ include '../includes/db.php';
                                 <th>Type</th>
                                 <th>Description</th>
                                 <th class="text-end">Amount</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
@@ -637,6 +641,15 @@ include '../includes/db.php';
             // Foolproof backdrop cleanup
             cleanupBackdrops();
         });
+
+        window.deleteAllowanceFromEditModal = function() {
+            const id = document.getElementById('editAllowanceId').value;
+            if (id) {
+                // Hide edit modal first
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editAllowanceModal')).hide();
+                window.deleteAllowance(id);
+            }
+        };
 
         // Add cleanup to other modals too
         ['addAllowanceModal', 'editAllowanceModal'].forEach(id => {
