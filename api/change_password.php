@@ -37,9 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($row = $result->fetch_assoc()) {
-        if ($currentPassword !== $row['password']) {
+        $db_password = $row['password'];
+        // Check if correct (supports both hash and plaintext for current password verification)
+        if (!password_verify($currentPassword, $db_password) && $currentPassword !== $db_password) {
             echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
             exit;
         }
@@ -49,9 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $stmt->close();
 
-    // Update with new plaintext password
+    // Update with new hashed password
+    $hashed_password = password_hash($newPassword, PASSWORD_DEFAULT);
     $updateStmt = $conn->prepare("UPDATE users SET password = ?, plaintext_password = ? WHERE id = ?");
-    $updateStmt->bind_param("ssi", $newPassword, $newPassword, $user_id);
+    $updateStmt->bind_param("ssi", $hashed_password, $newPassword, $user_id);
 
     if ($updateStmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Password changed successfully.']);
@@ -59,10 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'message' => 'Error updating password: ' . $conn->error]);
     }
     $updateStmt->close();
-
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
 
 $conn->close();
-?>

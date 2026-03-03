@@ -43,6 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                 } else if (isMaintenanceMode($conn) && !in_array($role, ['superadmin', 'admin'])) {
                     $error = "🔧 The system is currently under scheduled maintenance. Please try again later.";
                 } else {
+                    // Auto-migrate to hash if it's currently plaintext
+                    if ($password === $db_password && !password_get_info($db_password)['algo']) {
+                        $new_hash = password_hash($password, PASSWORD_DEFAULT);
+                        $update_stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+                        $update_stmt->bind_param("si", $new_hash, $id);
+                        $update_stmt->execute();
+                        $update_stmt->close();
+                    }
+
                     $_SESSION['id'] = $id;
                     $_SESSION['username'] = $username;
                     $_SESSION['first_name'] = $first_name;

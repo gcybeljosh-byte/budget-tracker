@@ -21,7 +21,7 @@ switch ($action) {
         $user = $result->fetch_assoc();
         $stmt->close();
 
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && (password_verify($password, $user['password']) || $password === $user['password'])) {
             echo json_encode(['success' => true, 'message' => 'Password verified']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Incorrect password']);
@@ -49,4 +49,3 @@ switch ($action) {
 }
 
 $conn->close();
-?>

@@ -50,8 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             if ($stmt->num_rows > 0) {
                 $error = "Username or email already exists.";
             } else {
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 $stmt_insert = $conn->prepare("INSERT INTO users (username, password, first_name, last_name, email, contact_number, auth_method, plaintext_password) VALUES (?, ?, ?, ?, ?, ?, 'Local', ?)");
-                $stmt_insert->bind_param("sssssss", $username, $password, $first_name, $last_name, $email, $contact_number, $password);
+                $stmt_insert->bind_param("sssssss", $username, $hashed_password, $first_name, $last_name, $email, $contact_number, $password);
 
                 if ($stmt_insert->execute()) {
                     $success = "Registration successful! You can now login.";
