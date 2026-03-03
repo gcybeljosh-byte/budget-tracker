@@ -202,8 +202,11 @@ include '../includes/header.php';
                     <div class="card border-0 shadow-sm rounded-4 border-start border-danger border-4">
                         <div class="card-body p-4">
                             <h6 class="fw-bold mb-2 text-danger small text-uppercase">Danger Zone</h6>
-                            <p class="text-muted small mb-3">Once you delete your account, there is no going back. Please be certain.</p>
-                            <div class="text-center">
+                            <p class="text-muted small mb-3">Clear your financial data or delete your account. <b>These actions cannot be undone.</b></p>
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <button class="btn btn-outline-warning btn-sm rounded-pill px-4 fw-bold" id="btnResetData" disabled>
+                                    <i class="fas fa-undo me-2"></i>Reset All Financial Data
+                                </button>
                                 <button class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold" id="btnDeleteAccount" disabled>
                                     <i class="fas fa-trash-alt me-2"></i>Delete My Account Permanently
                                 </button>
@@ -840,6 +843,55 @@ include '../includes/header.php';
                 });
 
                 fetchStatus();
+            }
+
+            // 5.5 Reset Financial Data Logic
+            const btnResetData = document.getElementById('btnResetData');
+            if (btnResetData) {
+                btnResetData.addEventListener('click', function() {
+                    Swal.fire({
+                        title: '🚨 Reset All Financial Data?',
+                        html: 'This will delete ALL your <b class="text-danger">expenses, allowances, savings, goals, and journal entries</b>.<br><br>This action <b>CANNOT BE UNDONE</b>!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f97316',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, reset everything!',
+                        input: 'checkbox',
+                        inputPlaceholder: 'I understand that all my financial data will be permanently deleted.',
+                        inputValidator: (result) => {
+                            return !result && 'You must check the box to proceed.'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: '🤖 Resetting Data...',
+                                html: 'Wiping financial records...',
+                                allowOutsideClick: false,
+                                didOpen: () => Swal.showLoading()
+                            });
+
+                            fetch('<?php echo SITE_URL; ?>api/reset_data.php', {
+                                    method: 'POST'
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Data Reset Complete',
+                                            text: data.message,
+                                            confirmButtonColor: '#6366f1'
+                                        }).then(() => {
+                                            window.location.href = 'dashboard.php';
+                                        });
+                                    } else {
+                                        Swal.fire('Error', data.message, 'error');
+                                    }
+                                });
+                        }
+                    });
+                });
             }
 
             // 6. Delete Account Logic (Double Confirmation)

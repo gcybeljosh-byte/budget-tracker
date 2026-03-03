@@ -540,7 +540,7 @@ include '../includes/db.php';
         });
 
         // Delete Allowance
-        function deleteAllowance(id) {
+        window.deleteAllowance = function(id) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -570,6 +570,14 @@ include '../includes/db.php';
                                 });
                                 fetchAllowances();
                                 fetchDashboardStats();
+
+                                // Also refresh the history modal if it's open
+                                const historyModalEl = document.getElementById('sourceHistoryModal');
+                                if (historyModalEl.classList.contains('show')) {
+                                    const title = document.getElementById('historyModalTitle').textContent;
+                                    const source = title.replace(' Transaction History', '');
+                                    fetchSourceHistory(source);
+                                }
                             } else {
                                 showAlert(result.message, 'danger');
                             }

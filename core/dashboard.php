@@ -474,6 +474,82 @@ include '../includes/header.php';
                         updateGamificationUI(gamData);
                     }
                 });
+
+            // --- Balance Forwarding Prompt ---
+            if (data.needs_forwarding) {
+                showForwardingPrompt(data.balance, data.prev_month_name);
+            }
+        }
+
+        function showForwardingPrompt(balance, prevMonth) {
+            // Prevent multiple prompts if polling is fast
+            if (window.forwardingPromptShown) return;
+            window.forwardingPromptShown = true;
+
+            Swal.fire({
+                title: '📅 New Month! Forward Balance?',
+                html: `You have <b>${formatCurrency(balance)}</b> leftover from <b>${prevMonth}</b>.<br><br>What would you like to do with it?`,
+                icon: 'question',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-piggy-bank me-1"></i> Move to Savings',
+                denyButtonText: '<i class="fas fa-hand-holding-dollar me-1"></i> Add to Allowance',
+                cancelButtonText: 'Not now',
+                confirmButtonColor: '#10b981',
+                denyButtonColor: '#6366f1',
+                reverseButtons: true,
+                allowOutsideClick: false
+            }).then((result) => {
+                let action = '';
+                if (result.isConfirmed) action = 'savings';
+                else if (result.isDenied) action = 'allowance';
+                else {
+                    // Just mark as dismissed for this month to stop prompting
+                    fetch('<?php echo SITE_URL; ?>api/forward_balance.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `action=dismiss`
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: '🤖 Processing Carryover...',
+                    html: 'Updating your accounts...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                const formData = new FormData();
+                formData.append('action', action);
+                formData.append('amount', balance);
+
+                fetch('<?php echo SITE_URL; ?>api/forward_balance.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: d.message,
+                                confirmButtonColor: '#6366f1'
+                            });
+                            fetchDashboardData();
+                        } else {
+                            Swal.fire('Error', d.message, 'error');
+                            window.forwardingPromptShown = false; // Allow retry
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire('Error', 'Could not process forwarding.', 'error');
+                        window.forwardingPromptShown = false;
+                    });
+            });
         }
 
         function updateGamificationUI(data) {

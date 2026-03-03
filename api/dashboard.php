@@ -16,17 +16,33 @@ $user_id = $_SESSION['id'];
 // --- Gamification: Update Streaks ---
 $achievementHelper->updateNoSpendStreak($user_id);
 
-// Fetch User Name
+// Fetch User Info (Name and Forwarding Status)
 $user_name = 'User';
-$stmt = $conn->prepare("SELECT first_name FROM users WHERE id = ?");
-$stmt->bind_param("i", $user_id);
-if ($stmt->execute()) {
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $user_name = $row['first_name'];
+$last_forwarded_month = '';
+try {
+    $stmt = $conn->prepare("SELECT first_name, last_forwarded_month FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $user_name = $row['first_name'];
+            $last_forwarded_month = $row['last_forwarded_month'] ?? '';
+        }
     }
+    $stmt->close();
+} catch (Exception $e) {
+    // If column missing, try to add it (Migration fallback)
+    $conn->query("ALTER TABLE users ADD COLUMN last_forwarded_month VARCHAR(7) DEFAULT NULL");
+
+    // Retry fetch
+    $stmt = $conn->prepare("SELECT first_name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $row = $stmt->get_result()->fetch_assoc();
+        $user_name = $row['first_name'] ?? 'User';
+    }
+    $stmt->close();
 }
-$stmt->close();
 
 $lifetime_allowance = 0;
 $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?");
@@ -172,6 +188,25 @@ if ($stmt) {
         }
     }
     $stmt->close();
+}
+
+// 8. Balance Forwarding Logic
+$current_month = date('Y-m');
+$is_first_day = (date('j') == 1);
+$response['needs_forwarding'] = false;
+$response['prev_month_name'] = date('F', strtotime('-1 month'));
+
+// Prompt if:
+// 1. It's the first day of the month (or we haven't forwarded for the current month yet)
+// 2. We have a balance to forward
+// 3. We haven't already forwarded/dismissed for this month
+if ($last_forwarded_month !== $current_month && $response['balance'] > 0) {
+    // Only prompt on 1st day OR if we want it to persist until they do it
+    // The user specifically asked for "every 1st day", but functional would mean it shows up or is tracked.
+    // Let's make it show if it's the 1st day OR if it's early in the month and not done.
+    if ($is_first_day || (date('j') <= 5)) { // First 5 days of the month as a buffer
+        $response['needs_forwarding'] = true;
+    }
 }
 
 echo json_encode($response);

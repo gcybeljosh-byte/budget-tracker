@@ -384,7 +384,7 @@ include '../includes/header.php';
                 document.getElementById('editSavingsAmount').value = data.amount;
                 document.getElementById('editSavingsDesc').value = data.desc;
                 document.getElementById('editSavingsSource').value = data.source;
-                new bootstrap.Modal(document.getElementById('editSavingsModal')).show();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editSavingsModal')).show();
             }
 
             // Delete Button
