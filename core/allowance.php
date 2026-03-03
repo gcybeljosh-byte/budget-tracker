@@ -27,7 +27,7 @@ include '../includes/db.php';
             <div class="col-md-6 mb-3 mb-md-0 stagger-item">
                 <div class="card h-100 bg-gradient-primary text-white border-0">
                     <div class="card-body">
-                        <h5 class="card-title text-opacity-75"><i class="fas fa-hand-holding-dollar me-2"></i>Total Allowance (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</h5>
+                        <h5 class="card-title text-opacity-75"><i class="fas fa-hand-holding-dollar me-2"></i>Monthly Allowance (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</h5>
                         <h2 class="display-6 fw-bold mb-0" id="totalAllowance"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
                     </div>
                 </div>
@@ -54,8 +54,11 @@ include '../includes/db.php';
             </div>
         </div>
 
-        <!-- Allowance Table -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <!-- Sources Table -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="mb-0 fw-bold text-uppercase small text-secondary letter-spacing-1">Your Wallets</h6>
+            </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table id="allowanceTable" class="table align-middle mb-0 table-hover">
@@ -67,7 +70,32 @@ include '../includes/db.php';
                             </tr>
                         </thead>
                         <tbody id="allowanceTableBody" class="border-top-0">
-                            <!-- Allowances will be dynamically inserted here -->
+                            <!-- Sources will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Allowance History Table -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-uppercase small text-secondary letter-spacing-1">Allowance History</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table id="historyTable" class="table align-middle mb-0 table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Date</th>
+                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Description</th>
+                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Source</th>
+                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-end">Amount (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</th>
+                                <th class="border-0 py-3 pe-4 text-secondary small text-uppercase fw-bold text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullHistoryTableBody" class="border-top-0">
+                            <!-- Full History will be dynamically inserted here -->
                         </tbody>
                     </table>
                 </div>
@@ -86,7 +114,6 @@ include '../includes/db.php';
             </div>
             <div class="modal-body p-4 pt-4">
                 <form id="allowanceForm">
-                    <input type="hidden" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="allowanceDate" required>
@@ -132,7 +159,6 @@ include '../includes/db.php';
             <div class="modal-body p-4 pt-4">
                 <form id="editAllowanceForm">
                     <input type="hidden" id="editAllowanceId">
-                    <input type="hidden" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="editAllowanceDate" required>
@@ -221,12 +247,12 @@ include '../includes/db.php';
         // --- Functions ---
 
         function fetchAllowances() {
-            const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
-            fetch('<?php echo SITE_URL; ?>api/allowance.php?mode=sources&t=' + new Date().getTime() + query)
+            fetch('<?php echo SITE_URL; ?>api/allowance.php?t=' + new Date().getTime())
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success && Array.isArray(data.data)) {
-                        renderTable(data.data);
+                    if (data.success) {
+                        renderSourcesTable(data.sources || []);
+                        renderHistoryTable(data.data || []);
                     } else {
                         console.error('Invalid data format:', data);
                     }
@@ -234,67 +260,64 @@ include '../includes/db.php';
                 .catch(error => console.error('Error fetching allowances:', error));
         }
 
-        function renderTable(sources) {
-            // Destroy existing DataTable if exists
+        function renderSourcesTable(sources) {
             if ($.fn.DataTable.isDataTable('#allowanceTable')) {
                 $('#allowanceTable').DataTable().destroy();
             }
-
             allowanceTableBody.innerHTML = '';
             sources.forEach(item => {
-                const isElectronic = item.source !== 'Cash';
-                const sourceBadge = isElectronic ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary';
-
+                const sourceBadge = item.source_type !== 'Cash' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary';
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
-                row.onclick = () => fetchSourceHistory(item.source);
-
+                row.onclick = () => fetchSourceHistory(item.source_type);
                 row.innerHTML = `
-                <td class="ps-4">
-                    <span class="badge ${sourceBadge} rounded-pill fw-bold" style="font-size:0.9rem;">${item.source}</span>
-                </td>
-                <td class="text-end fw-bold">
-                    <span class="${item.balance > 0 ? 'text-success' : 'text-danger'}">
-                        ${formatCurrency(item.balance)}
-                    </span>
-                </td>
-                <td class="text-end pe-4">
-                    <button class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold">
-                        <i class="fas fa-history me-1"></i> View History
-                    </button>
-                    <button class="btn btn-sm btn-link text-decoration-none p-0 ms-2" onclick="event.stopPropagation(); // add search logic if needed">
-                    </button>
-                </td>
-            `;
+                    <td class="ps-4"><span class="badge ${sourceBadge} rounded-pill fw-bold">${item.source_type}</span></td>
+                    <td class="text-end fw-bold"><span class="text-success">${formatCurrency(item.total)}</span></td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold"><i class="fas fa-history me-1"></i> Details</button>
+                    </td>`;
                 allowanceTableBody.appendChild(row);
             });
+            $('#allowanceTable').DataTable({
+                responsive: true,
+                dom: "<'row'<'col-sm-12'tr>>",
+                paging: false,
+                info: false
+            });
+        }
 
-            // Re-initialize DataTable with iOS layout
-            const table = $('#allowanceTable').DataTable({
+        function renderHistoryTable(history) {
+            const body = document.getElementById('fullHistoryTableBody');
+            if ($.fn.DataTable.isDataTable('#historyTable')) {
+                $('#historyTable').DataTable().destroy();
+            }
+            body.innerHTML = '';
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="ps-4 fw-medium">${item.date}</td>
+                    <td class="text-secondary">${item.description}</td>
+                    <td><span class="badge ${item.source_type !== 'Cash' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.source_type}</span></td>
+                    <td class="text-end fw-bold text-success">+${formatCurrency(item.amount)}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-light text-primary me-1 rounded-circle" onclick="editAllowanceFromHistory(${item.id}, '${item.date}', '${item.description}', ${item.amount}, '${item.source_type}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light text-danger rounded-circle" onclick="window.deleteAllowance(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>`;
+                body.appendChild(row);
+            });
+            const table = $('#historyTable').DataTable({
                 responsive: true,
                 order: [
                     [0, 'desc']
                 ],
-                searching: true,
                 dom: "<'row'<'col-sm-12'tr>><'row pagination-container'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
             });
-
-            // Custom Search Listener
             document.getElementById('allowanceSearch').addEventListener('keyup', function() {
                 table.search(this.value).draw();
-            });
-
-            // Attach Event Listeners to Buttons (since we re-rendered)
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    openEditModal(this.dataset);
-                });
-            });
-
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteAllowance(this.dataset.id);
-                });
             });
         }
 

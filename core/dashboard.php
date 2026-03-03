@@ -25,7 +25,7 @@ include '../includes/header.php';
             <div class="col-md-6 col-lg-4 stagger-item">
                 <div class="card h-100 border-0 shadow-sm rounded-4 bg-gradient-primary text-white overflow-hidden transition-all hover-lift">
                     <div class="card-body p-4">
-                        <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-2"><i class="fas fa-hand-holding-dollar me-2"></i>Allowance (<?php echo date('M'); ?>)</h6>
+                        <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-2"><i class="fas fa-hand-holding-dollar me-2"></i>Monthly Allowance (<?php echo date('M'); ?>)</h6>
                         <h2 class="fw-bold mb-0" id="dashTotalAllowance"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
                     </div>
                 </div>
@@ -34,7 +34,7 @@ include '../includes/header.php';
             <div class="col-md-6 col-lg-4 stagger-item">
                 <div class="card h-100 border-0 shadow-sm rounded-4 bg-gradient-danger text-white overflow-hidden transition-all hover-lift">
                     <div class="card-body p-4">
-                        <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-2"><i class="fas fa-receipt me-2"></i>Expenses (<?php echo date('M'); ?>)</h6>
+                        <h6 class="text-white text-opacity-75 small fw-bold text-uppercase mb-2"><i class="fas fa-receipt me-2"></i>Monthly Expenses (<?php echo date('M'); ?>)</h6>
                         <h2 class="fw-bold mb-0" id="dashTotalExpenses"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
                     </div>
                 </div>
@@ -448,7 +448,7 @@ include '../includes/header.php';
                 updateElement('dashDailyAvg', formatCurrency(data.analytics.daily_average));
                 const util = Math.min(100, (data.total_expenses / data.total_allowance) * 100) || 0;
                 document.getElementById('dashUtilBar').style.width = util + '%';
-                updateElement('dashUtilText', util.toFixed(1) + '% of monthly allowance spent');
+                updateElement('dashUtilText', util.toFixed(1) + '% of monthly budget spent');
             }
 
             updateElement('hubReportsThisMonth', `${data.reports_count || 0} this month`);

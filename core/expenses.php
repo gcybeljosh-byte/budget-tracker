@@ -24,7 +24,7 @@ include '../includes/header.php';
             <div class="col-md-6 stagger-item">
                 <div class="card h-100 bg-gradient-danger text-white border-0">
                     <div class="card-body">
-                        <h5 class="card-title text-opacity-75"><i class="fas fa-receipt me-2"></i>Total Expenses (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</h5>
+                        <h5 class="card-title text-opacity-75"><i class="fas fa-receipt me-2"></i>Monthly Expenses (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</h5>
                         <h2 class="display-6 fw-bold mb-0" id="totalExpenses"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
                     </div>
                 </div>
@@ -95,7 +95,6 @@ include '../includes/header.php';
             </div>
             <div class="modal-body p-4 pt-4">
                 <form id="expenseForm">
-                    <input type="hidden" id="expenseGroupId" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="expenseDate" required>
@@ -162,7 +161,6 @@ include '../includes/header.php';
             <div class="modal-body p-4 pt-4">
                 <form id="editExpenseForm">
                     <input type="hidden" id="editExpenseId">
-                    <input type="hidden" id="editExpenseGroupId" name="group_id" value="">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Date</label>
                         <input type="date" class="form-control rounded-3" id="editExpenseDate" required>
@@ -493,7 +491,6 @@ include '../includes/header.php';
         document.getElementById('editExpenseAmount').value = item.amount;
         document.getElementById('editExpenseSourceType').value = item.source_type || 'Cash';
         document.getElementById('editExpenseSource').value = item.expense_source || 'Allowance';
-        document.getElementById('editExpenseGroupId').value = item.group_id || '';
 
         const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
         modal.show();

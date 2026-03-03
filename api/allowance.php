@@ -136,14 +136,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         usort($history, fn($a, $b) => strcmp($b['date'], $a['date']));
         $response = ['success' => true, 'data' => $history];
     } else {
-        $stmt = $conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? ORDER BY date DESC");
+        // Default: Solo Budgeter - Fetch full record history
+        $stmt = $conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? ORDER BY date DESC, id DESC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $allowances = [];
         while ($row = $result->fetch_assoc()) $allowances[] = $row;
         $stmt->close();
-        $response = ['success' => true, 'data' => $allowances];
+
+        // Also fetch sources summary for the dashboard/UI stats
+        $stmtSummary = $conn->prepare("SELECT source_type, SUM(amount) as total FROM allowances WHERE user_id = ? GROUP BY source_type");
+        $stmtSummary->bind_param("i", $user_id);
+        $stmtSummary->execute();
+        $resSummary = $stmtSummary->get_result();
+        $sources = [];
+        while ($row = $resSummary->fetch_assoc()) $sources[] = $row;
+        $stmtSummary->close();
+
+        $response = [
+            'success' => true,
+            'data' => $allowances, // Transaction history
+            'sources' => $sources  // Aggregate totals
+        ];
     }
 }
 
