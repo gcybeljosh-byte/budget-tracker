@@ -379,6 +379,12 @@ include '../includes/header.php';
     }
 
     function fetchExpenses() {
+        // Capture current page if DataTable exists
+        let currentPage = 0;
+        if ($.fn.DataTable.isDataTable('#expensesTable')) {
+            currentPage = $('#expensesTable').DataTable().page();
+        }
+
         const baseUrl = window.SITE_URL || '';
         const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
         fetch(baseUrl + 'api/expenses.php?t=' + new Date().getTime() + query)
@@ -386,7 +392,7 @@ include '../includes/header.php';
             .then(data => {
                 if (data.success && Array.isArray(data.data)) {
                     window.currentExpenses = data.data;
-                    renderTable(data.data);
+                    renderTable(data.data, currentPage);
                 } else {
                     console.error('Invalid data format:', data);
                 }
@@ -429,7 +435,7 @@ include '../includes/header.php';
         });
     }
 
-    function renderTable(expenses) {
+    function renderTable(expenses, restorePage = 0) {
         if (!expenseTableBody) return;
 
         // Destroy existing DataTable if exists
@@ -469,8 +475,14 @@ include '../includes/header.php';
                 [0, 'desc']
             ],
             searching: true,
+            displayStart: restorePage * 10, // Assuming 10 items per page
             dom: "<'row'<'col-sm-12'tr>><'row pagination-container'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
         });
+
+        // Ensure we're on the right page
+        if (restorePage > 0) {
+            table.page(restorePage).draw('page');
+        }
 
         const searchInput = document.getElementById('expenseSearch');
         if (searchInput) {

@@ -210,7 +210,7 @@ include '../includes/header.php';
         // URL Context
         const urlParams = new URLSearchParams(window.location.search);
 
-        function initTable() {
+        function initTable(restorePage = 0) {
             if (table) table.destroy();
             table = $('#savingsTable').DataTable({
                 responsive: true,
@@ -219,10 +219,15 @@ include '../includes/header.php';
                 ],
                 dom: '<"row"<"col-sm-12"tr>><"row pagination-container"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                 pageLength: 10,
+                displayStart: restorePage * 10,
                 language: {
                     emptyTable: "No savings records found"
                 }
             });
+
+            if (restorePage > 0) {
+                table.page(restorePage).draw('page');
+            }
 
             document.getElementById('savingsSearch').addEventListener('keyup', function() {
                 table.search(this.value).draw();
@@ -244,6 +249,11 @@ include '../includes/header.php';
         }
 
         function fetchSavings() {
+            let currentPage = 0;
+            if (table) {
+                currentPage = table.page();
+            }
+
             fetch('<?php echo SITE_URL; ?>api/savings.php')
                 .then(response => response.json())
                 .then(result => {
@@ -287,7 +297,7 @@ include '../includes/header.php';
                             </tr>
                         `;
                         });
-                        initTable();
+                        initTable(currentPage);
                     }
                 });
         }

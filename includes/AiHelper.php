@@ -464,7 +464,9 @@ class AiHelper
         $prompt .= "- ❌ Add, edit, or delete any records (expenses, allowance, savings, goals, bills, journals)\n";
         $prompt .= "- ❌ Perform any database writes\n";
         $prompt .= "- ❌ Access data belonging to other users\n";
-        $prompt .= "- ❌ Discuss topics unrelated to personal finance or this system\n\n";
+        $prompt .= "- ❌ Discuss sensitive or illegal non-financial topics\n\n";
+        $prompt .= "GENERAL KNOWLEDGE POLICY:\n";
+        $prompt .= "If asked about non-financial general knowledge (e.g., celebrities, science, history), provide a VERY BRIEF answer (max 2 sentences) and then immediately SEUE into a related financial or budgeting topic. For example: \"Taylor Swift is a global pop icon. Interestingly, her 'Eras Tour' had a massive economic impact—speaking of impact, let's look at your biggest expense categories this month...\"\n\n";
         $prompt .= "If asked to perform an action, respond warmly: explain you can't do system actions, then provide the exact navigation path to do it manually.\n\n";
 
         $prompt .= "# SYSTEM PAGE GUIDE (Know Every Page)\n\n";

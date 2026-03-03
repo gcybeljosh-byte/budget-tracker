@@ -256,12 +256,18 @@ include '../includes/db.php';
         // --- Functions ---
 
         function fetchAllowances() {
+            // Capture current page if DataTable exists
+            let currentPage = 0;
+            if ($.fn.DataTable.isDataTable('#historyTable')) {
+                currentPage = $('#historyTable').DataTable().page();
+            }
+
             fetch('<?php echo SITE_URL; ?>api/allowance.php?t=' + new Date().getTime())
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         renderSourcesTable(data.sources || []);
-                        renderHistoryTable(data.data || []);
+                        renderHistoryTable(data.data || [], currentPage);
                     } else {
                         console.error('Invalid data format:', data);
                     }
@@ -296,7 +302,7 @@ include '../includes/db.php';
             });
         }
 
-        function renderHistoryTable(history) {
+        function renderHistoryTable(history, restorePage = 0) {
             const body = document.getElementById('fullHistoryTableBody');
             if ($.fn.DataTable.isDataTable('#historyTable')) {
                 $('#historyTable').DataTable().destroy();
@@ -324,8 +330,14 @@ include '../includes/db.php';
                 order: [
                     [0, 'desc']
                 ],
+                displayStart: restorePage * 10, // Assuming 10 items per page
                 dom: "<'row'<'col-sm-12'tr>><'row pagination-container'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
             });
+
+            // Ensure we're on the right page
+            if (restorePage > 0) {
+                table.page(restorePage).draw('page');
+            }
             document.getElementById('allowanceSearch').addEventListener('keyup', function() {
                 table.search(this.value).draw();
             });

@@ -37,36 +37,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // --- Self-Healing: Ensure chat history table exists ---
+    // Added 'response' column to store bot reply in the same row as the message for easier context tracking
     $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
         message TEXT NOT NULL,
-        sender ENUM('user', 'bot') NOT NULL,
+        response TEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )");
 
-    // 2. Save User Message
+    // 2. Save User Message and Get AI Response
     $aiHelper = new AiHelper($conn, $user_id);
-    $aiHelper->enforceChatTimeout(10); // Clear history if > 10 mins inactive
 
-    $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, sender) VALUES (?, ?, 'user')");
-    $stmt->bind_param("is", $user_id, $userMessage);
-    $stmt->execute();
-    $stmt->close();
+    // First prompt fix: Ensure history is enforced before fetching response
+    $aiHelper->enforceChatTimeout(10);
 
-    // 3. Generate AI Response
+    // Generate AI Response
     $aiResponse = $aiHelper->getResponse($userMessage);
-
     $responseMessage = is_array($aiResponse) ? ($aiResponse['message'] ?? '') : (string)$aiResponse;
 
     if (empty($responseMessage)) {
         $responseMessage = "I'm sorry, I couldn't generate a response. Please try again.";
     }
 
-    // 4. Save AI Response to History
-    $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, sender) VALUES (?, ?, 'bot')");
-    $stmt->bind_param("is", $user_id, $responseMessage);
+    // 3. Save Message and Response in one row (better for conversation flow)
+    $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, response) VALUES (?, ?, ?)");
+    $stmt->bind_param("iss", $user_id, $userMessage, $responseMessage);
     $stmt->execute();
     $stmt->close();
 
