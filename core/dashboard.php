@@ -127,43 +127,9 @@ include '../includes/header.php';
                         <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 extra-small fw-bold">Active Balances</span>
                     </div>
                     <div class="card-body p-0">
-                        <div class="row g-0">
-                            <!-- Cash Balance -->
-                            <div class="col-md-4 border-end border-light">
-                                <div class="d-flex align-items-center p-4 transition-all hover-bg-light h-100">
-                                    <div class="rounded-circle bg-secondary-subtle p-3 me-3 text-secondary shadow-sm">
-                                        <i class="fas fa-wallet"></i>
-                                    </div>
-                                    <div>
-                                        <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Cash Wallet</div>
-                                        <div class="h4 fw-bold text-dark mb-0" id="dashCashBalance"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Digital Balance -->
-                            <div class="col-md-4 border-end border-light">
-                                <div class="d-flex align-items-center p-4 transition-all hover-bg-light h-100">
-                                    <div class="rounded-circle bg-primary-subtle p-3 me-3 text-primary shadow-sm">
-                                        <i class="fas fa-credit-card"></i>
-                                    </div>
-                                    <div>
-                                        <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Digital / Bank</div>
-                                        <div class="h4 fw-bold text-dark mb-0" id="dashDigitalBalance"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Savings Balance -->
-                            <div class="col-md-4">
-                                <div class="d-flex align-items-center p-4 transition-all hover-bg-light h-100">
-                                    <div class="rounded-circle bg-warning-subtle p-3 me-3 text-warning shadow-sm">
-                                        <i class="fas fa-piggy-bank"></i>
-                                    </div>
-                                    <div>
-                                        <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Savings Account</div>
-                                        <div class="h4 fw-bold text-dark mb-0" id="dashSavingsBalance"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="row g-0" id="dashWalletsContainer">
+                            <!-- Wallets will be dynamically inserted here -->
+                            <div class="col-12 p-4 text-center text-muted small">Loading wallets...</div>
                         </div>
                     </div>
                 </div>
@@ -402,9 +368,8 @@ include '../includes/header.php';
             updateElement('dashTotalAllowance', formatCurrency(data.total_allowance));
             updateElement('dashTotalExpenses', formatCurrency(data.total_expenses));
             updateElement('dashBalance', formatCurrency(data.balance));
-            document.getElementById('dashCashBalance').textContent = formatCurrency(data.cash_balance);
-            document.getElementById('dashDigitalBalance').textContent = formatCurrency(data.digital_balance);
-            document.getElementById('dashSavingsBalance').textContent = formatCurrency(data.total_savings);
+
+            renderDashboardWallets(data.source_balances, data.total_savings);
 
             // Update Safe-to-Spend
             if (data.analytics && data.analytics.safe_to_spend) {
@@ -479,6 +444,65 @@ include '../includes/header.php';
             if (data.needs_forwarding) {
                 showForwardingPrompt(data.balance, data.prev_month_name);
             }
+        }
+
+        function renderDashboardWallets(sources, savings) {
+            const container = document.getElementById('dashWalletsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // 1. Regular Source Wallets
+            sources.forEach((item, index) => {
+                const isLast = index === sources.length && savings === 0;
+                const borderClass = isLast ? '' : 'border-end border-light';
+
+                let icon = 'fa-credit-card';
+                let iconColor = 'primary';
+                if (item.source === 'Cash') {
+                    icon = 'fa-wallet';
+                    iconColor = 'secondary';
+                } else if (item.source === 'GCash') {
+                    icon = 'fa-mobile-screen';
+                    iconColor = 'primary';
+                } else if (item.source === 'Maya') {
+                    icon = 'fa-bolt';
+                    iconColor = 'warning';
+                } else if (item.source === 'Bank') {
+                    icon = 'fa-building-columns';
+                    iconColor = 'info';
+                }
+
+                const col = document.createElement('div');
+                col.className = `col-md-4 ${borderClass}`;
+                col.innerHTML = `
+                    <div class="d-flex align-items-center p-4 transition-all hover-bg-light h-100">
+                        <div class="rounded-circle bg-${iconColor}-subtle p-3 me-3 text-${iconColor} shadow-sm">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div>
+                            <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">${item.source} Wallet</div>
+                            <div class="h4 fw-bold text-dark mb-0">${formatCurrency(item.balance)}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+
+            // 2. Savings Card (Always show)
+            const savingsCol = document.createElement('div');
+            savingsCol.className = 'col-md-4';
+            savingsCol.innerHTML = `
+                <div class="d-flex align-items-center p-4 transition-all hover-bg-light h-100">
+                    <div class="rounded-circle bg-warning-subtle p-3 me-3 text-warning shadow-sm">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div>
+                        <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">Savings Account</div>
+                        <div class="h4 fw-bold text-dark mb-0">${formatCurrency(savings)}</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(savingsCol);
         }
 
         function showForwardingPrompt(balance, prevMonth) {

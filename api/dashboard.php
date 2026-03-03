@@ -99,10 +99,18 @@ if ($stmt) {
 }
 
 // 3. Balances
+$source_balances = $balanceHelper->getBalancesByAllSources($user_id);
+$response['source_balances'] = $source_balances;
 $response['cash_balance'] = $balanceHelper->getCashBalance($user_id);
-$response['digital_balance'] = $balanceHelper->getDigitalBalance($user_id);
+$response['digital_balance'] = $balanceHelper->getDigitalBalance($user_id); // Kept for legacy if needed
 $response['total_savings'] = $balanceHelper->getTotalSavings($user_id);
-$response['balance'] = $response['cash_balance'] + $response['digital_balance'];
+
+// Total Balance is now the sum of all individual sources except savings
+$total_bal = 0;
+foreach ($source_balances as $sb) {
+    if ($sb['source'] !== 'Savings') $total_bal += $sb['balance'];
+}
+$response['balance'] = $total_bal;
 
 // 4. Category Spending
 $stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");

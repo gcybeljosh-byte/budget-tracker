@@ -145,14 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         while ($row = $result->fetch_assoc()) $allowances[] = $row;
         $stmt->close();
 
-        // Also fetch sources summary for the dashboard/UI stats
-        $stmtSummary = $conn->prepare("SELECT source_type, SUM(amount) as total FROM allowances WHERE user_id = ? GROUP BY source_type");
-        $stmtSummary->bind_param("i", $user_id);
-        $stmtSummary->execute();
-        $resSummary = $stmtSummary->get_result();
-        $sources = [];
-        while ($row = $resSummary->fetch_assoc()) $sources[] = $row;
-        $stmtSummary->close();
+        // Also fetch sources summary for the dashboard/UI stats - now with accurate net balances
+        $sources = $balanceHelper->getBalancesByAllSources($user_id);
 
         $response = [
             'success' => true,

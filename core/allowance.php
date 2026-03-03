@@ -266,13 +266,13 @@ include '../includes/db.php';
             }
             allowanceTableBody.innerHTML = '';
             sources.forEach(item => {
-                const sourceBadge = item.source_type !== 'Cash' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary';
+                const sourceBadge = item.source !== 'Cash' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary';
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
-                row.onclick = () => fetchSourceHistory(item.source_type);
+                row.onclick = () => fetchSourceHistory(item.source);
                 row.innerHTML = `
-                    <td class="ps-4"><span class="badge ${sourceBadge} rounded-pill fw-bold">${item.source_type}</span></td>
-                    <td class="text-end fw-bold"><span class="text-success">${formatCurrency(item.total)}</span></td>
+                    <td class="ps-4"><span class="badge ${sourceBadge} rounded-pill fw-bold">${item.source}</span></td>
+                    <td class="text-end fw-bold"><span class="text-success">${formatCurrency(item.balance)}</span></td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold"><i class="fas fa-history me-1"></i> Details</button>
                     </td>`;

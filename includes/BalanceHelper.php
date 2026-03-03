@@ -73,15 +73,8 @@ class BalanceHelper
 
     public function getBalanceBySource($user_id, $expense_source, $source_type)
     {
-        if ($expense_source === 'Savings') {
-            return $this->getTotalSavings($user_id, false, $source_type);
-        } else {
-            if ($source_type === 'Cash') {
-                return $this->getCashBalance($user_id, false);
-            } else {
-                return $this->getDigitalBalance($user_id, false);
-            }
-        }
+        $details = $this->getBalanceDetails($user_id, $expense_source, $source_type);
+        return $details['balance'];
     }
 
     public function getBalanceDetails($user_id, $expense_source, $source_type)
@@ -135,10 +128,15 @@ class BalanceHelper
 
         foreach ($sources as $source) {
             $details = $this->getBalanceDetails($user_id, 'Allowance', $source);
-            $results[] = [
-                'source' => $source,
-                'balance' => $details['balance']
-            ];
+            // Only include sources that have some history or balance
+            if ($details['allowance_sum'] > 0 || $details['expense_sum'] > 0 || $details['savings_sum'] > 0) {
+                $results[] = [
+                    'source' => $source,
+                    'balance' => $details['balance'],
+                    'allowance_sum' => $details['allowance_sum'],
+                    'expense_sum' => $details['expense_sum']
+                ];
+            }
         }
 
         return $results;
