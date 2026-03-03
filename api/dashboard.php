@@ -193,21 +193,80 @@ if ($stmt) {
     $stmt->close();
 }
 
-// 8. Balance Forwarding Logic
+// 8. Financial Goals Summary
+$goals_summary = ['active' => 0, 'total' => 0];
+// Auto-update overdue goals (Sync logic from financial_goals.php)
+$conn->query("UPDATE financial_goals SET status = 'overdue' 
+              WHERE user_id = $user_id AND status = 'active' AND deadline < CURDATE() AND saved_amount < target_amount");
+$conn->query("UPDATE financial_goals SET status = 'completed' 
+              WHERE user_id = $user_id AND saved_amount >= target_amount");
+
+$stmt = $conn->prepare("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM financial_goals WHERE user_id = ?");
+if ($stmt) {
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $row = $stmt->get_result()->fetch_assoc();
+        $goals_summary['total'] = (int)$row['total'];
+        $goals_summary['active'] = (int)($row['active'] ?? 0);
+    }
+    $stmt->close();
+}
+$response['goals_summary'] = $goals_summary;
+
+// 9. Journal Summary
+$journal_summary = null;
+$stmt = $conn->prepare("SELECT date FROM journals WHERE user_id = ? ORDER BY date DESC LIMIT 1");
+if ($stmt) {
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $res = $stmt->get_result();
+        if ($row = $res->fetch_assoc()) {
+            $journal_summary = ['date' => $row['date']];
+        }
+    }
+    $stmt->close();
+}
+$response['journal_summary'] = $journal_summary;
+
+// 10. Reports Count (This Month)
+$reports_count = 0;
+// Check if reports table exists before querying
+$check = $conn->query("SHOW TABLES LIKE 'reports'");
+if ($check && $check->num_rows > 0) {
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM reports WHERE user_id = ? AND created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        if ($stmt->execute()) {
+            $reports_count = (int)$stmt->get_result()->fetch_row()[0];
+        }
+        $stmt->close();
+    }
+}
+$response['reports_count'] = $reports_count;
+
+// 11. Top Category Insight
+$top_category = 'None';
+$stmt = $conn->prepare("SELECT category FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1");
+if ($stmt) {
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $res = $stmt->get_result();
+        if ($row = $res->fetch_assoc()) {
+            $top_category = $row['category'];
+        }
+    }
+    $stmt->close();
+}
+$response['analytics']['top_category'] = $top_category;
+
+// 12. Balance Forwarding Logic
 $current_month = date('Y-m');
 $is_first_day = (date('j') == 1);
 $response['needs_forwarding'] = false;
 $response['prev_month_name'] = date('F', strtotime('-1 month'));
 
-// Prompt if:
-// 1. It's the first day of the month (or we haven't forwarded for the current month yet)
-// 2. We have a balance to forward
-// 3. We haven't already forwarded/dismissed for this month
 if ($last_forwarded_month !== $current_month && $response['balance'] > 0) {
-    // Only prompt on 1st day OR if we want it to persist until they do it
-    // The user specifically asked for "every 1st day", but functional would mean it shows up or is tracked.
-    // Let's make it show if it's the 1st day OR if it's early in the month and not done.
-    if ($is_first_day || (date('j') <= 5)) { // First 5 days of the month as a buffer
+    if ($is_first_day || (date('j') <= 5)) {
         $response['needs_forwarding'] = true;
     }
 }
