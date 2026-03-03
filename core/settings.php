@@ -655,7 +655,7 @@ include '../includes/header.php';
 
             function toggleEditMode(enable) {
                 isEditMode = enable;
-                const securityFields = securitySection.querySelectorAll('input, select, button[type="submit"], #btnDeleteAccount');
+                const securityFields = securitySection.querySelectorAll('input, select, button[type="submit"], #btnDeleteAccount, #btnResetData');
                 securityFields.forEach(field => field.disabled = !enable);
 
                 if (enable) {

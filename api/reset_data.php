@@ -18,18 +18,25 @@ if (!$conn) {
 
 $conn->begin_transaction();
 try {
-    // List of tables to clear for this user
+    // 1. Delete child records first to avoid foreign key constraints
+    $conn->query("DELETE FROM journal_lines WHERE journal_id IN (SELECT id FROM journals WHERE user_id = $user_id)");
+    $conn->query("DELETE FROM journal_tag_relations WHERE journal_id IN (SELECT id FROM journals WHERE user_id = $user_id)");
+
+    // 2. Clear user-specific data from other tables
     $tables = [
+        'journals',
+        'journal_tags',
         'expenses',
         'allowances',
         'savings',
         'bills',
         'goals',
-        'journal',
-        'achievements_unlocked',
-        'streaks',
+        'user_achievements',
+        'user_streaks',
         'notifications',
-        'budget_limits'
+        'budget_limits',
+        'ai_chat_history',
+        'categories'
     ];
 
     foreach ($tables as $table) {
@@ -41,8 +48,8 @@ try {
         }
     }
 
-    // Reset last_forwarded_month in users table
-    $stmt = $conn->prepare("UPDATE users SET last_forwarded_month = NULL WHERE id = ?");
+    // 3. Reset user-level counters and preferences
+    $stmt = $conn->prepare("UPDATE users SET last_forwarded_month = NULL, monthly_budget_goal = 0 WHERE id = ?");
     if ($stmt) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
