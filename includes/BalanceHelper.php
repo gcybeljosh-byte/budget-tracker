@@ -133,22 +133,32 @@ class BalanceHelper
 
     public function getBalancesByAllSources($user_id)
     {
+        // Start with default expected sources to ensure they show up even if empty
         $sources = ['Cash', 'GCash', 'Maya', 'Bank', 'Electronic'];
-        $results = [];
 
+        // Supplement with any other sources found in the database for this user
+        $stmt = $this->conn->prepare("SELECT DISTINCT source_type FROM allowances WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_row()) {
+            if ($row[0] && !in_array($row[0], $sources)) {
+                $sources[] = $row[0];
+            }
+        }
+        $stmt->close();
+
+        $results = [];
         foreach ($sources as $source) {
             $details = $this->getBalanceDetails($user_id, 'Allowance', $source);
-            // Only include sources that have some history or balance
-            if ($details['allowance_sum'] > 0 || $details['expense_sum'] > 0 || $details['savings_sum'] > 0) {
-                $results[] = [
-                    'source' => $source,
-                    'balance' => $details['balance'],
-                    'allowance_sum' => $details['allowance_sum'],
-                    'expense_sum' => $details['expense_sum'],
-                    'monthly_allowance' => $details['monthly_allowance'],
-                    'monthly_expense' => $details['monthly_expense']
-                ];
-            }
+            $results[] = [
+                'source' => $source,
+                'balance' => $details['balance'],
+                'allowance_sum' => $details['allowance_sum'],
+                'expense_sum' => $details['expense_sum'],
+                'monthly_allowance' => $details['monthly_allowance'],
+                'monthly_expense' => $details['monthly_expense']
+            ];
         }
 
         return $results;
