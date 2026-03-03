@@ -18,9 +18,20 @@ if (!$conn) {
 
 $conn->begin_transaction();
 try {
+    // Helper to check table existence
+    function checkTable($conn, $table)
+    {
+        $res = $conn->query("SHOW TABLES LIKE '$table'");
+        return $res && $res->num_rows > 0;
+    }
+
     // 1. Delete child records first to avoid foreign key constraints
-    $conn->query("DELETE FROM journal_lines WHERE journal_id IN (SELECT id FROM journals WHERE user_id = $user_id)");
-    $conn->query("DELETE FROM journal_tag_relations WHERE journal_id IN (SELECT id FROM journals WHERE user_id = $user_id)");
+    if (checkTable($conn, 'journal_lines')) {
+        $conn->query("DELETE FROM journal_lines WHERE journal_id IN (SELECT id FROM journals WHERE user_id = $user_id)");
+    }
+    if (checkTable($conn, 'journal_tag_relations')) {
+        $conn->query("DELETE FROM journal_tag_relations WHERE journal_id IN (SELECT id FROM journals WHERE user_id = $user_id)");
+    }
 
     // 2. Clear user-specific data from other tables
     $tables = [
@@ -29,8 +40,7 @@ try {
         'expenses',
         'allowances',
         'savings',
-        'bills',
-        'goals',
+        'financial_goals',
         'user_achievements',
         'user_streaks',
         'notifications',
@@ -40,11 +50,13 @@ try {
     ];
 
     foreach ($tables as $table) {
-        $stmt = $conn->prepare("DELETE FROM $table WHERE user_id = ?");
-        if ($stmt) {
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            $stmt->close();
+        if (checkTable($conn, $table)) {
+            $stmt = $conn->prepare("DELETE FROM $table WHERE user_id = ?");
+            if ($stmt) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
         }
     }
 
