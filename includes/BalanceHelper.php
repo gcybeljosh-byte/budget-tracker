@@ -162,9 +162,19 @@ class BalanceHelper
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_row()) {
-            $type = $row[0];
-            if ($type && $type !== '0' && !in_array($type, $sources)) {
-                $sources[] = $type;
+            $type = trim($row[0]);
+            if ($type && $type !== '0') {
+                // Case-insensitive check to avoid duplicates (e.g., 'GCash' vs 'GCASH')
+                $exists = false;
+                foreach ($sources as $s) {
+                    if (strcasecmp($s, $type) === 0) {
+                        $exists = true;
+                        break;
+                    }
+                }
+                if (!$exists) {
+                    $sources[] = $type;
+                }
             }
         }
         $stmt->close();

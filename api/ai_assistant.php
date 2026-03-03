@@ -36,8 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // --- Self-Healing: Ensure chat history table exists ---
-    // Added 'response' column to store bot reply in the same row as the message for easier context tracking
+    // --- Self-Healing: Ensure chat history table and columns exist ---
     $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
@@ -46,6 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )");
+
+    // Migration: If table exists but missing 'response' column (from older version)
+    $check = $conn->query("SHOW COLUMNS FROM ai_chat_history LIKE 'response'");
+    if ($check && $check->num_rows == 0) {
+        $conn->query("ALTER TABLE ai_chat_history ADD COLUMN response TEXT DEFAULT NULL AFTER message");
+    }
+
+    // Migration: Remove old 'sender' column if it exists
+    $check = $conn->query("SHOW COLUMNS FROM ai_chat_history LIKE 'sender'");
+    if ($check && $check->num_rows > 0) {
+        $conn->query("ALTER TABLE ai_chat_history DROP COLUMN sender");
+    }
 
     // 2. Save User Message and Get AI Response
     $aiHelper = new AiHelper($conn, $user_id);

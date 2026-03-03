@@ -377,7 +377,13 @@ include '../includes/header.php';
                 const stsCard = document.getElementById('safeToSpendCard');
                 const stsIcon = document.getElementById('safeToSpendIcon');
                 updateElement('dashSafeToSpend', formatCurrency(sts.daily_limit));
-                updateElement('safeToSpendDays', `${sts.remaining_days} days left in month`);
+
+                let subtext = `${sts.remaining_days} days left in month`;
+                if (sts.unpaid_bills_sum > 0) {
+                    subtext += ` • ${formatCurrency(sts.unpaid_bills_sum)} bills pending`;
+                }
+                updateElement('safeToSpendDays', subtext);
+
                 // Color Logic (Safe-to-Spend)
                 stsCard.classList.remove('border-info', 'border-warning', 'border-danger');
                 stsIcon.classList.remove('bg-info-subtle', 'text-info', 'bg-warning-subtle', 'text-warning', 'bg-danger-subtle', 'text-danger', 'bg-danger', 'text-white');
@@ -385,6 +391,9 @@ include '../includes/header.php';
                 if (sts.daily_limit <= 0) {
                     stsCard.classList.add('border-danger');
                     stsIcon.className = 'rounded-circle bg-danger p-2 me-2 text-white';
+                    if (sts.is_overdrawn) {
+                        updateElement('safeToSpendDays', 'Budget overdrawn with pending bills');
+                    }
                 } else if (sts.daily_limit < 100) {
                     stsCard.classList.add('border-warning');
                     stsIcon.className = 'rounded-circle bg-warning-subtle p-2 me-2 text-warning';

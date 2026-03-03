@@ -177,14 +177,19 @@ $current_day = (int)date('j');
 $total_days = (int)date('t');
 $remaining_days = $total_days - $current_day + 1; // Inclusive of today
 
-// Use the net balance (Allowance/Wallets) for safe-to-spend
+// Safe-to-Spend Calculation Strategy:
+// We use the "Liquid" balance (Total Wallet Balances) minus "Unpaid Bills" for the month.
+// If the user has a negative lifetime balance, it naturally reduces their safe-to-spend.
 $available_balance = (float)$response['balance'];
-$safe_to_spend = ($remaining_days > 0) ? ($available_balance - $total_unpaid_bills) / $remaining_days : 0;
+$net_liquid = $available_balance - $total_unpaid_bills;
+$safe_to_spend = ($remaining_days > 0) ? ($net_liquid / $remaining_days) : 0;
 
 $response['analytics']['safe_to_spend'] = [
     'daily_limit' => max(0, $safe_to_spend),
     'remaining_days' => $remaining_days,
-    'unpaid_bills_sum' => $total_unpaid_bills
+    'unpaid_bills_sum' => $total_unpaid_bills,
+    'available_balance' => $available_balance,
+    'is_overdrawn' => ($net_liquid < 0)
 ];
 
 // 7. Recent Transactions
