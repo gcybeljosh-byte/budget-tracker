@@ -65,7 +65,8 @@ include '../includes/db.php';
                         <thead class="bg-light">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Source</th>
-                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-end">Current Balance (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</th>
+                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-end">Monthly Allowance</th>
+                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-end">Current Balance</th>
                                 <th class="border-0 py-3 pe-4 text-secondary small text-uppercase fw-bold text-end">Actions</th>
                             </tr>
                         </thead>
@@ -272,7 +273,8 @@ include '../includes/db.php';
                 row.onclick = () => fetchSourceHistory(item.source);
                 row.innerHTML = `
                     <td class="ps-4"><span class="badge ${sourceBadge} rounded-pill fw-bold">${item.source}</span></td>
-                    <td class="text-end fw-bold"><span class="text-success">${formatCurrency(item.balance)}</span></td>
+                    <td class="text-end fw-bold text-primary">${formatCurrency(item.monthly_allowance)}</td>
+                    <td class="text-end fw-bold text-success">${formatCurrency(item.balance)}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold"><i class="fas fa-history me-1"></i> Details</button>
                     </td>`;

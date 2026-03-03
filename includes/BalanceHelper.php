@@ -79,16 +79,18 @@ class BalanceHelper
 
     public function getBalanceDetails($user_id, $expense_source, $source_type)
     {
-        $dateFilter = ""; // Lifetime
+        $monthFilter = " AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')";
 
         if ($expense_source === 'Savings') {
             $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $dateFilter) as total_saved,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Savings' $dateFilter) as total_spent
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ?) as total_saved,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Savings') as total_spent,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $monthFilter) as monthly_saved,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Savings' $monthFilter) as monthly_spent
             ";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bind_param("isis", $user_id, $source_type, $user_id, $source_type);
+            $stmt->bind_param("isisisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
             $stmt->execute();
             $res = $stmt->get_result()->fetch_assoc();
             $stmt->close();
@@ -96,18 +98,23 @@ class BalanceHelper
             return [
                 'allowance_sum' => (float)$res['total_saved'],
                 'expense_sum' => (float)$res['total_spent'],
+                'monthly_allowance' => (float)$res['monthly_saved'],
+                'monthly_expense' => (float)$res['monthly_spent'],
                 'savings_sum' => 0,
                 'balance' => (float)$res['total_saved'] - (float)$res['total_spent']
             ];
         } else {
             $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = ? $dateFilter) as total_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' $dateFilter) as total_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $dateFilter) as total_savings
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = ?) as total_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance') as total_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ?) as total_savings,
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = ? $monthFilter) as monthly_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' $monthFilter) as monthly_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $monthFilter) as monthly_savings
             ";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bind_param("isisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
+            $stmt->bind_param("isisisisisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
             $stmt->execute();
             $res = $stmt->get_result()->fetch_assoc();
             $stmt->close();
@@ -116,6 +123,9 @@ class BalanceHelper
                 'allowance_sum' => (float)$res['total_allowance'],
                 'expense_sum' => (float)$res['total_expense'],
                 'savings_sum' => (float)$res['total_savings'],
+                'monthly_allowance' => (float)$res['monthly_allowance'],
+                'monthly_expense' => (float)$res['monthly_expense'],
+                'monthly_savings' => (float)$res['monthly_savings'],
                 'balance' => (float)$res['total_allowance'] - (float)$res['total_expense'] - (float)$res['total_savings']
             ];
         }
@@ -134,7 +144,9 @@ class BalanceHelper
                     'source' => $source,
                     'balance' => $details['balance'],
                     'allowance_sum' => $details['allowance_sum'],
-                    'expense_sum' => $details['expense_sum']
+                    'expense_sum' => $details['expense_sum'],
+                    'monthly_allowance' => $details['monthly_allowance'],
+                    'monthly_expense' => $details['monthly_expense']
                 ];
             }
         }

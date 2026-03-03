@@ -482,6 +482,7 @@ include '../includes/header.php';
                         <div>
                             <div class="extra-small text-muted fw-bold text-uppercase mb-1" style="font-size: 0.6rem; letter-spacing: 1px;">${item.source} Wallet</div>
                             <div class="h4 fw-bold text-dark mb-0">${formatCurrency(item.balance)}</div>
+                            <div class="extra-small text-primary fw-bold mt-1" style="font-size: 0.55rem;">Month: ${formatCurrency(item.monthly_allowance)}</div>
                         </div>
                     </div>
                 `;
