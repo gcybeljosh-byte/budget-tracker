@@ -148,14 +148,12 @@ $response['analytics'] = [
 
 // 6. Bills & Hub logic (Personal Only)
 $upcoming_bills = [];
-$total_unpaid_bills = 0;
 $stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
-            $total_unpaid_bills += (float)$row['amount'];
             if (count($upcoming_bills) < 5) $upcoming_bills[] = $row;
         }
     }
@@ -163,8 +161,26 @@ if ($stmt) {
 }
 $response['upcoming_bills'] = $upcoming_bills;
 
-$remaining_days = (int)date('t') - (int)date('j') + 1;
-$safe_to_spend = ($remaining_days > 0) ? ($response['balance'] - $total_unpaid_bills) / $remaining_days : 0;
+// 7. Safe-to-Spend Calculation (Refined)
+// Include all active unpaid bills whose due date has passed or is within the current month
+$stmt = $conn->prepare("SELECT SUM(amount) FROM recurring_payments 
+                       WHERE user_id = ? AND is_active = 1 
+                       AND (last_paid_at IS NULL OR DATE_FORMAT(last_paid_at, '%Y-%m') < DATE_FORMAT(NOW(), '%Y-%m'))
+                       AND (due_date <= LAST_DAY(NOW()))");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$total_unpaid_bills = (float)$stmt->get_result()->fetch_row()[0];
+$stmt->close();
+
+// Current day of month and total days in month
+$current_day = (int)date('j');
+$total_days = (int)date('t');
+$remaining_days = $total_days - $current_day + 1; // Inclusive of today
+
+// Use the net balance (Allowance/Wallets) for safe-to-spend
+$available_balance = (float)$response['balance'];
+$safe_to_spend = ($remaining_days > 0) ? ($available_balance - $total_unpaid_bills) / $remaining_days : 0;
+
 $response['analytics']['safe_to_spend'] = [
     'daily_limit' => max(0, $safe_to_spend),
     'remaining_days' => $remaining_days,

@@ -427,10 +427,6 @@ include '../includes/header.php';
             renderDashboardChart(data.category_spending);
             renderRecentTransactions(data.recent_transactions);
 
-            if (data.shared_wallets) {
-                renderSharedWallets(data.shared_wallets);
-            }
-
             // --- Gamification Logic ---
             fetch('<?php echo SITE_URL; ?>api/gamification.php')
                 .then(res => res.json())
