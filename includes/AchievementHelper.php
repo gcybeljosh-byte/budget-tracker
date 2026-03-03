@@ -52,9 +52,14 @@ class AchievementHelper
             if ($lastDate === $today) return;
 
             if (!$hadExpensesYesterday) {
-                if ($lastDate === $yesterday || $lastDate === null) {
+                if ($lastDate === $yesterday) {
+                    // Continue an existing streak from yesterday
                     $currentCount++;
+                } elseif ($lastDate === null) {
+                    // Fresh start — don't count yet, set today as the first check but keep at 0
+                    $currentCount = 0;
                 } else {
+                    // Streak broken — restart from 1
                     $currentCount = 1;
                 }
             } else {
