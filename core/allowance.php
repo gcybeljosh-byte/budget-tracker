@@ -230,6 +230,9 @@ include '../includes/db.php';
         const allowanceForm = document.getElementById('allowanceForm');
         const editAllowanceForm = document.getElementById('editAllowanceForm');
 
+        // State tracking
+        let currentSourceViewing = null;
+
         // URL Context
         const urlParams = new URLSearchParams(window.location.search);
         const activeGroupId = urlParams.get('group_id');
@@ -324,6 +327,7 @@ include '../includes/db.php';
         }
 
         function fetchSourceHistory(source) {
+            currentSourceViewing = source;
             document.getElementById('historyModalTitle').textContent = `${source} Transaction History`;
             const historyTableBody = document.getElementById('historyTableBody');
             historyTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading history...</td></tr>';
@@ -557,6 +561,11 @@ include '../includes/db.php';
                         bootstrap.Modal.getOrCreateInstance(document.getElementById('editAllowanceModal')).hide();
                         fetchAllowances();
                         fetchDashboardStats();
+
+                        // Reopen source history if we were viewing one
+                        if (currentSourceViewing) {
+                            fetchSourceHistory(currentSourceViewing);
+                        }
                     } else {
                         showAlert(result.message, 'danger');
                     }
@@ -596,12 +605,9 @@ include '../includes/db.php';
                                 fetchAllowances();
                                 fetchDashboardStats();
 
-                                // Also refresh the history modal if it's open
-                                const historyModalEl = document.getElementById('sourceHistoryModal');
-                                if (historyModalEl.classList.contains('show')) {
-                                    const title = document.getElementById('historyModalTitle').textContent;
-                                    const source = title.replace(' Transaction History', '');
-                                    fetchSourceHistory(source);
+                                // Refresh source history if we were viewing one
+                                if (currentSourceViewing) {
+                                    fetchSourceHistory(currentSourceViewing);
                                 }
                             } else {
                                 showAlert(result.message, 'danger');
@@ -611,6 +617,11 @@ include '../includes/db.php';
                 }
             });
         }
+
+        // Clear viewing state when modal is closed
+        document.getElementById('sourceHistoryModal').addEventListener('hidden.bs.modal', function() {
+            currentSourceViewing = null;
+        });
 
         // --- Helpers ---
 
