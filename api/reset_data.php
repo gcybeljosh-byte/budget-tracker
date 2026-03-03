@@ -68,6 +68,16 @@ try {
         $stmt->close();
     }
 
+    // 4. Hard-reset streak counters (rows get auto-recreated, so zero them out)
+    if (checkTable($conn, 'user_streaks')) {
+        $stmt = $conn->prepare("UPDATE user_streaks SET current_count = 0, max_count = 0, last_triggered_date = NULL WHERE user_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
     logActivity($conn, $user_id, 'data_reset', 'User performed a full financial data reset');
 
     $conn->commit();
