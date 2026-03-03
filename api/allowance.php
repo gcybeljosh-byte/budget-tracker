@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($date && $description && $amount) {
                 $stmt = $conn->prepare("INSERT INTO allowances (user_id, date, description, amount, source_type) VALUES (?, ?, ?, ?, ?)");
-                $stmt->bind_param("isssd", $user_id, $date, $description, $amount, $source_type);
+                $stmt->bind_param("issds", $user_id, $date, $description, $amount, $source_type);
 
                 if ($stmt->execute()) {
                     require_once '../includes/CurrencyHelper.php';

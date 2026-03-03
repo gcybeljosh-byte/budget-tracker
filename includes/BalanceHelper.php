@@ -104,14 +104,16 @@ class BalanceHelper
                 'balance' => (float)$res['total_saved'] - (float)$res['total_spent']
             ];
         } else {
+            $sourcePart = ($source_type === 'Cash') ? "(source_type = ? OR source_type = '0' OR source_type IS NULL)" : "source_type = ?";
+
             $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = ?) as total_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance') as total_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ?) as total_savings,
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type = ? $monthFilter) as monthly_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Allowance' $monthFilter) as monthly_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $monthFilter) as monthly_savings
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND $sourcePart) as total_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND $sourcePart AND expense_source = 'Allowance') as total_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND $sourcePart) as total_savings,
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND $sourcePart $monthFilter) as monthly_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND $sourcePart AND expense_source = 'Allowance' $monthFilter) as monthly_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND $sourcePart $monthFilter) as monthly_savings
             ";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("isisisisisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
@@ -142,8 +144,9 @@ class BalanceHelper
         $stmt->execute();
         $res = $stmt->get_result();
         while ($row = $res->fetch_row()) {
-            if ($row[0] && !in_array($row[0], $sources)) {
-                $sources[] = $row[0];
+            $type = $row[0];
+            if ($type && $type !== '0' && !in_array($type, $sources)) {
+                $sources[] = $type;
             }
         }
         $stmt->close();
