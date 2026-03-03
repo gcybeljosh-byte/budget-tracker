@@ -15,14 +15,15 @@ $user_id = $_SESSION['id'];
 ensureColumnExists($conn, 'users', 'preferred_currency', "VARCHAR(10) DEFAULT 'PHP'");
 ensureColumnExists($conn, 'users', 'monthly_budget_goal', "DECIMAL(10,2) DEFAULT 5000.00");
 ensureColumnExists($conn, 'users', 'ai_tone', "VARCHAR(50) DEFAULT 'Professional'");
+ensureColumnExists($conn, 'users', 'ai_language', "VARCHAR(50) DEFAULT 'Auto-Detect'");
 ensureColumnExists($conn, 'users', 'auth_method', "VARCHAR(20) DEFAULT 'Local'");
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $stmt = $conn->prepare("SELECT username, first_name, last_name, email, contact_number, profile_picture, preferred_currency, monthly_budget_goal, ai_tone, notif_budget, notif_low_balance, security_question, auth_method FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT username, first_name, last_name, email, contact_number, profile_picture, preferred_currency, monthly_budget_goal, ai_tone, ai_language, notif_budget, notif_low_balance, security_question, auth_method FROM users WHERE id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($row = $result->fetch_assoc()) {
         echo json_encode(['success' => true, 'data' => $row]);
     } else {
@@ -31,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt->close();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'info'; // 'info' or 'username'
-    
+
     if ($action === 'username') {
         $username = trim($_POST['username'] ?? '');
         if (empty($username)) {
@@ -65,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'security_question') {
         $question = $_POST['security_question'] ?? '';
         $answer = trim($_POST['security_answer'] ?? '');
-        
+
         if (empty($question) || empty($answer)) {
             echo json_encode(['success' => false, 'message' => 'Question and answer are required.']);
             exit;
@@ -76,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $stmt = $conn->prepare("UPDATE users SET security_question = ?, security_answer = ? WHERE id = ?");
         $stmt->bind_param("ssi", $question, $hashedAnswer, $user_id);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Security recovery set successfully.']);
         } else {
@@ -91,12 +92,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $currency = $_POST['preferred_currency'] ?? 'PHP';
         $goal = $_POST['monthly_budget_goal'] ?? 5000;
         $tone = $_POST['ai_tone'] ?? 'Professional';
+        $language = $_POST['ai_language'] ?? 'Auto-Detect';
         $notif_budget = isset($_POST['notif_budget']) ? 1 : 0;
         $notif_low_balance = isset($_POST['notif_low_balance']) ? 1 : 0;
 
-        $stmt = $conn->prepare("UPDATE users SET preferred_currency = ?, monthly_budget_goal = ?, ai_tone = ?, notif_budget = ?, notif_low_balance = ? WHERE id = ?");
-        $stmt->bind_param("sdiiii", $currency, $goal, $tone, $notif_budget, $notif_low_balance, $user_id);
-        
+        $stmt = $conn->prepare("UPDATE users SET preferred_currency = ?, monthly_budget_goal = ?, ai_tone = ?, ai_language = ?, notif_budget = ?, notif_low_balance = ? WHERE id = ?");
+        $stmt->bind_param("sdssiii", $currency, $goal, $tone, $language, $notif_budget, $notif_low_balance, $user_id);
+
         if ($stmt->execute()) {
             $_SESSION['user_currency'] = $currency; // Update session if needed
             echo json_encode(['success' => true, 'message' => 'Preferences updated successfully.']);
@@ -130,8 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         if ($file['size'] > $maxSize) {
-             echo json_encode(['success' => false, 'message' => 'File size exceeds 2MB limit.']);
-             exit;
+            echo json_encode(['success' => false, 'message' => 'File size exceeds 2MB limit.']);
+            exit;
         }
 
         $uploadDir = '../uploads/profile_pics/';
@@ -161,10 +163,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $_SESSION['first_name'] = $first_name;
         $_SESSION['last_name'] = $last_name;
         if ($profile_pic_path) $_SESSION['profile_picture'] = $profile_pic_path;
-        
+
         echo json_encode([
-            'success' => true, 
-            'message' => 'Profile updated successfully.', 
+            'success' => true,
+            'message' => 'Profile updated successfully.',
             'profile_picture' => $profile_pic_path,
             'first_name' => $first_name,
             'last_name' => $last_name
@@ -178,4 +180,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 $conn->close();
-?>

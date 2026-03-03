@@ -287,6 +287,17 @@ include '../includes/header.php';
                                                     <option value="Strict">Strict & Analytical</option>
                                                 </select>
                                             </div>
+                                            <div class="col-12">
+                                                <label class="form-label text-secondary small text-uppercase fw-bold">Preferred AI Language</label>
+                                                <select class="form-select border-0 bg-light rounded-3 py-2" name="ai_language" id="prefLanguage">
+                                                    <option value="Auto-Detect">Auto-Detect (Based on chat)</option>
+                                                    <option value="English">English</option>
+                                                    <option value="Tagalog">Tagalog</option>
+                                                    <option value="Cebuano">Cebuano</option>
+                                                    <option value="Spanish">Spanish</option>
+                                                </select>
+                                                <span class="text-muted small mt-1 d-block"><i class="fas fa-info-circle me-1"></i> I will respond in this language or detect it automatically.</span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -633,6 +644,9 @@ include '../includes/header.php';
                             document.getElementById('prefCurrency').value = user.preferred_currency || 'PHP';
                             document.getElementById('prefGoal').value = user.monthly_budget_goal || 5000;
                             document.getElementById('prefTone').value = user.ai_tone || 'Professional';
+                            if (document.getElementById('prefLanguage')) {
+                                document.getElementById('prefLanguage').value = user.ai_language || 'Auto-Detect';
+                            }
                             document.getElementById('notifBudget').checked = parseInt(user.notif_budget) === 1;
                             document.getElementById('notifLowBalance').checked = parseInt(user.notif_low_balance) === 1;
                         }

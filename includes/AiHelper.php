@@ -64,7 +64,7 @@ class AiHelper
         $context = [];
 
         // 1. User Profile
-        $stmt = $this->conn->prepare("SELECT first_name, last_name, email, preferred_currency, ai_tone, notif_budget, notif_low_balance, monthly_budget_goal, role FROM users WHERE id = ?");
+        $stmt = $this->conn->prepare("SELECT first_name, last_name, email, preferred_currency, ai_tone, ai_language, notif_budget, notif_low_balance, monthly_budget_goal, role FROM users WHERE id = ?");
         $stmt->bind_param("i", $this->user_id);
         $stmt->execute();
         $res  = $stmt->get_result();
@@ -73,6 +73,7 @@ class AiHelper
         $context['role']         = $user['role'] ?? 'user';
         $context['currency']     = $user['preferred_currency'] ?? 'PHP';
         $context['ai_tone']      = $user['ai_tone'] ?? 'Professional';
+        $context['ai_language']  = $user['ai_language'] ?? 'Auto-Detect';
         $context['budget_goal']  = $user['monthly_budget_goal'] ?? 0;
         $stmt->close();
 
@@ -311,6 +312,7 @@ class AiHelper
         $budgetGoal   = number_format($context['budget_goal'], 2);
         $role         = $context['role'];
         $tone         = $context['ai_tone'] ?? 'Professional';
+        $aiLanguage   = $context['ai_language'] ?? 'Auto-Detect';
 
         $symbols = ['PHP' => '₱', 'USD' => '$', 'EUR' => '€', 'JPY' => '¥', 'GBP' => '£'];
         $symbol  = $symbols[$currencyCode] ?? '₱';
@@ -402,6 +404,12 @@ class AiHelper
         $prompt .= "- Use clear formatting: bullet points, bold headings, step-by-step lists for how-tos.\n";
         $prompt .= "- Keep responses concise but complete. Don't pad with filler words.\n";
         $prompt .= "- When asked about features you can't do (adding/editing records), politely redirect them to the correct page with exact navigation steps.\n\n";
+
+        $prompt .= "# LANGUAGE PROTOCOL\n";
+        $prompt .= "- **Preferred Language:** {$aiLanguage}\n";
+        $prompt .= "- If Preferred Language is **\"Auto-Detect\"**: Respond in the same language as the user's message (e.g., if they speak Tagalog, respond in Tagalog. If English, respond in English).\n";
+        $prompt .= "- If Preferred Language is a **Specific Language** (e.g., Tagalog): ALWAYS respond in that language, even if the user speaks to you in a different one.\n";
+        $prompt .= "- Support all major Philippine dialects (Tagalog, Cebuano, etc.) and international languages with high accuracy and financial expertise.\n\n";
 
         $prompt .= "# USER PROFILE\n";
         $prompt .= "- **Name:** {$fullName}\n";

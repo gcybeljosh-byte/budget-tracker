@@ -60,3 +60,14 @@ if (!function_exists('isMaintenanceMode')) {
         return false;
     }
 }
+
+if (!function_exists('ensureColumnExists')) {
+    function ensureColumnExists($conn, $table, $column, $definition)
+    {
+        if (!$conn) return;
+        $check = mysqli_query($conn, "SHOW COLUMNS FROM `$table` LIKE '$column'");
+        if (mysqli_num_rows($check) == 0) {
+            mysqli_query($conn, "ALTER TABLE `$table` ADD `$column` $definition");
+        }
+    }
+}
