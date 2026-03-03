@@ -232,6 +232,7 @@ include '../includes/db.php';
 
         // State tracking
         let currentSourceViewing = null;
+        let isSwitchingModals = false;
 
         // URL Context
         const urlParams = new URLSearchParams(window.location.search);
@@ -332,7 +333,8 @@ include '../includes/db.php';
             const historyTableBody = document.getElementById('historyTableBody');
             historyTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading history...</td></tr>';
 
-            const modal = new bootstrap.Modal(document.getElementById('sourceHistoryModal'));
+            const modalEl = document.getElementById('sourceHistoryModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
 
             const query = activeGroupId ? `&group_id=${activeGroupId}` : '';
@@ -410,10 +412,19 @@ include '../includes/db.php';
             document.getElementById('editAllowanceSourceType').value = data.source || 'Cash';
 
             // Hide history modal before showing edit modal
-            const historyModal = bootstrap.Modal.getInstance(document.getElementById('sourceHistoryModal'));
-            if (historyModal) historyModal.hide();
+            const historyModalEl = document.getElementById('sourceHistoryModal');
+            const historyModal = bootstrap.Modal.getInstance(historyModalEl);
+            if (historyModal) {
+                isSwitchingModals = true;
+                historyModal.hide();
+                // Reset flag after hide transition
+                setTimeout(() => {
+                    isSwitchingModals = false;
+                }, 400);
+            }
 
-            const modal = new bootstrap.Modal(document.getElementById('editAllowanceModal'));
+            const editModalEl = document.getElementById('editAllowanceModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(editModalEl);
             modal.show();
         }
 
@@ -562,9 +573,9 @@ include '../includes/db.php';
                         fetchAllowances();
                         fetchDashboardStats();
 
-                        // Reopen source history if we were viewing one
+                        // Reopen source history if we were viewing one (with slight delay for backdrop cleanup)
                         if (currentSourceViewing) {
-                            fetchSourceHistory(currentSourceViewing);
+                            setTimeout(() => fetchSourceHistory(currentSourceViewing), 400);
                         }
                     } else {
                         showAlert(result.message, 'danger');
@@ -605,9 +616,9 @@ include '../includes/db.php';
                                 fetchAllowances();
                                 fetchDashboardStats();
 
-                                // Refresh source history if we were viewing one
+                                // Refresh source history if we were viewing one (with slight delay for backdrop cleanup)
                                 if (currentSourceViewing) {
-                                    fetchSourceHistory(currentSourceViewing);
+                                    setTimeout(() => fetchSourceHistory(currentSourceViewing), 400);
                                 }
                             } else {
                                 showAlert(result.message, 'danger');
@@ -620,8 +631,29 @@ include '../includes/db.php';
 
         // Clear viewing state when modal is closed
         document.getElementById('sourceHistoryModal').addEventListener('hidden.bs.modal', function() {
-            currentSourceViewing = null;
+            if (!isSwitchingModals) {
+                currentSourceViewing = null;
+            }
+            // Foolproof backdrop cleanup
+            cleanupBackdrops();
         });
+
+        // Add cleanup to other modals too
+        ['addAllowanceModal', 'editAllowanceModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('hidden.bs.modal', cleanupBackdrops);
+        });
+
+        function cleanupBackdrops() {
+            // Check if any modal is still visible
+            const anyVisible = document.querySelector('.modal.show');
+            if (!anyVisible) {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        }
 
         // --- Helpers ---
 
