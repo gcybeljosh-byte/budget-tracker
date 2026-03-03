@@ -1268,10 +1268,19 @@ table.dataTable thead .sorting_desc:after {
         --bs-gutter-x: 0.85rem;
     }
 
+    /* Row g-3 — prevent horizontal overflow */
+    .row.g-3 {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 0.75rem;
+    }
+
     /* Tables */
     .table-responsive {
         border-radius: 0.75rem;
         margin-bottom: 1rem;
+        /* Prevent table from overflowing the card on mobile */
+        max-width: 100%;
+        overflow-x: auto;
     }
 
     /* Table text slightly smaller */
@@ -1279,6 +1288,12 @@ table.dataTable thead .sorting_desc:after {
     .table thead th {
         font-size: 0.82rem;
         padding: 0.75rem 0.75rem;
+    }
+
+    /* Wallet border-end: remove when stacking vertically */
+    .col-md-4.border-end {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-dim) !important;
     }
 }
 
@@ -1288,9 +1303,9 @@ table.dataTable thead .sorting_desc:after {
         --page-px: 0.9rem;
     }
 
-    /* Body: extra padding at bottom to clear mobile bottom nav */
+    /* Body: extra padding at bottom to clear mobile bottom nav + safe area */
     body {
-        padding-bottom: 70px;
+        padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
     }
 
     /* ─ Bottom Navigation Bar ─ */
@@ -1300,7 +1315,8 @@ table.dataTable thead .sorting_desc:after {
         bottom: 0;
         left: 0;
         right: 0;
-        height: 62px;
+        height: auto;
+        min-height: 62px;
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -1308,8 +1324,8 @@ table.dataTable thead .sorting_desc:after {
         z-index: 998;
         justify-content: space-around;
         align-items: center;
-        padding: 0 0.5rem;
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding: 0.35rem 0.5rem;
+        padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0.35rem));
     }
 
     .bottom-nav-item {
@@ -1361,9 +1377,9 @@ table.dataTable thead .sorting_desc:after {
         opacity: 1;
     }
 
-    /* ─ AI FAB: above bottom nav ─ */
+    /* ─ AI FAB: clearly above bottom nav + iOS safe area ─ */
     .ai-fab {
-        bottom: 75px;
+        bottom: calc(80px + env(safe-area-inset-bottom, 0px));
         right: 18px;
         width: 50px;
         height: 50px;
@@ -1374,8 +1390,8 @@ table.dataTable thead .sorting_desc:after {
     #aiChatWidget {
         width: 96% !important;
         right: 2% !important;
-        bottom: 82px !important;
-        max-height: 68vh !important;
+        bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+        max-height: 65vh !important;
         border-radius: 1.15rem !important;
     }
 
@@ -1430,9 +1446,11 @@ table.dataTable thead .sorting_desc:after {
         margin-top: 0.5rem;
     }
 
+    /* Keep DataTables search at full width even on focus (no expand animation) */
     .dataTables_wrapper .dataTables_filter input,
     .dataTables_wrapper .dataTables_filter input:focus {
-        width: 100%;
+        width: 100% !important;
+        transition: none;
     }
 
     .dataTables_wrapper .dataTables_filter {
@@ -1454,10 +1472,11 @@ table.dataTable thead .sorting_desc:after {
         left: auto !important;
     }
 
-    /* ─ Modals: nearly full-screen ─ */
+    /* ─ Modals: nearly full-screen, safe-area aware ─ */
     .modal-dialog {
-        max-width: 100%;
+        max-width: calc(100% - 1rem);
         margin: 0.5rem auto;
+        margin-bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem));
     }
 
     .modal-content {
@@ -1474,16 +1493,31 @@ table.dataTable thead .sorting_desc:after {
         max-width: 50vw;
     }
 
-    /* ─ Stat grid: all single-column ─ */
-    [class*="col-"] {
-        flex: 0 0 100%;
-        max-width: 100%;
+    /* ─ Stat grid: specific columns go full-width on mobile ─
+       Using named column classes instead of the broad [class*="col-"]
+       selector, so intentional 2-col grids (Quick Hub, row-cols) still work */
+    .col-12,
+    .col-sm-6,
+    .col-md-3:not(.row-cols-2 > .col),
+    .col-md-4:not(.row-cols-2 > .col),
+    .col-md-6:not(.row-cols-2 > .col),
+    .col-lg-4:not(.row-cols-2 > .col),
+    .col-lg-8:not(.row-cols-2 > .col) {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
     }
 
-    /* But keep 2-col for quick access hub */
+    /* ─ Preserve 2-col for Quick Access Hub and similar ─ */
     .row-cols-2>.col {
         flex: 0 0 50% !important;
         max-width: 50% !important;
+        width: 50% !important;
+    }
+
+    /* ─ Prevent horizontal page overflow ─ */
+    .container-fluid {
+        overflow-x: hidden;
     }
 }
 
@@ -1495,6 +1529,7 @@ table.dataTable thead .sorting_desc:after {
 
     .navbar h2 {
         font-size: 0.95rem;
+        max-width: 42vw;
     }
 
     .h4,
@@ -1510,10 +1545,20 @@ table.dataTable thead .sorting_desc:after {
     .row-cols-2>.col {
         flex: 0 0 100% !important;
         max-width: 100% !important;
+        width: 100% !important;
     }
 
     #mobile-bottom-nav {
-        height: 58px;
+        height: auto;
+        min-height: 54px;
+    }
+
+    /* AI FAB: even tighter on tiny phones */
+    .ai-fab {
+        bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+        width: 46px;
+        height: 46px;
+        font-size: 1.05rem;
     }
 
     .bottom-nav-item {

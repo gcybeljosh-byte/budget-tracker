@@ -56,25 +56,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     // 3. Generate AI Response
-    // AiHelper instance already created above
-
-    // The AiHelper::getResponse method determines whether to use Real API or Simulation
-    // based on the config.php settings.
     $aiResponse = $aiHelper->getResponse($userMessage);
 
-    $responseMessage = '';
-    $actionPerformed = false;
-    $actionType = '';
+    $responseMessage = is_array($aiResponse) ? ($aiResponse['message'] ?? '') : (string)$aiResponse;
 
-    if (is_array($aiResponse)) {
-        $responseMessage = $aiResponse['message'];
-        $actionPerformed = $aiResponse['action_performed'] ?? false;
-        $actionType = $aiResponse['action_type'] ?? '';
-    } else {
-        $responseMessage = $aiResponse;
+    if (empty($responseMessage)) {
+        $responseMessage = "I'm sorry, I couldn't generate a response. Please try again.";
     }
 
-    // 4. Save AI Response
+    // 4. Save AI Response to History
     $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, sender) VALUES (?, ?, 'bot')");
     $stmt->bind_param("is", $user_id, $responseMessage);
     $stmt->execute();
@@ -83,12 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 5. Return Response
     echo json_encode([
         'success' => true,
-        'data' => [
-            'message' => $responseMessage,
-            'sender' => 'bot',
+        'data'    => [
+            'message'    => $responseMessage,
+            'sender'     => 'bot',
             'created_at' => date('Y-m-d H:i:s'),
-            'action_performed' => $actionPerformed,
-            'action_type' => $actionType
         ],
         'debug_info' => [
             'api_key_hint' => substr(defined('AI_API_KEY') ? AI_API_KEY : '', 0, 4) . '...',

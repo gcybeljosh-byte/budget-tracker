@@ -113,7 +113,7 @@ if (isset($_SESSION['id'])) {
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-16 md:mb-20 px-4 md:px-0">
-                <a href="<?php echo SITE_URL; ?>auth/register.php" class="w-full sm:w-auto bg-slate-900 text-white font-bold px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-base md:text-lg shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
+                <a href="<?php echo SITE_URL; ?>auth/register.php" class="w-full sm:w-auto bg-slate-900 text-white font-bold px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-sm sm:text-base md:text-lg shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
                     Start Your Path <i class="fas fa-arrow-right text-sm"></i>
                 </a>
                 <a href="#features" class="w-full sm:w-auto glass text-slate-700 font-bold px-8 md:px-10 py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-base md:text-lg ios-shadow hover:bg-white hover:-translate-y-1 ios-transition">
@@ -126,7 +126,7 @@ if (isset($_SESSION['id'])) {
                 <!-- Background Glow -->
                 <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2rem] md:rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 ios-transition"></div>
 
-                <div class="relative glass p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] ios-shadow overflow-hidden min-h-[400px] md:min-h-[500px] flex flex-col gap-6">
+                <div class="relative glass p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] ios-shadow overflow-hidden min-h-[320px] sm:min-h-[400px] md:min-h-[500px] flex flex-col gap-6">
                     <!-- Internal Dashboard Mockup Header (Account Overview) -->
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
                         <div class="flex items-center gap-4">
@@ -481,7 +481,7 @@ if (isset($_SESSION['id'])) {
             </h2>
 
             <div class="flex flex-col items-center gap-6">
-                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white font-bold px-12 py-5 rounded-2xl text-xl shadow-2xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
+                <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white font-bold px-8 sm:px-12 py-4 sm:py-5 rounded-2xl text-base sm:text-xl shadow-2xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 ios-transition flex items-center justify-center gap-3">
                     Sign Up - It's Free
                 </a>
 

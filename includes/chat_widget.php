@@ -150,24 +150,6 @@
                     hideTypingIndicator();
                     if (result.success && result.data) {
                         appendMessageToWidget(result.data.message, 'bot');
-
-                        // --- Dispatch AI Action Event ---
-                        if (result.data.action_performed) {
-                            const actionDetail = {
-                                actionType: result.data.action_type
-                            };
-
-                            // Dispatch to current window
-                            window.dispatchEvent(new CustomEvent('aiActionCompleted', {
-                                detail: actionDetail
-                            }));
-
-                            // Update localStorage to trigger 'storage' event in other tabs
-                            localStorage.setItem('budget_tracker_ai_action', JSON.stringify({
-                                type: result.data.action_type,
-                                timestamp: new Date().getTime()
-                            }));
-                        }
                     } else {
                         let errMsg = result.message || 'Unknown';
                         if (result.debug_info) {
@@ -251,35 +233,57 @@
         function parseMarkdown(text) {
             if (!text) return "";
 
+            // Escape script and harmful HTML but allow some basic formatting
             let html = text
-                // Escape HTML
-                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                // Bold (**text**)
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                // Italic (*text*)
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                // Dividers
-                .replace(/^---$/gm, '<hr class="my-3 opacity-25">');
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 
-            // Handle Paragraphs & Lists
+            // 1. Code Blocks (Fenced)
+            html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                return `<pre class="bg-dark text-light p-2 rounded my-2" style="font-size: 0.8rem; overflow-x: auto;"><code>${code.trim()}</code></pre>`;
+            });
+
+            // 2. Inline Code
+            html = html.replace(/`([^`]+)`/g, '<code class="bg-light border rounded px-1" style="font-size: 0.85em; color: #d63384;">$1</code>');
+
+            // 3. Headings (H1 - H4)
+            html = html.replace(/^# (.*$)/gm, '<h5 class="fw-bold mt-3 mb-2 border-bottom pb-1">$1</h5>');
+            html = html.replace(/^## (.*$)/gm, '<h6 class="fw-bold mt-2 mb-1">$1</h6>');
+            html = html.replace(/^### (.*$)/gm, '<div class="fw-bold small mb-1">$1</div>');
+
+            // 4. Bold and Italic
+            html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            // 5. Links [text](url)
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary fw-bold text-decoration-none hover-underline">$1</a>');
+
+            // 6. Dividers
+            html = html.replace(/^---$/gm, '<hr class="my-3 opacity-25">');
+
+            // 7. Split into blocks for lists and paragraphs
             const blocks = html.split(/\n\n+/);
             html = blocks.map(block => {
-                // Unordered Lists (- or *)
+                // Unordered Lists
                 if (block.match(/^\s*[-*•]\s+/m)) {
-                    return '<ul class="ps-3 mb-2">' + block.split(/\n/).map(line => {
+                    const items = block.trim().split(/\n/).map(line => {
                         const match = line.match(/^\s*[-*•]\s+(.*)/);
-                        return match ? `<li>${match[1]}</li>` : line;
-                    }).join('') + '</ul>';
+                        return match ? `<li class="mb-1">${match[1]}</li>` : line;
+                    }).join('');
+                    return `<ul class="ps-3 mb-2">${items}</ul>`;
                 }
-                // Ordered Lists (1.)
+                // Ordered Lists
                 if (block.match(/^\s*\d+\.\s+/m)) {
-                    return '<ol class="ps-3 mb-2">' + block.split(/\n/).map(line => {
+                    const items = block.trim().split(/\n/).map(line => {
                         const match = line.match(/^\s*\d+\.\s+(.*)/);
-                        return match ? `<li>${match[1]}</li>` : line;
-                    }).join('') + '</ol>';
+                        return match ? `<li class="mb-1">${match[1]}</li>` : line;
+                    }).join('');
+                    return `<ol class="ps-3 mb-2">${items}</ol>`;
                 }
                 // Standard Paragraph
-                return `<p class="mb-2">${block.replace(/\n/g, '<br>')}</p>`;
+                return `<p class="mb-2 last-child-mb-0">${block.replace(/\n/g, '<br>')}</p>`;
             }).join('');
 
             return html;

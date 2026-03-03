@@ -40,9 +40,9 @@
                             </div>
                         <?php endif; ?>
 
-                        <!-- Page Action Buttons (Visible on all sizes) -->
+                        <!-- Page Action Buttons (Hidden on very small phones to prevent overflow) -->
                         <?php if (isset($extraNavContent)): ?>
-                            <div class="ps-3 me-1">
+                            <div class="d-none d-sm-flex align-items-center ps-2 me-1">
                                 <?php echo str_replace('ms-auto', '', $extraNavContent); ?>
                             </div>
                         <?php endif; ?>
