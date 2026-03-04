@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Handle GET Request (Fetch History)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $aiHelper = new AiHelper($conn, $user_id);
-    $aiHelper->enforceChatTimeout(10);
+    $aiHelper->enforceChatTimeout(5);
 
     $sql = "SELECT message, response, created_at FROM ai_chat_history WHERE user_id = ?";
     $params = ["i", $user_id];

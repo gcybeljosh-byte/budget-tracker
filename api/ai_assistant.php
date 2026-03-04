@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aiHelper = new AiHelper($conn, $user_id);
 
     // First prompt fix: Ensure history is enforced before fetching response
-    $aiHelper->enforceChatTimeout(10);
+    $aiHelper->enforceChatTimeout(5);
 
     // Generate AI Response
     $aiResponse = $aiHelper->getResponse($userMessage);

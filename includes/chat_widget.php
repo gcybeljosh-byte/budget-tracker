@@ -77,11 +77,18 @@
         const chatPlaceholder = document.getElementById('widgetChatPlaceholder');
 
         // Load history on init if you want persistence across page loads
-        // fetchChatHistory(); 
         let lastActivityTime = parseInt(localStorage.getItem('chat_last_activity') || Date.now());
 
         function fetchChatHistory() {
             if (!chatMessagesDiv) return;
+
+            const now = Date.now();
+            // 5-minute browser-side timeout (300,000 ms)
+            if (now - lastActivityTime > 300000) {
+                chatMessagesDiv.innerHTML = '';
+                localStorage.setItem('chat_last_activity', now);
+                lastActivityTime = now;
+            }
 
             fetch('<?php echo SITE_URL; ?>api/history_log.php?mode=widget')
                 .then(res => res.json())
