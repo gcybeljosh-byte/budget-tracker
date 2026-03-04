@@ -2,7 +2,8 @@
         <div id="sidebar-wrapper">
             <?php
             // Determine dashboard URL based on role
-            $dashUrl = (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') ? SITE_URL . 'admin/dashboard.php' : SITE_URL . 'core/dashboard.php';
+            $roleStr = isset($_SESSION['role']) ? strtolower(trim($_SESSION['role'])) : '';
+            $dashUrl = ($roleStr === 'superadmin') ? SITE_URL . 'admin/dashboard.php' : SITE_URL . 'core/dashboard.php';
             ?>
             <a href="<?php echo $dashUrl; ?>" class="sidebar-heading pb-2 text-decoration-none" style="color: inherit; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                 <div class="premium-logo-container me-3" style="width: 40px; height: 40px;">
@@ -20,7 +21,7 @@
                 $currentPage = basename($_SERVER['PHP_SELF']);
                 $currentDir = basename(dirname($_SERVER['PHP_SELF']));
                 ?>
-                <?php if ($_SESSION['role'] !== 'superadmin'): ?>
+                <?php if ($roleStr !== 'superadmin'): ?>
                     <!-- General Section -->
                     <div class="px-4 py-2 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">General</div>
                     <a href="<?php echo SITE_URL; ?>core/dashboard.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'dashboard.php' && $currentDir == 'core') ? 'active' : ''; ?>">
@@ -28,13 +29,13 @@
                     </a>
                 <?php endif; ?>
 
-                <?php if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['superadmin', 'admin'])): ?>
+                <?php if ($roleStr === 'superadmin' || $roleStr === 'admin'): ?>
                     <!-- Administration Section -->
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Administration</div>
                     <a href="<?php echo SITE_URL; ?>admin/dashboard.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'dashboard.php' && $currentDir == 'admin') ? 'active' : ''; ?>">
                         <i class="fas fa-user-shield me-2"></i> Admin Dashboard
                     </a>
-                    <?php if ($_SESSION['role'] === 'superadmin'): ?>
+                    <?php if ($roleStr === 'superadmin'): ?>
                         <a href="<?php echo SITE_URL; ?>admin/logs.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'logs.php') ? 'active' : ''; ?>">
                             <i class="fas fa-history me-2"></i> Activity Logs
                         </a>
@@ -44,7 +45,7 @@
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <?php if ($_SESSION['role'] !== 'superadmin'): ?>
+                <?php if ($roleStr !== 'superadmin'): ?>
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Finance</div>
                     <a href="<?php echo SITE_URL; ?>core/allowance.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'allowance.php') ? 'active' : ''; ?>">
                         <i class="fas fa-hand-holding-dollar me-2" style="width: 20px;"></i> Allowance

@@ -5,7 +5,7 @@ require_once 'includes/config.php';
 
 // If already logged in, redirect to dashboard
 if (isset($_SESSION['id'])) {
-    $role = $_SESSION['role'] ?? 'user';
+    $role = strtolower($_SESSION['role'] ?? 'user');
     if (in_array($role, ['superadmin', 'admin'])) {
         header("Location: " . SITE_URL . "admin/dashboard.php");
     } else {

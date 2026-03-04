@@ -4,7 +4,7 @@ require_once '../includes/db.php';
 session_start();
 
 // Security Check: Superadmin or Admin
-if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['superadmin', 'admin'])) {
+if (!isset($_SESSION['id']) || !in_array(strtolower(trim($_SESSION['role'] ?? '')), ['superadmin', 'admin'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }

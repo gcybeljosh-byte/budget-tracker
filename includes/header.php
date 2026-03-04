@@ -39,7 +39,7 @@ $stmt->close();
 $seen_tutorials = json_decode($page_tutorials_json, true) ?: [];
 
 $currentPage = basename($_SERVER['PHP_SELF']);
-$role = $_SESSION['role'] ?? 'user';
+$role = strtolower(trim($_SESSION['role'] ?? 'user'));
 if ($onboarding_completed == 0 && !in_array($role, ['superadmin', 'admin']) && $currentPage !== 'onboarding.php' && $currentPage !== 'logout.php') {
     header("Location: " . SITE_URL . "core/onboarding.php");
     exit;

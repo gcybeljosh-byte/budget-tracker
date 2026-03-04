@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                     $_SESSION['last_name'] = $last_name;
                     $_SESSION['nickname'] = $nickname;
                     $_SESSION['profile_picture'] = $profile_picture;
-                    $_SESSION['role'] = $role;
+                    $_SESSION['role'] = strtolower($role);
                     $_SESSION['user_currency'] = $currency ?? 'PHP';
                     $_SESSION['login_time'] = date("Y-m-d H:i:s");
 

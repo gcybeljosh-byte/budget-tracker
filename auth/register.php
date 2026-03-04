@@ -12,9 +12,10 @@ if (isset($_SESSION['id'])) {
     $stmt->fetch();
     $stmt->close();
 
-    if ($oncompleted == 0 && !in_array($_SESSION['role'] ?? 'user', ['superadmin', 'admin'])) {
+    $role = strtolower(trim($_SESSION['role'] ?? 'user'));
+    if ($oncompleted == 0 && !in_array($role, ['superadmin', 'admin'])) {
         header("Location: " . SITE_URL . "core/onboarding.php");
-    } else if (in_array($_SESSION['role'] ?? 'user', ['superadmin', 'admin'])) {
+    } else if (in_array($role, ['superadmin', 'admin'])) {
         header("Location: " . SITE_URL . "admin/dashboard.php");
     } else {
         header("Location: " . SITE_URL . "core/dashboard.php");

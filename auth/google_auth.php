@@ -77,6 +77,7 @@ if ($email) {
         $_SESSION['last_name'] = $last_name;
         $_SESSION['nickname'] = $nickname;
         $_SESSION['profile_picture'] = $profile_picture;
+        $role = strtolower($role);
         $_SESSION['role'] = $role;
         $_SESSION['user_currency'] = $currency ?? 'PHP';
         $_SESSION['login_time'] = date("Y-m-d H:i:s");
@@ -121,7 +122,8 @@ if ($email) {
             $_SESSION['username'] = $username;
             $_SESSION['first_name'] = $first_name_google;
             $_SESSION['last_name'] = $last_name_google;
-            $_SESSION['role'] = 'user';
+            $role = strtolower('user'); // Assuming 'user' is the default role for new Google registrations
+            $_SESSION['role'] = $role;
             $_SESSION['user_currency'] = 'PHP';
             $_SESSION['login_time'] = date("Y-m-d H:i:s");
 

@@ -5,7 +5,7 @@ include '../includes/header.php';
 include '../includes/db.php';
 
 // Security Check
-if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['superadmin', 'admin'])) {
+if (!isset($_SESSION['id']) || !in_array(strtolower(trim($_SESSION['role'] ?? '')), ['superadmin', 'admin'])) {
     header("Location: " . SITE_URL . "auth/login.php");
     exit;
 }
@@ -17,7 +17,7 @@ if ($saCheck === false) {
     // deleted_at column doesn't exist yet, fallback
     $saCheck = $conn->query("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1");
 }
-if ($saCheck && $saCheck->num_rows === 0 && $_SESSION['role'] === 'admin') {
+if ($saCheck && $saCheck->num_rows === 0 && strtolower(trim($_SESSION['role'] ?? '')) === 'admin') {
     $currentId = $_SESSION['id'];
     $conn->query("UPDATE users SET role = 'superadmin' WHERE id = $currentId");
     $_SESSION['role'] = 'superadmin';
