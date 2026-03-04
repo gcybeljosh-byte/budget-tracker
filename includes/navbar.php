@@ -141,7 +141,7 @@
                                     id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <div class="d-flex align-items-center">
                                         <div class="d-none d-sm-block me-2 text-end">
-                                            <div class="fw-bold small text-dark lh-1"><?php echo htmlspecialchars($_SESSION['nickname'] ?: $_SESSION['first_name']); ?></div>
+                                            <div class="fw-bold small text-dark lh-1"><?php echo htmlspecialchars(($_SESSION['nickname'] ?? '') ?: $_SESSION['first_name']); ?></div>
                                         </div>
                                         <div id="navbarProfilePicContainer"
                                             class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
