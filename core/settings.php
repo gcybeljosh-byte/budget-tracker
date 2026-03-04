@@ -152,13 +152,13 @@ include '../includes/header.php';
                                         <label class="form-label text-secondary small text-uppercase fw-bold">Current Password</label>
                                         <input type="password" class="form-control bg-app-alt border-dim text-main rounded-3 py-2" name="confirm_password" disabled required minlength="8" placeholder="Repeat new password">
                                     </div>
+                                    <div class="mt-4 text-center">
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold" disabled>
+                                            <i class="fas fa-key me-2"></i>Change Password
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="mt-4 text-center">
-                                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold" disabled>
-                                    <i class="fas fa-key me-2"></i>Change Password
-                                </button>
-                            </div>
-                            </form>
                         </div>
 
                         <!-- 3. Security Question Card -->
