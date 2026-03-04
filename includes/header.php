@@ -94,6 +94,12 @@ if (isset($_SESSION['id'])) {
     $currencyConfig = CurrencyHelper::getJSConfig($_SESSION['user_currency'] ?? 'PHP');
     ?>
     <script>
+        // Apply theme immediately to prevent flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+
         window.SITE_URL = "<?php echo SITE_URL; ?>";
         window.userCurrency = <?php echo json_encode($currencyConfig); ?>;
         window.seenTutorials = <?php echo json_encode($seen_tutorials); ?>;

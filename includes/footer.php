@@ -10,6 +10,20 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Global SweetAlert2 Configuration for Dark Mode
+        (function() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const isDark = currentTheme === 'dark';
+
+            window.Swal = Swal.mixin({
+                background: isDark ? '#2c2c2e' : '#ffffff',
+                color: isDark ? '#ffffff' : '#1c1c1e',
+                confirmButtonColor: '#0a84ff',
+                cancelButtonColor: '#8e8e93'
+            });
+        })();
+    </script>
     <script type="module" src="<?php echo SITE_URL; ?>assets/js/app.js"></script>
     <script src="<?php echo SITE_URL; ?>assets/js/clock.js"></script>
     <script src="<?php echo SITE_URL; ?>assets/js/smooth-interactions.js"></script>

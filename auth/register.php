@@ -74,7 +74,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Budget Tracker</title>
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
+    <script>
+        // Apply theme immediately to prevent flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,11 +108,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             padding: 2rem 1rem;
         }
 
+        .dark body {
+            background-color: #0f172a;
+        }
+
         .glass {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .ios-shadow {
@@ -149,22 +174,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
 
         <div class="glass p-8 md:p-12 rounded-[2.5rem] ios-shadow">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
+                <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Join Budget Tracker</h2>
-                <p class="text-slate-500 mt-2 font-medium">Start your journey to financial freedom</p>
+                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Join Budget Tracker</h2>
+                <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Start your journey to financial freedom</p>
             </div>
 
             <form method="POST" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name</label>
-                        <input type="text" name="first_name" placeholder="John" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                        <input type="text" name="first_name" placeholder="John" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Last Name</label>
-                        <input type="text" name="last_name" placeholder="Doe" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                        <input type="text" name="last_name" placeholder="Doe" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                     </div>
                 </div>
 
@@ -197,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-4">
+                <button type="submit" class="w-full bg-slate-900 dark:bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 dark:shadow-none hover:bg-slate-800 dark:hover:bg-indigo-700 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-4">
                     Create Account <i class="fas fa-check-circle text-xs"></i>
                 </button>
             </form>
@@ -238,6 +263,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
+        // Global SweetAlert2 Configuration for Dark Mode
+        (function() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const isDark = currentTheme === 'dark';
+
+            window.Swal = Swal.mixin({
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#ffffff' : '#1e293b',
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#64748b',
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                }
+            });
+        })();
+
         const urlParams = new URLSearchParams(window.location.search);
 
         <?php if ($error): ?>

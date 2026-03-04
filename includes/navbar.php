@@ -133,6 +133,11 @@
                             </div>
                         <?php endif; ?>
 
+                        <!-- Theme Toggle -->
+                        <button class="btn btn-link nav-link px-2 me-1" id="theme-toggle" title="Toggle Dark Mode">
+                            <i class="fas fa-moon text-secondary fs-5" id="theme-icon"></i>
+                        </button>
+
                         <!-- Profile Avatar (always visible on tablet + mobile) -->
                         <?php if (isset($_SESSION['id']) && $isDashboard): ?>
                             <div class="dropdown">
@@ -224,6 +229,35 @@
 
                     // Poll every 60 seconds for new notifications
                     setInterval(checkNewNotifications, 60000);
+
+                    // Theme Toggle Logic
+                    const themeToggle = document.getElementById('theme-toggle');
+                    const themeIcon = document.getElementById('theme-icon');
+
+                    function updateThemeIcon(theme) {
+                        if (theme === 'dark') {
+                            themeIcon.classList.remove('fa-moon');
+                            themeIcon.classList.add('fa-sun');
+                        } else {
+                            themeIcon.classList.remove('fa-sun');
+                            themeIcon.classList.add('fa-moon');
+                        }
+                    }
+
+                    // Initial icon state
+                    updateThemeIcon(localStorage.getItem('theme') || 'light');
+
+                    themeToggle.addEventListener('click', () => {
+                        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('theme', newTheme);
+                        updateThemeIcon(newTheme);
+
+                        // Also sync to server via session (optional but good for consistency)
+                        fetch('<?php echo SITE_URL; ?>api/update_theme.php?theme=' + newTheme);
+                    });
                 });
             </script>
 

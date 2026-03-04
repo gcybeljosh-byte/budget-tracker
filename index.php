@@ -21,7 +21,23 @@ if (isset($_SESSION['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker - Master Your Finances</title>
+    <script>
+        // Apply theme immediately to prevent flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,11 +48,20 @@ if (isset($_SESSION['id'])) {
             background-color: #f8fafc;
         }
 
+        .dark body {
+            background-color: #0f172a;
+        }
+
         .glass {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .ios-transition {
@@ -74,7 +99,7 @@ if (isset($_SESSION['id'])) {
     </style>
 </head>
 
-<body class="text-slate-900 overflow-x-hidden">
+<body class="text-slate-900 dark:text-slate-100 overflow-x-hidden">
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4">
         <div class="max-w-6xl mx-auto flex items-center justify-between glass px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl ios-shadow">
@@ -82,10 +107,14 @@ if (isset($_SESSION['id'])) {
                 <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 whitespace-nowrap">BudgetTracker</span>
+                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 dark:text-white whitespace-nowrap">BudgetTracker</span>
             </div>
             <div class="flex items-center gap-1 md:gap-4">
-                <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 font-bold text-sm md:text-base hover:text-indigo-600 ios-transition px-3 py-2 rounded-xl hover:bg-slate-50">Login</a>
+                <button id="theme-toggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 ios-transition">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block"></i>
+                </button>
+                <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 dark:text-slate-400 font-bold text-sm md:text-base hover:text-indigo-600 ios-transition px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">Login</a>
                 <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white text-xs md:text-sm font-bold px-4 md:px-6 py-2 md:py-2.5 rounded-xl md:rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-0.5 ios-transition whitespace-nowrap">Sign Up</a>
             </div>
         </div>
@@ -567,6 +596,18 @@ if (isset($_SESSION['id'])) {
                     }, 150);
                 }, index * 30);
             });
+        });
+
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
         });
     </script>
 </body>
