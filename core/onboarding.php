@@ -321,7 +321,7 @@ if ($onboarding_completed == 1) {
 
             <div class="bg-slate-50/50 p-6 border-t border-slate-100 text-center">
                 <p class="text-xs text-slate-400 font-medium">
-                    Not you? <a href="logout.php" class="text-indigo-600 font-bold hover:underline">Sign out & Start Over</a>
+                    Not you? <a href="../auth/logout.php" class="text-indigo-600 font-bold hover:underline">Sign out & Start Over</a>
                 </p>
             </div>
         </div>
