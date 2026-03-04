@@ -553,8 +553,8 @@ class AiHelper
 
         $prompt .= "## 🗑️ Recycle Bin (`core/recycle_bin.php`) — For Regular Users & Admins\n";
         $prompt .= "- **Purpose**: A safety net for accidentally deleted financial records. Records are NEVER gone immediately — they go here first.\n";
-        $prompt .= "- **What's stored here**: Deleted Expenses, Allowances, Savings entries, Bills/Subscriptions, and Financial Goals.\n";
-        $prompt .= "- **Tabs**: Filter by All / Expenses / Allowances / Savings / Bills / Goals. Badges show counts per category.\n";
+        $prompt .= "- **What's stored here**: Deleted Expenses, Allowances, Savings entries, Bills/Subscriptions, Financial Goals, and Journals.\n";
+        $prompt .= "- **Tabs**: Filter by All / Expenses / Allowances / Savings / Bills / Goals / Journals. Badges show counts per category.\n";
         $prompt .= "- **Search**: Use the search bar to find a specific deleted record by name or description.\n";
         $prompt .= "- **To restore a record**:\n";
         $prompt .= "  1. Go to **Sidebar → Recycle Bin**.\n";

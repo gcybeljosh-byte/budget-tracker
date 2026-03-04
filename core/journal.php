@@ -332,7 +332,8 @@ include '../includes/header.php';
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_journal') {
             $id = (int)$_POST['journal_id'];
             if ($id > 0) {
-                $stmt = $conn->prepare("DELETE FROM journals WHERE id=? AND user_id=?");
+                ensureColumnExists($conn, 'journals', 'deleted_at', "TIMESTAMP NULL DEFAULT NULL");
+                $stmt = $conn->prepare("UPDATE journals SET deleted_at = NOW() WHERE id=? AND user_id=?");
                 $stmt->bind_param("ii", $id, $_SESSION['id']);
                 if ($stmt->execute()) {
                     echo '<script>
@@ -499,10 +500,10 @@ include '../includes/header.php';
 
                 // Count Total
                 if ($filterTagId > 0) {
-                    $countStmt = $conn->prepare("SELECT COUNT(DISTINCT j.id) as total FROM journals j JOIN journal_tag_relations tr ON j.id = tr.journal_id WHERE j.user_id = ? AND tr.tag_id = ?");
+                    $countStmt = $conn->prepare("SELECT COUNT(DISTINCT j.id) as total FROM journals j JOIN journal_tag_relations tr ON j.id = tr.journal_id WHERE j.user_id = ? AND tr.tag_id = ? AND j.deleted_at IS NULL");
                     $countStmt->bind_param("ii", $user_id, $filterTagId);
                 } else {
-                    $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM journals WHERE user_id = ?");
+                    $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM journals WHERE user_id = ? AND deleted_at IS NULL");
                     $countStmt->bind_param("i", $user_id);
                 }
                 $countStmt->execute();
@@ -512,10 +513,10 @@ include '../includes/header.php';
 
                 // Fetch Entries
                 if ($filterTagId > 0) {
-                    $stmt = $conn->prepare("SELECT j.* FROM journals j JOIN journal_tag_relations tr ON j.id = tr.journal_id WHERE j.user_id = ? AND tr.tag_id = ? ORDER BY j.date DESC, j.created_at DESC LIMIT ? OFFSET ?");
+                    $stmt = $conn->prepare("SELECT j.* FROM journals j JOIN journal_tag_relations tr ON j.id = tr.journal_id WHERE j.user_id = ? AND tr.tag_id = ? AND j.deleted_at IS NULL ORDER BY j.date DESC, j.created_at DESC LIMIT ? OFFSET ?");
                     $stmt->bind_param("iiii", $user_id, $filterTagId, $limit, $offset);
                 } else {
-                    $stmt = $conn->prepare("SELECT * FROM journals WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT ? OFFSET ?");
+                    $stmt = $conn->prepare("SELECT * FROM journals WHERE user_id = ? AND deleted_at IS NULL ORDER BY date DESC, created_at DESC LIMIT ? OFFSET ?");
                     $stmt->bind_param("iii", $user_id, $limit, $offset);
                 }
                 $stmt->execute();

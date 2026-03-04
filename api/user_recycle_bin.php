@@ -20,6 +20,7 @@ $map = [
     'savings'        => ['table' => 'savings',            'label_col' => 'description', 'amount_col' => 'amount', 'date_col' => 'date'],
     'bills'          => ['table' => 'recurring_payments', 'label_col' => 'title',        'amount_col' => 'amount', 'date_col' => 'due_date'],
     'goals'          => ['table' => 'financial_goals',    'label_col' => 'title',        'amount_col' => 'target_amount', 'date_col' => 'created_at'],
+    'journals'       => ['table' => 'journals',           'label_col' => 'title',        'amount_col' => '0',      'date_col' => 'date'],
 ];
 
 // Ensure columns exist to prevent MySQL warnings that break JSON output
@@ -34,7 +35,8 @@ if ($action === 'list') {
         $label = $info['label_col'];
         $amt   = $info['amount_col'];
         $dt    = $info['date_col'];
-        $rows  = $conn->query("SELECT id, `$label` as label, `$amt` as amount, `$dt` as record_date, deleted_at FROM `$tbl` WHERE user_id = $user_id AND deleted_at IS NOT NULL ORDER BY deleted_at DESC");
+        $amt_sql = $amt === '0' ? "0 as amount" : "`$amt` as amount";
+        $rows  = $conn->query("SELECT id, `$label` as label, $amt_sql, `$dt` as record_date, deleted_at FROM `$tbl` WHERE user_id = $user_id AND deleted_at IS NOT NULL ORDER BY deleted_at DESC");
         if ($rows) {
             while ($r = $rows->fetch_assoc()) {
                 $r['type'] = $typeKey;

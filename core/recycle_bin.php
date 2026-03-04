@@ -62,6 +62,12 @@ if (!isset($_SESSION['id'])) {
                     <span class="badge bg-white text-dark ms-1 rounded-pill" id="cnt-goals">0</span>
                 </button>
             </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4" data-filter="journals">
+                    <i class="fas fa-book-open me-1"></i> Journals
+                    <span class="badge bg-white text-dark ms-1 rounded-pill" id="cnt-journals">0</span>
+                </button>
+            </li>
         </ul>
 
         <!-- Search -->
@@ -168,6 +174,11 @@ if (!isset($_SESSION['id'])) {
         color: #ec4899;
     }
 
+    .type-badge-journals {
+        background: rgba(100, 116, 139, .1);
+        color: #64748b;
+    }
+
     .type-icon-expenses {
         color: #ef4444;
     }
@@ -186,6 +197,10 @@ if (!isset($_SESSION['id'])) {
 
     .type-icon-goals {
         color: #ec4899;
+    }
+
+    .type-icon-journals {
+        color: #64748b;
     }
 
     .nav-pills .nav-link.active {
@@ -207,13 +222,15 @@ if (!isset($_SESSION['id'])) {
         savings: 'fa-piggy-bank',
         bills: 'fa-file-invoice-dollar',
         goals: 'fa-bullseye',
+        journals: 'fa-book-open'
     };
     const TYPE_LABELS = {
         expenses: 'Expense',
         allowances: 'Allowance',
         savings: 'Savings',
         bills: 'Bill',
-        goals: 'Goal'
+        goals: 'Goal',
+        journals: 'Journal'
     };
 
     function fmt(n) {
@@ -233,10 +250,13 @@ if (!isset($_SESSION['id'])) {
     }
 
     function updateCounts(records) {
-        const types = ['expenses', 'allowances', 'savings', 'bills', 'goals'];
+        const types = ['expenses', 'allowances', 'savings', 'bills', 'goals', 'journals'];
         document.getElementById('cnt-all').textContent = records.length;
         types.forEach(t => {
-            document.getElementById('cnt-' + t).textContent = records.filter(r => r.type === t).length;
+            const cntId = document.getElementById('cnt-' + t);
+            if (cntId) {
+                cntId.textContent = records.filter(r => r.type === t).length;
+            }
         });
     }
 
@@ -270,7 +290,7 @@ if (!isset($_SESSION['id'])) {
                     <div class="d-flex justify-content-between align-items-end">
                         <div>
                             <div class="small text-muted" style="font-size:.7rem;">Amount</div>
-                            <div class="fw-bold text-primary">${fmt(r.amount)}</div>
+                            <div class="fw-bold text-primary">${r.type === 'journals' ? '—' : fmt(r.amount)}</div>
                         </div>
                         <div class="text-end">
                             <div class="small text-danger" style="font-size:.65rem;">
@@ -295,7 +315,7 @@ if (!isset($_SESSION['id'])) {
 
         document.getElementById('modalTitle').textContent = r.label || '—';
         document.getElementById('modalType').textContent = TYPE_LABELS[r.type] + ' Record';
-        document.getElementById('modalAmount').textContent = fmt(r.amount);
+        document.getElementById('modalAmount').textContent = (r.type === 'journals') ? '—' : fmt(r.amount);
         document.getElementById('modalDate').textContent = fmtDate(r.record_date);
         document.getElementById('modalDeletedAt').textContent = fmtDate(r.deleted_at);
 
