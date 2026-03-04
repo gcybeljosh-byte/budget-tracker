@@ -23,6 +23,7 @@ if (isset($_SESSION['id'])) {
     <title>Budget Tracker - Master Your Finances</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
+    <?php include 'includes/favicon_force.php'; ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">

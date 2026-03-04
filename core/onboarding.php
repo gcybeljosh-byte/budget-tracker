@@ -35,6 +35,7 @@ if ($onboarding_completed == 1) {
     <title>Personalize Your Explorer - Budget Tracker</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
+    <?php include '../includes/favicon_force.php'; ?>
     <style>
         :root {
             --primary: #6366f1;
