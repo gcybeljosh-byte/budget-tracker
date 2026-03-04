@@ -765,7 +765,7 @@ class AiHelper
         elseif (isset($json['message']))       $apiErrorMessage = $json['message'];
 
         if ($http_code == 429) {
-            return json_encode(['response_message' => "⏳ You've reached the daily AI limit. Please try again tomorrow — I'll be ready to help!"]);
+            return json_encode(['response_message' => "⏳ **AI Provider Quota Reached!** Google (the AI provider) is temporarily limiting requests. This is separate from your daily 10-prompt limit. Please try again in a few minutes or tomorrow."]);
         }
 
         if ($http_code == 403) {
