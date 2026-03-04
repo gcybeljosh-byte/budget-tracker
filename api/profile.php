@@ -17,9 +17,10 @@ ensureColumnExists($conn, 'users', 'monthly_budget_goal', "DECIMAL(10,2) DEFAULT
 ensureColumnExists($conn, 'users', 'ai_tone', "VARCHAR(50) DEFAULT 'Professional'");
 ensureColumnExists($conn, 'users', 'ai_language', "VARCHAR(50) DEFAULT 'Auto-Detect'");
 ensureColumnExists($conn, 'users', 'auth_method', "VARCHAR(20) DEFAULT 'Local'");
+ensureColumnExists($conn, 'users', 'nickname', "VARCHAR(50) DEFAULT NULL"); // Added for nickname
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $stmt = $conn->prepare("SELECT username, first_name, last_name, email, contact_number, profile_picture, preferred_currency, monthly_budget_goal, ai_tone, ai_language, notif_budget, notif_low_balance, security_question, auth_method FROM users WHERE id = ?");
+    $stmt = $conn->prepare("SELECT username, first_name, last_name, nickname, email, contact_number, profile_picture, preferred_currency, monthly_budget_goal, ai_tone, ai_language, notif_budget, notif_low_balance, security_question, auth_method FROM users WHERE id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();

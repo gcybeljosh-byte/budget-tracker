@@ -186,7 +186,7 @@ if ($onboarding_completed == 1) {
 
     <div class="onboarding-card shadow">
         <div class="step-indicator">
-            <div id="progress" class="step-progress" style="width: 33%;"></div>
+            <div id="progress" class="step-progress" style="width: 20%;"></div>
         </div>
 
         <form id="onboardingForm">
@@ -213,6 +213,38 @@ if ($onboarding_completed == 1) {
                 </div>
             </div>
 
+            <!-- Step 2: Profile Customization -->
+            <div class="step-content" id="step2">
+                <div class="icon-box">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h3 class="fw-bold mb-2">Personalize Your Profile</h3>
+                <p class="text-muted mb-4">Set a nickname and upload a profile picture to display in the system.</p>
+
+                <div class="mb-4 text-center">
+                    <div class="position-relative mx-auto mb-3" style="width: 120px; height: 120px;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden h-100 w-100 border border-4 border-white shadow-sm">
+                            <img id="profilePreview" src="" alt="Profile" class="d-none" style="width: 100%; height: 100%; object-fit: cover;">
+                            <i id="defaultIcon" class="fas fa-user" style="font-size: 3rem;"></i>
+                        </div>
+                        <label for="profile_upload" class="position-absolute bottom-0 end-0 bg-white rounded-circle shadow p-2" style="cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-camera text-primary"></i>
+                        </label>
+                        <input type="file" name="profile_picture" id="profile_upload" class="d-none" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Nickname</label>
+                    <input type="text" name="nickname" class="form-control form-control-lg rounded-3" placeholder="How should we call you?" value="<?php echo htmlspecialchars($first_name); ?>">
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-link text-muted fw-semibold text-decoration-none prev-step" data-prev="1">Back</button>
+                    <button type="button" class="btn btn-gradient next-step" data-next="3">Next Step</button>
+                </div>
+            </div>
+
             <!-- Step 2: Categories -->
             <div class="step-content" id="step2">
                 <h3 class="fw-bold mb-2">Build Your Library</h3>
@@ -228,18 +260,18 @@ if ($onboarding_completed == 1) {
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <button type="button" class="btn btn-link text-muted fw-semibold text-decoration-none prev-step" data-prev="1">Back</button>
-                    <button type="button" class="btn btn-gradient next-step" data-next="3">Next Step</button>
+                    <button type="button" class="btn btn-link text-muted fw-semibold text-decoration-none prev-step" data-prev="2">Back</button>
+                    <button type="button" class="btn btn-gradient next-step" data-next="4">Next Step</button>
                 </div>
             </div>
 
-            <!-- Step 3: Goals -->
-            <div class="step-content" id="step3">
-                <h3 class="fw-bold mb-2">Setting Targets</h3>
-                <p class="text-muted mb-4">Set a monthly budget goal to help you stay on track.</p>
+            <!-- Step 4: Goals -->
+            <div class="step-content" id="step4">
+                <h3 class="fw-bold mb-2">Monthly Limit/Goal</h3>
+                <p class="text-muted mb-4">Set a monthly spending limit to help you stay on track. This will be shown in your Journal.</p>
 
                 <div class="mb-4">
-                    <label class="form-label fw-semibold">Monthly Spending Goal</label>
+                    <label class="form-label fw-semibold">Monthly Limit</label>
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-white border-end-0"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?></span>
                         <input type="number" name="budget_goal" class="form-control border-start-0 ps-0" placeholder="0.00" value="5000">
@@ -248,13 +280,13 @@ if ($onboarding_completed == 1) {
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <button type="button" class="btn btn-link text-muted fw-semibold text-decoration-none prev-step" data-prev="2">Back</button>
-                    <button type="button" class="btn btn-gradient next-step" data-next="4">Last Step</button>
+                    <button type="button" class="btn btn-link text-muted fw-semibold text-decoration-none prev-step" data-prev="3">Back</button>
+                    <button type="button" class="btn btn-gradient next-step" data-next="5">Last Step</button>
                 </div>
             </div>
 
-            <!-- Step 4: Credential Review -->
-            <div class="step-content" id="step4">
+            <!-- Step 5: Credential Review -->
+            <div class="step-content" id="step5">
                 <h3 class="fw-bold mb-2">Review Your Account</h3>
                 <p class="text-muted mb-4">Verification of your registered credentials.</p>
 
@@ -262,6 +294,11 @@ if ($onboarding_completed == 1) {
                     <div class="mb-3">
                         <label class="small text-muted d-block mb-1 fw-bold text-uppercase">Full Name</label>
                         <div class="fw-bold text-dark fs-5"><?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small text-muted d-block mb-1 fw-bold text-uppercase">Nickname</label>
+                        <div id="reviewNickname" class="fw-bold text-primary fs-5">Pending...</div>
                     </div>
 
                     <div class="mb-3">
@@ -359,8 +396,31 @@ if ($onboarding_completed == 1) {
             function showStep(stepNum) {
                 document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
                 document.getElementById('step' + stepNum).classList.add('active');
-                progress.style.width = (stepNum * 25) + '%';
+                progress.style.width = (stepNum * 20) + '%';
+
+                // Update review step
+                if (stepNum == 5) {
+                    const nickname = document.querySelector('input[name="nickname"]').value;
+                    document.getElementById('reviewNickname').textContent = nickname || 'Not set';
+                }
             }
+
+            // Profile Upload Preview
+            const profileUpload = document.getElementById('profile_upload');
+            const profilePreview = document.getElementById('profilePreview');
+            const defaultIcon = document.getElementById('defaultIcon');
+
+            profileUpload.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePreview.src = e.target.result;
+                        profilePreview.classList.remove('d-none');
+                        defaultIcon.classList.add('d-none');
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
 
             window.copyValue = function(elementId, btn) {
                 const copyText = document.getElementById(elementId);

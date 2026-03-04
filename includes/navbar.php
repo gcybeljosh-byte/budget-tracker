@@ -139,15 +139,21 @@
                             <div class="dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center py-0 ps-1" href="#"
                                     id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <div id="navbarProfilePicContainer"
-                                        class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
-                                        style="width: 36px; height: 36px; border: 2px solid #fff; flex-shrink: 0;">
-                                        <?php if (isset($_SESSION['profile_picture']) && !empty($_SESSION['profile_picture'])): ?>
-                                            <img src="<?php echo SITE_URL . htmlspecialchars($_SESSION['profile_picture']); ?>"
-                                                alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                                        <?php else: ?>
-                                            <i class="fas fa-user" style="font-size: 0.85rem;"></i>
-                                        <?php endif; ?>
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-none d-sm-block me-2 text-end">
+                                            <div class="fw-bold small text-dark lh-1"><?php echo htmlspecialchars($_SESSION['nickname'] ?? $_SESSION['first_name']); ?></div>
+                                            <div class="text-muted extra-small" style="font-size: 0.6rem;"><?php echo htmlspecialchars($_SESSION['role']); ?></div>
+                                        </div>
+                                        <div id="navbarProfilePicContainer"
+                                            class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+                                            style="width: 36px; height: 36px; border: 2px solid #fff; flex-shrink: 0;">
+                                            <?php if (isset($_SESSION['profile_picture']) && !empty($_SESSION['profile_picture'])): ?>
+                                                <img src="<?php echo SITE_URL . htmlspecialchars($_SESSION['profile_picture']); ?>"
+                                                    alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                                            <?php else: ?>
+                                                <i class="fas fa-user" style="font-size: 0.85rem;"></i>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" aria-labelledby="navbarDropdown">

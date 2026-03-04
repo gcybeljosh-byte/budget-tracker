@@ -28,13 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     if (empty($username) || empty($password)) {
         $error = "Please fill in all fields.";
     } else {
-        $stmt = $conn->prepare("SELECT id, password, first_name, last_name, profile_picture, role, status, currency FROM users WHERE username = ?");
+        $stmt = $conn->prepare("SELECT id, password, first_name, last_name, nickname, profile_picture, role, status, currency FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($id, $db_password, $first_name, $last_name, $profile_picture, $role, $status, $currency);
+            $stmt->bind_result($id, $db_password, $first_name, $last_name, $nickname, $profile_picture, $role, $status, $currency);
             $stmt->fetch();
 
             if ($password === $db_password || password_verify($password, $db_password)) {
@@ -56,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                     $_SESSION['username'] = $username;
                     $_SESSION['first_name'] = $first_name;
                     $_SESSION['last_name'] = $last_name;
+                    $_SESSION['nickname'] = $nickname;
                     $_SESSION['profile_picture'] = $profile_picture;
                     $_SESSION['role'] = $role;
                     $_SESSION['user_currency'] = $currency ?? 'PHP';

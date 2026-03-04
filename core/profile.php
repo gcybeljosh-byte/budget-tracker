@@ -53,6 +53,10 @@ include '../includes/header.php';
                                     <input type="email" class="form-control" id="email" name="email" required disabled>
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label text-secondary small text-uppercase fw-bold">Nickname</label>
+                                    <input type="text" class="form-control" id="nickname" name="nickname" disabled>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label text-secondary small text-uppercase fw-bold">Contact Number</label>
                                     <input type="text" class="form-control" id="contactNumber" name="contact_number" required disabled>
                                 </div>
@@ -146,17 +150,15 @@ include '../includes/header.php';
             .then(result => {
                 if (result.success && result.data) {
                     const user = result.data;
-                    document.getElementById('firstName').value = user.first_name || '';
-                    document.getElementById('lastName').value = user.last_name || '';
-                    document.getElementById('email').value = user.email || '';
-                    document.getElementById('contactNumber').value = user.contact_number || '';
-                    document.getElementById('displayFullName').textContent = `${user.first_name || ''} ${user.last_name || ''}`;
+                    document.getElementById('nickname').value = user.nickname || '';
+                    document.getElementById('displayFullName').textContent = user.nickname || `${user.first_name || ''} ${user.last_name || ''}`;
                     document.getElementById('displayUsername').textContent = `@${user.username}`;
 
                     // Save initial state for cancel
                     originalData = {
                         firstName: user.first_name,
                         lastName: user.last_name,
+                        nickname: user.nickname,
                         email: user.email,
                         contactNumber: user.contact_number
                     };
@@ -265,7 +267,8 @@ include '../includes/header.php';
                         // Update display name
                         const fName = document.getElementById('firstName').value;
                         const lName = document.getElementById('lastName').value;
-                        document.getElementById('displayFullName').textContent = `${fName} ${lName}`;
+                        const nick = document.getElementById('nickname').value;
+                        document.getElementById('displayFullName').textContent = nick || `${fName} ${lName}`;
 
                         // Update profile picture preview
                         if (result.profile_picture) {

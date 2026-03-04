@@ -178,33 +178,43 @@ if ($_SESSION['role'] === 'superadmin') {
             const runwayText = d.runway_days === null ? 'More data required' : `${d.runway_days} days`;
             const runwayColor = (d.runway_days === null) ? 'muted' : (d.runway_days < 7 ? 'danger' : (d.runway_days < 14 ? 'warning' : 'success'));
 
+            const varianceText = d.budget_variance >= 0 ? `Unused: ${sym}${d.budget_variance.toLocaleString(locale)}` : `Over: ${sym}${Math.abs(d.budget_variance).toLocaleString(locale)}`;
+            const varianceColor = d.budget_variance >= 0 ? 'success' : 'danger';
+
             document.getElementById('forecastStats').innerHTML = `
             <div class="col-md-3">
                 <div class="forecast-card text-center">
-                    <div class="text-muted small mb-1">Current Balance</div>
-                    <div class="fs-4 fw-bold text-primary">${sym}${d.current_balance.toLocaleString(locale, {minimumFractionDigits:2})}</div>
+                    <div class="text-muted small mb-1">Spent So Far</div>
+                    <div class="fs-4 fw-bold text-main">${sym}${d.spent_so_far.toLocaleString(locale, {minimumFractionDigits:2})}</div>
+                    <div class="extra-small text-muted mt-2">of ${sym}${d.target_budget.toLocaleString(locale)} limit</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="forecast-card text-center">
-                    <div class="text-muted small mb-1">Projected End-of-Month</div>
-                    <div class="fs-4 fw-bold text-${statusColor}">${sym}${d.projected_balance.toLocaleString(locale, {minimumFractionDigits:2})}</div>
+                    <div class="text-muted small mb-1">Projected Total Spend</div>
+                    <div class="fs-4 fw-bold text-${statusColor}">${sym}${d.total_projected_spend.toLocaleString(locale, {minimumFractionDigits:2})}</div>
                     <div class="mt-1">${trendBadge}</div>
-                    <div class="extra-small text-muted mt-2" style="font-size: 0.6rem;" title="${d.basis}">
-                        <i class="fas fa-info-circle me-1"></i>Basis: Run rate projection
+                    <div class="extra-small text-${varianceColor} mt-2 fw-semibold">
+                        ${varianceText}
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="forecast-card text-center">
-                    <div class="text-muted small mb-1">Daily Avg Spend</div>
-                    <div class="fs-4 fw-bold text-main">${sym}${d.daily_avg_spend.toLocaleString(locale, {minimumFractionDigits:2})}</div>
+                    <div class="text-muted small mb-1">Projected Cash at EOM</div>
+                    <div class="fs-4 fw-bold text-primary">${sym}${d.projected_balance.toLocaleString(locale, {minimumFractionDigits:2})}</div>
+                    <div class="extra-small text-muted mt-2">
+                        <i class="fas fa-info-circle me-1"></i>Wallet estimate
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="forecast-card text-center">
-                    <div class="text-muted small mb-1">Balance Runway</div>
+                    <div class="text-muted small mb-1">Budget Runway</div>
                     <div class="fs-4 fw-bold text-${runwayColor}">${runwayText}</div>
+                    <div class="extra-small text-muted mt-2">
+                         At current ${sym}${d.daily_avg_spend}/day
+                    </div>
                 </div>
             </div>
         `;

@@ -121,21 +121,27 @@ if ($action === 'trends') {
     // Balanced Projection: current wallet balance minus what we PREDICT will be spent from now to end of month
     $projectedEndOfMonthBalance = $currentBalance - $pSpendRemaining;
 
+    // Budget-centric projection: How much of the LIMIT will be left or exceeded?
+    $budgetVariance = ($targetBudget > 0) ? ($targetBudget - $totalProjectedSpend) : 0;
+
     echo json_encode([
         'success'           => true,
         'currency'          => $currency,
         'current_balance'   => $currentBalance,
         'monthly_allowance' => $monthlyAllowance,
         'monthly_budget_goal' => $budgetGoal,
+        'target_budget'     => $targetBudget,
         'daily_avg_spend'   => round($dailyAvg, 2),
         'days_left'         => $daysLeft,
-        'projected_spend'   => round($pSpendRemaining, 2),
+        'spent_so_far'      => $spent,
+        'projected_spend_remaining' => round($pSpendRemaining, 2),
         'total_projected_spend' => round($totalProjectedSpend, 2),
         'projected_balance' => round(max(0, $projectedEndOfMonthBalance), 2),
+        'budget_variance'   => round($budgetVariance, 2),
         'runway_days'       => $dailyAvg > 0 ? (int)($currentBalance / $dailyAvg) : null,
         'last_month_total'  => $lastMonthTotal,
         'is_on_track'       => $isOnTrack,
-        'basis'             => 'Daily average run-rate extrapolated to end of month vs monthly allowance budget.'
+        'basis'             => 'Based on your ' . ($budgetGoal > 0 ? 'Monthly Limit' : 'Monthly Allowance') . ' of ' . number_format($targetBudget, 2)
     ]);
 }
 $conn->close();

@@ -50,7 +50,7 @@ ensureColumnExists($conn, 'users', 'auth_method', "VARCHAR(20) DEFAULT 'Local'")
 
 if ($email) {
     // 1. Check if email exists
-    $stmt = $conn->prepare("SELECT id, username, first_name, last_name, role, currency, status FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, username, first_name, last_name, nickname, profile_picture, role, currency, status FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
@@ -63,7 +63,7 @@ if ($email) {
         }
 
         // --- LOGIN FLOW ---
-        $stmt->bind_result($user_id, $username, $first_name, $last_name, $role, $currency, $status);
+        $stmt->bind_result($user_id, $username, $first_name, $last_name, $nickname, $profile_picture, $role, $currency, $status);
         $stmt->fetch();
 
         if ($status === 'inactive') {
@@ -75,6 +75,8 @@ if ($email) {
         $_SESSION['username'] = $username;
         $_SESSION['first_name'] = $first_name;
         $_SESSION['last_name'] = $last_name;
+        $_SESSION['nickname'] = $nickname;
+        $_SESSION['profile_picture'] = $profile_picture;
         $_SESSION['role'] = $role;
         $_SESSION['user_currency'] = $currency ?? 'PHP';
         $_SESSION['login_time'] = date("Y-m-d H:i:s");
