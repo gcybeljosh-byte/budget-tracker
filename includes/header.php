@@ -76,6 +76,7 @@ if (isset($_SESSION['id'])) {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>assets/css/style.css?v=<?php echo time(); ?>">
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><clipPath id="c"><circle cx="50" cy="50" r="50"/></clipPath><image href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" width="100" height="100" clip-path="url(#c)"/></svg>'>
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
     <!-- Currency Configuration -->
     <?php

@@ -26,7 +26,7 @@ include '../includes/header.php';
                     <div class="card-header bg-card border-0 pt-4 pb-0 text-center">
                         <div class="position-relative mx-auto mb-3" style="width: 100px; height: 100px;">
                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden h-100 w-100">
-                                <img id="profileImagePreview" src="" alt="Profile" class="d-none" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img id="profileImagePreview" src="" alt="Profile" class="d-none rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
                                 <i id="defaultProfileIcon" class="fas fa-user" style="font-size: 2.5rem;"></i>
                             </div>
                             <label for="profileUpload" id="profileUploadLabel" class="position-absolute bottom-0 end-0 bg-card rounded-circle shadow p-2 d-none" style="cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
@@ -290,7 +290,7 @@ include '../includes/header.php';
                             // Update Navbar Image
                             const navbarPicContainer = document.getElementById('navbarProfilePicContainer');
                             if (navbarPicContainer) {
-                                navbarPicContainer.innerHTML = `<img src="<?php echo SITE_URL; ?>${result.profile_picture}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">`;
+                                navbarPicContainer.innerHTML = `<img src="<?php echo SITE_URL; ?>${result.profile_picture}" alt="Profile" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">`;
                             }
                         }
 

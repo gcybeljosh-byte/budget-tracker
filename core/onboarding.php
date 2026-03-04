@@ -224,7 +224,7 @@ if ($onboarding_completed == 1) {
                 <div class="mb-4 text-center">
                     <div class="position-relative mx-auto mb-3" style="width: 120px; height: 120px;">
                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden h-100 w-100 border border-4 border-white shadow-sm">
-                            <img id="profilePreview" src="" alt="Profile" class="d-none" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img id="profilePreview" src="" alt="Profile" class="d-none rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
                             <i id="defaultIcon" class="fas fa-user" style="font-size: 3rem;"></i>
                         </div>
                         <label for="profile_upload" class="position-absolute bottom-0 end-0 bg-white rounded-circle shadow p-2" style="cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
