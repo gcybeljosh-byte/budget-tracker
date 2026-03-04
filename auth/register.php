@@ -3,7 +3,7 @@ session_start();
 include '../includes/config.php';
 include '../includes/db.php';
 
-if (isset($_SESSION['id'])) {
+if (isset($_SESSION['id']) && !isset($_GET['google_success']) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     // If logged in, check onboarding status before redirecting
     $stmt = $conn->prepare("SELECT onboarding_completed FROM users WHERE id = ?");
     $stmt->bind_param("i", $_SESSION['id']);
@@ -58,7 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                 $stmt_insert->bind_param("sssssss", $username, $hashed_password, $first_name, $last_name, $email, $contact_number, $password);
 
                 if ($stmt_insert->execute()) {
-                    $success = "Registration successful! You can now login.";
+                    $new_user_id = $stmt_insert->insert_id;
+                    $_SESSION['id'] = $new_user_id;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['first_name'] = $first_name;
+                    $_SESSION['last_name'] = $last_name;
+                    $_SESSION['role'] = 'user';
+                    $_SESSION['user_currency'] = 'PHP';
+                    $_SESSION['login_time'] = date("Y-m-d H:i:s");
+                    $_SESSION['temp_registration_password'] = $password;
+
+                    $success = "Registration successful! Welcome to the family, $first_name.";
                 } else {
                     $error = "Registration failed. Please try again.";
                 }
@@ -284,9 +294,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                     confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
                 }
             }).then(() => {
-                window.location.href = 'login.php';
+                window.location.href = '<?php echo SITE_URL; ?>core/onboarding.php';
             });
         <?php endif; ?>
+
+        if (urlParams.get('google_success') === '1') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Welcome!',
+                text: 'Google registration successful! Let\'s set up your account.',
+                confirmButtonColor: '#4f46e5',
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                }
+            }).then(() => {
+                window.location.href = '<?php echo SITE_URL; ?>core/onboarding.php';
+            });
+        }
+
+        if (urlParams.get('error') === 'account_exists') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Account Exists',
+                text: 'This email is already registered. Please login instead.',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
 
         function handleCredentialResponse(response) {
             const form = document.createElement('form');
