@@ -227,7 +227,17 @@ include '../includes/header.php';
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label text-secondary small text-uppercase fw-bold">Preferred Currency</label>
-                                                    <input type="number" step="0.01" class="form-control border-dim bg-app-alt text-main rounded-3 py-2" name="monthly_budget_goal" id="prefGoal">
+                                                    <select class="form-select border-dim bg-app-alt text-main rounded-3 py-2" name="preferred_currency" id="prefCurrency">
+                                                        <option value="PHP">Philippine Peso (₱)</option>
+                                                        <option value="USD">US Dollar ($)</option>
+                                                        <option value="EUR">Euro (€)</option>
+                                                        <option value="JPY">Japanese Yen (¥)</option>
+                                                        <option value="GBP">British Pound (£)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label text-secondary small text-uppercase fw-bold">Monthly Budget Goal</label>
+                                                    <input type="number" step="0.01" class="form-control border-dim bg-app-alt text-main rounded-3 py-2" name="monthly_budget_goal" id="prefGoal" placeholder="e.g. 5000.00">
                                                 </div>
                                             </div>
                                         </div>
@@ -700,14 +710,19 @@ include '../includes/header.php';
 
                         // Load Preferences if section exists
                         if (preferencesSection) {
-                            document.getElementById('prefCurrency').value = user.preferred_currency || 'PHP';
-                            document.getElementById('prefGoal').value = user.monthly_budget_goal || 5000;
-                            document.getElementById('prefTone').value = user.ai_tone || 'Professional';
-                            if (document.getElementById('prefLanguage')) {
-                                document.getElementById('prefLanguage').value = user.ai_language || 'Auto-Detect';
-                            }
-                            document.getElementById('notifBudget').checked = parseInt(user.notif_budget) === 1;
-                            document.getElementById('notifLowBalance').checked = parseInt(user.notif_low_balance) === 1;
+                            const prefCurrency = document.getElementById('prefCurrency');
+                            const prefGoal = document.getElementById('prefGoal');
+                            const prefTone = document.getElementById('prefTone');
+                            const prefLanguage = document.getElementById('prefLanguage');
+                            const notifBudget = document.getElementById('notifBudget');
+                            const notifLowBalance = document.getElementById('notifLowBalance');
+
+                            if (prefCurrency) prefCurrency.value = user.preferred_currency || 'PHP';
+                            if (prefGoal) prefGoal.value = user.monthly_budget_goal || '5000.00';
+                            if (prefTone) prefTone.value = user.ai_tone || 'Professional';
+                            if (prefLanguage) prefLanguage.value = user.ai_language || 'Auto-Detect';
+                            if (notifBudget) notifBudget.checked = parseInt(user.notif_budget) === 1;
+                            if (notifLowBalance) notifLowBalance.checked = parseInt(user.notif_low_balance) === 1;
                         }
 
                         // Update Auth Method Badge

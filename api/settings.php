@@ -30,13 +30,14 @@ switch ($action) {
 
     case 'preferences':
     default:
-        $currency = $_POST['currency'] ?? 'PHP';
+        $currency = $_POST['preferred_currency'] ?? 'PHP';
+        $goal = $_POST['monthly_budget_goal'] ?? 5000;
         $ai_tone = $_POST['ai_tone'] ?? 'Professional';
         $notif_budget = isset($_POST['notif_budget']) ? 1 : 0;
         $notif_low_balance = isset($_POST['notif_low_balance']) ? 1 : 0;
 
-        $stmt = $conn->prepare("UPDATE users SET currency = ?, ai_tone = ?, notif_budget = ?, notif_low_balance = ? WHERE id = ?");
-        $stmt->bind_param("ssiii", $currency, $ai_tone, $notif_budget, $notif_low_balance, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET preferred_currency = ?, monthly_budget_goal = ?, ai_tone = ?, notif_budget = ?, notif_low_balance = ? WHERE id = ?");
+        $stmt->bind_param("sdsiii", $currency, $goal, $ai_tone, $notif_budget, $notif_low_balance, $user_id);
 
         if ($stmt->execute()) {
             $_SESSION['user_currency'] = $currency;
