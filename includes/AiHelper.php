@@ -280,18 +280,18 @@ class AiHelper
     private function getActionLinks()
     {
         return [
-            'Dashboard'   => '[🏠 Dashboard](core/dashboard.php)',
-            'Expenses'    => '[💸 Expenses](core/expenses.php)',
-            'Allowance'   => '[💰 Allowance](core/allowance.php)',
-            'Savings'     => '[🐷 Savings](core/savings.php)',
-            'Bills'       => '[🧾 Bills Hub](core/bills.php)',
-            'Goals'       => '[🎯 Goals](core/goals.php)',
-            'Analytics'   => '[📊 Trends & Analytics](core/analytics.php)',
-            'Reports'     => '[📋 Reports](core/reports.php)',
-            'Statements'  => '[📜 Statements](core/statements.php)',
-            'Settings'    => '[⚙️ Settings](core/settings.php)',
-            'Profile'     => '[👤 My Profile](core/profile.php)',
-            'History'     => '[📝 Chat History](core/history_log.php)',
+            'Dashboard'   => '[🏠 Dashboard](' . SITE_URL . 'core/dashboard.php)',
+            'Expenses'    => '[💸 Expenses](' . SITE_URL . 'core/expenses.php)',
+            'Allowance'   => '[💰 Allowance](' . SITE_URL . 'core/allowance.php)',
+            'Savings'     => '[🐷 Savings](' . SITE_URL . 'core/savings.php)',
+            'Bills'       => '[🧾 Bills Hub](' . SITE_URL . 'core/bills.php)',
+            'Goals'       => '[🎯 Goals](' . SITE_URL . 'core/goals.php)',
+            'Analytics'   => '[📊 Trends & Analytics](' . SITE_URL . 'core/analytics.php)',
+            'Reports'     => '[📋 Reports](' . SITE_URL . 'core/reports.php)',
+            'Statements'  => '[📜 Statements](' . SITE_URL . 'core/statements.php)',
+            'Settings'    => '[⚙️ Settings](' . SITE_URL . 'core/settings.php)',
+            'Profile'     => '[👤 My Profile](' . SITE_URL . 'core/profile.php)',
+            'History'     => '[📝 Chat History](' . SITE_URL . 'core/history_log.php)',
         ];
     }
 
