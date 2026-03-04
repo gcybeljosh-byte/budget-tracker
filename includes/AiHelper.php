@@ -667,6 +667,7 @@ class AiHelper
             // Graceful fallback: respect JSON error messages (quota, API errors)
             return [
                 'message'          => $decoded['response_message'],
+                'error'            => $decoded['error'] ?? false,
                 'action_performed' => false
             ];
         }
@@ -747,7 +748,7 @@ class AiHelper
         if ($response === false) {
             $error_msg = curl_error($ch);
             curl_close($ch);
-            return json_encode(['response_message' => "⚠️ Network error: $error_msg. Please try again."]);
+            return json_encode(['response_message' => "⚠️ Network error: $error_msg. Please try again.", 'error' => true]);
         }
 
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -765,11 +766,11 @@ class AiHelper
         elseif (isset($json['message']))       $apiErrorMessage = $json['message'];
 
         if ($http_code == 429) {
-            return json_encode(['response_message' => "⏳ **AI Provider Quota Reached!** Google (the AI provider) is temporarily limiting requests. This is separate from your daily 10-prompt limit. Please try again in a few minutes or tomorrow."]);
+            return json_encode(['response_message' => "⏳ **AI Provider Quota Reached!** Google (the AI provider) is temporarily limiting requests. This is separate from your daily 10-prompt limit. Please try again in a few minutes or tomorrow.", 'error' => true]);
         }
 
         if ($http_code == 403) {
-            return json_encode(['response_message' => "🔑 API key issue detected. Please check your AI configuration in Settings."]);
+            return json_encode(['response_message' => "🔑 API key issue detected. Please check your AI configuration in Settings.", 'error' => true]);
         }
 
         $proxyUsed = (defined('AI_PROXY_URL') && !empty(AI_PROXY_URL)) ? 'Yes' : 'No';
@@ -777,6 +778,7 @@ class AiHelper
 
         return json_encode([
             'response_message' => "⚠️ AI Error: $apiErrorMessage (HTTP $http_code). Please try again or contact your administrator.",
+            'error'            => true,
             'debug_info'       => ['proxy_active' => $proxyUsed, 'api_key_hint' => $keyHint, 'model' => $model]
         ]);
     }
@@ -805,7 +807,7 @@ class AiHelper
         if ($response === false) {
             $error_msg = curl_error($ch);
             curl_close($ch);
-            return json_encode(['response_message' => "⚠️ OpenAI Connection Error: $error_msg"]);
+            return json_encode(['response_message' => "⚠️ OpenAI Connection Error: $error_msg", 'error' => true]);
         }
 
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -817,7 +819,7 @@ class AiHelper
         }
 
         $apiError = $json['error']['message'] ?? 'Unknown OpenAI Error';
-        return json_encode(['response_message' => "⚠️ OpenAI API Error: $apiError (HTTP $http_code)"]);
+        return json_encode(['response_message' => "⚠️ OpenAI API Error: $apiError (HTTP $http_code)", 'error' => true]);
     }
 
     // ========================================================================

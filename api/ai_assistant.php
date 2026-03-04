@@ -115,10 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 3. Save Message and Response in one row (better for conversation flow)
-    $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, response) VALUES (?, ?, ?)");
-    $stmt->bind_param("iss", $user_id, $userMessage, $responseMessage);
-    $stmt->execute();
-    $stmt->close();
+    // ONLY save if it was a successful AI response (not a quota/technical error)
+    // This ensures that technical errors don't count towards the user's 10-prompt daily limit.
+    if (!isset($aiResponse['error']) || $aiResponse['error'] !== true) {
+        $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, response) VALUES (?, ?, ?)");
+        $stmt->bind_param("iss", $user_id, $userMessage, $responseMessage);
+        $stmt->execute();
+        $stmt->close();
+    }
 
     // 5. Return Response
     echo json_encode([
