@@ -222,19 +222,6 @@ include '../includes/header.php';
                     <div class="extra-small text-white text-opacity-75" id="dashUtilText" style="font-size: 0.6rem;">0% spent</div>
                 </div>
 
-                <!-- Safe-to-Spend Card -->
-                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-info border-4 mb-4" id="safeToSpendCard">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="rounded-circle bg-info-subtle p-2 me-2 text-info" id="safeToSpendIcon">
-                                <i class="fas fa-shield-halved small"></i>
-                            </div>
-                            <h6 class="text-secondary small fw-bold text-uppercase mb-0">Safe-to-Spend</h6>
-                        </div>
-                        <h2 class="fw-bold mb-0 text-dark" id="dashSafeToSpend"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
-                        <div class="extra-small text-muted mt-1" id="safeToSpendDays">Calculating...</div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -371,37 +358,6 @@ include '../includes/header.php';
 
             renderDashboardWallets(data.source_balances, data.total_savings);
 
-            // Update Safe-to-Spend
-            if (data.analytics && data.analytics.safe_to_spend) {
-                const sts = data.analytics.safe_to_spend;
-                const stsCard = document.getElementById('safeToSpendCard');
-                const stsIcon = document.getElementById('safeToSpendIcon');
-                updateElement('dashSafeToSpend', formatCurrency(sts.daily_limit));
-
-                let subtext = `${sts.remaining_days} days left in month`;
-                if (sts.unpaid_bills_sum > 0) {
-                    subtext += ` • ${formatCurrency(sts.unpaid_bills_sum)} bills pending`;
-                }
-                updateElement('safeToSpendDays', subtext);
-
-                // Color Logic (Safe-to-Spend)
-                stsCard.classList.remove('border-info', 'border-warning', 'border-danger');
-                stsIcon.classList.remove('bg-info-subtle', 'text-info', 'bg-warning-subtle', 'text-warning', 'bg-danger-subtle', 'text-danger', 'bg-danger', 'text-white');
-
-                if (sts.daily_limit <= 0) {
-                    stsCard.classList.add('border-danger');
-                    stsIcon.className = 'rounded-circle bg-danger p-2 me-2 text-white';
-                    if (sts.is_overdrawn) {
-                        updateElement('safeToSpendDays', 'Budget overdrawn with pending bills');
-                    }
-                } else if (sts.daily_limit < 100) {
-                    stsCard.classList.add('border-warning');
-                    stsIcon.className = 'rounded-circle bg-warning-subtle p-2 me-2 text-warning';
-                } else {
-                    stsCard.classList.add('border-info');
-                    stsIcon.className = 'rounded-circle bg-info-subtle p-2 me-2 text-info';
-                }
-            }
 
             // Update Hub Data
             if (data.journal_summary) {
