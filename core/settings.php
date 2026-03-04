@@ -106,385 +106,400 @@ include '../includes/header.php';
                     }
                 </style>
 
-                <!-- Security Settings Section -->
-                <div id="securitySection" class="settings-section d-none">
-                    <div class="d-flex justify-content-between align-items-center mb-4 px-1">
-                        <div>
-                            <h4 class="fw-bold mb-0">Identity & Security</h4>
-                            <p class="text-muted small mb-0">Manage your account credentials and recovery options.</p>
-                        </div>
-                        <button class="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold border-2" id="btnEditSecurity">
-                            <i class="fas fa-lock me-1"></i> Edit
-                        </button>
-                    </div>
-
-                    <!-- 1. Username Card -->
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-body p-4">
-                            <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Identity Hub</h6>
-                            <form id="usernameForm">
-                                <input type="hidden" name="action" value="username">
-                                <div class="mb-3">
-                                    <label class="form-label text-secondary small text-uppercase fw-bold">Login Username</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-app-alt border-dim rounded-start-3"><i class="fas fa-at text-muted"></i></span>
-                                        <input type="text" class="form-control bg-app-alt border-dim text-main rounded-end-3 py-2" name="username" id="usernameInput" disabled>
-                                    </div>
-                                </div>
-                                <div class="text-center">
-                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold mt-2" disabled>
-                                        <i class="fas fa-user-edit me-2"></i>Update Username
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- 2. Password & Auth Card -->
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-body p-4">
-                            <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Access Security</h6>
-                            <div id="authMethodBadge"></div>
-
-                            <form id="passwordForm">
-                                <div class="mb-3">
-                                    <label class="form-label text-secondary small text-uppercase fw-bold">Current Password</label>
-                                    <input type="password" class="form-control bg-app-alt border-dim text-main rounded-3 py-2" name="confirm_password" disabled required minlength="8" placeholder="Repeat new password">
-                                </div>
-                        </div>
-                        <div class="mt-4 text-center">
-                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold" disabled>
-                                <i class="fas fa-key me-2"></i>Change Password
+                <div id="settingsContent" class="position-relative">
+                    <!-- Security Settings Section -->
+                    <div id="securitySection" class="settings-section d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4 px-1">
+                            <div>
+                                <h4 class="fw-bold mb-0">Identity & Security</h4>
+                                <p class="text-muted small mb-0">Manage your account credentials and recovery options.</p>
+                            </div>
+                            <button class="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold border-2" id="btnEditSecurity">
+                                <i class="fas fa-lock me-1"></i> Edit
                             </button>
                         </div>
-                        </form>
-                    </div>
-                </div>
 
-                <!-- 3. Security Question Card -->
-                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Account Recovery</h6>
-                        <form id="securityQuestionForm">
-                            <div class="mb-3">
-                                <label class="form-label text-secondary small text-uppercase fw-bold">Security Question</label>
-                                <select class="form-select bg-light border-0 rounded-3 py-2" name="security_question" id="securityQuestionSelect" disabled required>
-                                    <option value="">Select a security question...</option>
-                                    <option value="What was the name of your first pet?">What was the name of your first pet?</option>
-                                    <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
-                                    <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
-                                    <option value="In what city were you born?">In what city were you born?</option>
-                                    <option value="What is the name of your favorite book?">What is the name of your favorite book?</option>
-                                </select>
+                        <!-- 1. Username Card -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Identity Hub</h6>
+                                <form id="usernameForm">
+                                    <input type="hidden" name="action" value="username">
+                                    <div class="mb-3">
+                                        <label class="form-label text-secondary small text-uppercase fw-bold">Login Username</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-app-alt border-dim rounded-start-3"><i class="fas fa-at text-muted"></i></span>
+                                            <input type="text" class="form-control bg-app-alt border-dim text-main rounded-end-3 py-2" name="username" id="usernameInput" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold mt-2" disabled>
+                                            <i class="fas fa-user-edit me-2"></i>Update Username
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label text-secondary small text-uppercase fw-bold">Answer</label>
-                                <input type="password" class="form-control bg-app-alt border-dim text-main rounded-3 py-2" name="security_answer" id="securityAnswerInput" placeholder="Enter answer to verify or update" disabled required>
+                        </div>
+
+                        <!-- 2. Password & Auth Card -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Access Security</h6>
+                                <div id="authMethodBadge"></div>
+
+                                <form id="passwordForm">
+                                    <div class="mb-3">
+                                        <label class="form-label text-secondary small text-uppercase fw-bold">Current Password</label>
+                                        <input type="password" class="form-control bg-app-alt border-dim text-main rounded-3 py-2" name="confirm_password" disabled required minlength="8" placeholder="Repeat new password">
+                                    </div>
                             </div>
-                            <div class="text-center">
+                            <div class="mt-4 text-center">
                                 <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold" disabled>
-                                    <i class="fas fa-shield-alt me-2"></i>Save Security Recovery
+                                    <i class="fas fa-key me-2"></i>Change Password
                                 </button>
                             </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- 4. Danger Zone -->
-                <div class="card border-0 shadow-sm rounded-4 border-start border-danger border-4">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold mb-2 text-danger small text-uppercase">Danger Zone</h6>
-                        <p class="text-muted small mb-3">Clear your financial data or delete your account. <b>These actions cannot be undone.</b></p>
-                        <div class="d-flex flex-wrap justify-content-center gap-2">
-                            <button class="btn btn-outline-warning btn-sm rounded-pill px-4 fw-bold" id="btnResetData" disabled>
-                                <i class="fas fa-undo me-2"></i>Reset All Financial Data
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold" id="btnDeleteAccount" disabled>
-                                <i class="fas fa-trash-alt me-2"></i>Delete My Account Permanently
-                            </button>
+                            </form>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <?php if ($_SESSION['role'] !== 'superadmin'): ?>
-                <!-- App Preferences Section -->
-                <div id="preferencesSection" class="settings-section d-none">
+                    <!-- 3. Security Question Card -->
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-card border-0 pt-4 pb-0 d-flex justify-content-between align-items-center px-4">
-                            <div>
-                                <h5 class="mb-0 fw-bold"><i class="fas fa-sliders-h me-2 text-primary"></i>App Preferences</h5>
-                                <p class="text-muted small mb-0">Personalize your experience and notifications.</p>
-                            </div>
-                        </div>
                         <div class="card-body p-4">
-                            <form id="preferencesForm">
-                                <input type="hidden" name="action" value="preferences">
-
-                                <!-- 1. General Preferences -->
-                                <div class="mb-5">
-                                    <h6 class="fw-bold mb-3 small text-uppercase text-secondary">General Settings</h6>
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label text-secondary small text-uppercase fw-bold">Preferred Currency</label>
-                                            <input type="number" step="0.01" class="form-control border-dim bg-app-alt text-main rounded-3 py-2" name="monthly_budget_goal" id="prefGoal">
-                                        </div>
-                                    </div>
+                            <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Account Recovery</h6>
+                            <form id="securityQuestionForm">
+                                <div class="mb-3">
+                                    <label class="form-label text-secondary small text-uppercase fw-bold">Security Question</label>
+                                    <select class="form-select bg-light border-0 rounded-3 py-2" name="security_question" id="securityQuestionSelect" disabled required>
+                                        <option value="">Select a security question...</option>
+                                        <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                                        <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
+                                        <option value="In what city were you born?">In what city were you born?</option>
+                                        <option value="What is the name of your favorite book?">What is the name of your favorite book?</option>
+                                    </select>
                                 </div>
-
-                                <hr class="my-4 text-secondary opacity-25">
-
-                                <!-- 2. Notification Center -->
-                                <div class="mb-5">
-                                    <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Notification Center</h6>
-                                    <div class="card border-0 bg-app-alt rounded-4 p-3 mb-3">
-                                        <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
-                                            <div>
-                                                <label class="form-check-label fw-bold text-main d-block" for="notifBudget">Budget Reminders</label>
-                                                <span class="text-muted small">Daily alerts at 10am, 5pm, and 9pm to track your expenses.</span>
-                                            </div>
-                                            <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" name="notif_budget" id="notifBudget">
-                                        </div>
-                                    </div>
-                                    <div class="card border-0 bg-app-alt rounded-4 p-3">
-                                        <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
-                                            <div>
-                                                <label class="form-check-label fw-bold text-main d-block" for="notifLowBalance">Low Balance Alerts</label>
-                                                <span class="text-muted small">Instant notification when your balance drops below ₱500.</span>
-                                            </div>
-                                            <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" name="notif_low_balance" id="notifLowBalance">
-                                        </div>
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-secondary small text-uppercase fw-bold">Answer</label>
+                                    <input type="password" class="form-control bg-app-alt border-dim text-main rounded-3 py-2" name="security_answer" id="securityAnswerInput" placeholder="Enter answer to verify or update" disabled required>
                                 </div>
-
-                                <hr class="my-4 text-secondary opacity-25">
-
-                                <!-- 3. Interface & Experience -->
-                                <div class="mb-5">
-                                    <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Interface & AI</h6>
-                                    <div class="row g-3">
-                                        <div class="col-12">
-                                            <label class="form-label text-secondary small text-uppercase fw-bold">Tone Personality</label>
-                                            <select class="form-select border-dim bg-app-alt text-main rounded-3 py-2" name="ai_tone" id="prefTone">
-                                                <option value="Professional">Professional & Direct</option>
-                                                <option value="Friendly">Friendly & Encouraging</option>
-                                                <option value="Strict">Strict & Analytical</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label text-secondary small text-uppercase fw-bold">Preferred AI Language</label>
-                                            <select class="form-select border-dim bg-app-alt text-main rounded-3 py-2" name="ai_language" id="prefLanguage">
-                                                <option value="Auto-Detect">Auto-Detect (Based on chat)</option>
-                                                <option value="English">English</option>
-                                                <option value="Tagalog">Tagalog</option>
-                                                <option value="Cebuano">Cebuano</option>
-                                                <option value="Spanish">Spanish</option>
-                                            </select>
-                                            <span class="text-muted small mt-1 d-block"><i class="fas fa-info-circle me-1"></i> I will respond in this language or detect it automatically.</span>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="text-center">
-                                    <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-sm">
-                                        <i class="fas fa-save me-2"></i>Save Preferences
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold" disabled>
+                                        <i class="fas fa-shield-alt me-2"></i>Save Security Recovery
                                     </button>
                                 </div>
                             </form>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
 
-            <?php if ($_SESSION['role'] === 'superadmin'): ?>
-                <!-- System Management Section -->
-                <div id="systemSection" class="settings-section d-none">
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-card border-0 pt-4 pb-0 d-flex justify-content-between align-items-center px-4">
-                            <div>
-                                <h5 class="mb-0 fw-bold"><i class="fas fa-cogs me-2 text-primary"></i>System Management</h5>
-                                <p class="text-muted small mb-0">Control global system settings and maintenance.</p>
-                            </div>
-                        </div>
+                    <!-- 4. Danger Zone -->
+                    <div class="card border-0 shadow-sm rounded-4 border-start border-danger border-4">
                         <div class="card-body p-4">
-                            <!-- Maintenance Mode Toggle -->
-                            <div class="card border-0 bg-app-alt rounded-4 p-4 mb-3 border-start border-warning border-4">
-                                <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
-                                    <div>
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <h6 class="fw-bold text-dark mb-0">Maintenance Mode</h6>
-                                            <span id="maintenanceStatusBadge" class="badge rounded-pill bg-success small">Live</span>
-                                        </div>
-                                        <p class="text-muted small mb-0">When enabled, regular users cannot login. Please ensure all maintenance tasks are completed before disabling.</p>
-                                    </div>
-                                    <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="maintenanceToggle" style="width: 3rem; height: 1.5rem;">
-                                </div>
-                            </div>
-
-                            <div class="alert alert-info rounded-4 border-0 small">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Note:</strong> Enabling maintenance mode will log out all currently active users (except yourself) upon their next request.
+                            <h6 class="fw-bold mb-2 text-danger small text-uppercase">Danger Zone</h6>
+                            <p class="text-muted small mb-3">Clear your financial data or delete your account. <b>These actions cannot be undone.</b></p>
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <button class="btn btn-outline-warning btn-sm rounded-pill px-4 fw-bold" id="btnResetData" disabled>
+                                    <i class="fas fa-undo me-2"></i>Reset All Financial Data
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold" id="btnDeleteAccount" disabled>
+                                    <i class="fas fa-trash-alt me-2"></i>Delete My Account Permanently
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
 
-            <!-- About System Section -->
-            <div id="aboutSection" class="settings-section d-none">
-                <div class="card border-0 shadow-lg rounded-4 mb-4 overflow-hidden bg-card">
-                    <!-- Premium Header -->
-                    <div class="p-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 0 0 25px 25px;">
-                        <!-- Background Illustration -->
-                        <div class="position-absolute opacity-10" style="top: 0px; right: -30px; font-size: 11rem; transform: rotate(-5deg);">
-                            <i class="fas fa-wallet"></i>
+                <?php if ($_SESSION['role'] !== 'superadmin'): ?>
+                    <!-- App Preferences Section -->
+                    <div id="preferencesSection" class="settings-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-header bg-card border-0 pt-4 pb-0 d-flex justify-content-between align-items-center px-4">
+                                <div>
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-sliders-h me-2 text-primary"></i>App Preferences</h5>
+                                    <p class="text-muted small mb-0">Personalize your experience and notifications.</p>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <form id="preferencesForm">
+                                    <input type="hidden" name="action" value="preferences">
+
+                                    <!-- 1. General Preferences -->
+                                    <div class="mb-5">
+                                        <h6 class="fw-bold mb-3 small text-uppercase text-secondary">General Settings</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-secondary small text-uppercase fw-bold">Preferred Currency</label>
+                                                <input type="number" step="0.01" class="form-control border-dim bg-app-alt text-main rounded-3 py-2" name="monthly_budget_goal" id="prefGoal">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4 text-secondary opacity-25">
+
+                                    <!-- 2. Notification Center -->
+                                    <div class="mb-5">
+                                        <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Notification Center</h6>
+                                        <div class="card border-0 bg-app-alt rounded-4 p-3 mb-3">
+                                            <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                                                <div>
+                                                    <label class="form-check-label fw-bold text-main d-block" for="notifBudget">Budget Reminders</label>
+                                                    <span class="text-muted small">Daily alerts at 10am, 5pm, and 9pm to track your expenses.</span>
+                                                </div>
+                                                <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" name="notif_budget" id="notifBudget">
+                                            </div>
+                                        </div>
+                                        <div class="card border-0 bg-app-alt rounded-4 p-3">
+                                            <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                                                <div>
+                                                    <label class="form-check-label fw-bold text-main d-block" for="notifLowBalance">Low Balance Alerts</label>
+                                                    <span class="text-muted small">Instant notification when your balance drops below ₱500.</span>
+                                                </div>
+                                                <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" name="notif_low_balance" id="notifLowBalance">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4 text-secondary opacity-25">
+
+                                    <!-- 3. Interface & Experience -->
+                                    <div class="mb-5">
+                                        <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Interface & AI</h6>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label text-secondary small text-uppercase fw-bold">Tone Personality</label>
+                                                <select class="form-select border-dim bg-app-alt text-main rounded-3 py-2" name="ai_tone" id="prefTone">
+                                                    <option value="Professional">Professional & Direct</option>
+                                                    <option value="Friendly">Friendly & Encouraging</option>
+                                                    <option value="Strict">Strict & Analytical</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label text-secondary small text-uppercase fw-bold">Preferred AI Language</label>
+                                                <select class="form-select border-dim bg-app-alt text-main rounded-3 py-2" name="ai_language" id="prefLanguage">
+                                                    <option value="Auto-Detect">Auto-Detect (Based on chat)</option>
+                                                    <option value="English">English</option>
+                                                    <option value="Tagalog">Tagalog</option>
+                                                    <option value="Cebuano">Cebuano</option>
+                                                    <option value="Spanish">Spanish</option>
+                                                </select>
+                                                <span class="text-muted small mt-1 d-block"><i class="fas fa-info-circle me-1"></i> I will respond in this language or detect it automatically.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-sm">
+                                            <i class="fas fa-save me-2"></i>Save Preferences
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
+                    </div>
+                <?php endif; ?>
 
-                        <div class="position-relative z-1">
-                            <div class="d-flex align-items-center gap-4">
-                                <!-- Logo Container -->
-                                <div class="bg-app-alt p-2 rounded-4 shadow-sm animate__animated animate__fadeIn d-flex align-items-center justify-content-center" style="width: 75px; height: 75px;">
-                                    <div class="w-100 h-100 rounded-3 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%); border: 1px solid var(--border-theme);">
-                                        <i class="fas fa-wallet text-white fs-4"></i>
+                <?php if ($_SESSION['role'] === 'superadmin'): ?>
+                    <!-- System Management Section -->
+                    <div id="systemSection" class="settings-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-header bg-card border-0 pt-4 pb-0 d-flex justify-content-between align-items-center px-4">
+                                <div>
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-cogs me-2 text-primary"></i>System Management</h5>
+                                    <p class="text-muted small mb-0">Control global system settings and maintenance.</p>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Maintenance Mode Toggle -->
+                                <div class="card border-0 bg-app-alt rounded-4 p-4 mb-3 border-start border-warning border-4">
+                                    <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <h6 class="fw-bold text-dark mb-0">Maintenance Mode</h6>
+                                                <span id="maintenanceStatusBadge" class="badge rounded-pill bg-success small">Live</span>
+                                            </div>
+                                            <p class="text-muted small mb-0">When enabled, regular users cannot login. Please ensure all maintenance tasks are completed before disabling.</p>
+                                        </div>
+                                        <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="maintenanceToggle" style="width: 3rem; height: 1.5rem;">
                                     </div>
                                 </div>
 
-                                <!-- Title & Version -->
-                                <div>
-                                    <h2 class="mb-0 fw-bold tracking-tight text-white mb-1" style="font-size: 2.1rem;"><?php echo APP_NAME; ?></h2>
-                                    <div class="badge bg-app-alt text-primary border border-theme rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="font-size: 0.75rem; font-weight: 700;">
-                                        <span class="text-primary" style="opacity: 0.8;">v2.5.0</span>
-                                        <span class="text-muted opacity-25">•</span>
-                                        <span class="text-primary">Enterprise Suite</span>
+                                <div class="alert alert-info rounded-4 border-0 small mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Enabling maintenance mode will log out all currently active users (except yourself) upon their next request.
+                                </div>
+
+                                <!-- Seed Sample Data (Superadmin Only) -->
+                                <div class="card border-0 bg-primary bg-opacity-10 rounded-4 p-4 border-start border-primary border-4">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold text-primary mb-1">Functional Readiness Tool</h6>
+                                            <p class="text-muted small mb-0">Quickly populate the database with realistic sample records (Allowances, Expenses, Goals) for the current month to evaluate the dashboard.</p>
+                                        </div>
+                                        <button class="btn btn-primary rounded-pill px-4 fw-bold" id="btnSeedData">
+                                            <i class="fas fa-magic me-2"></i>Seed Sample Data
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                <?php endif; ?>
 
-                    <div class="card-body p-4 p-md-5">
-                        <!-- 1. General Objectives -->
-                        <div class="mb-5">
-                            <div class="d-flex align-items-center gap-2 mb-4">
-                                <div class="icon-box-sm bg-primary bg-opacity-10 text-primary rounded-3 p-2">
-                                    <i class="fas fa-bullseye shadow-sm"></i>
-                                </div>
-                                <h5 class="fw-bold mb-0 text-main">General Objectives</h5>
+                <!-- About System Section -->
+                <div id="aboutSection" class="settings-section d-none">
+                    <div class="card border-0 shadow-lg rounded-4 mb-4 overflow-hidden bg-card">
+                        <!-- Premium Header -->
+                        <div class="p-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 0 0 25px 25px;">
+                            <!-- Background Illustration -->
+                            <div class="position-absolute opacity-10" style="top: 0px; right: -30px; font-size: 11rem; transform: rotate(-5deg);">
+                                <i class="fas fa-wallet"></i>
                             </div>
-                            <div class="p-4 bg-app-alt rounded-4 border-start border-primary border-4 shadow-sm">
-                                <ul class="text-secondary mb-0 lh-lg list-unstyled" style="font-size: 0.95rem;">
-                                    <li>1. Provide a unified platform for managing allowances, expenses, savings, and historical statements.</li>
-                                    <li>2. Empower users with real-time monthly tracking through automated dashboard resets.</li>
-                                    <li>3. Proactively manage recurring costs with the Bills and Subscriptions Hub.</li>
-                                    <li>4. Deliver real-time daily spending intelligence via the Safe-to-Spend Calculator.</li>
-                                    <li>5. Ensure multi-level security with a 3-tier role system and session guards.</li>
-                                    <li>6. Deliver a premium, mobile-responsive experience with desktop-class animations.</li>
-                                </ul>
-                            </div>
-                        </div>
 
-                        <!-- 2. Specific Objectives -->
-                        <div class="mb-5">
-                            <h6 class="fw-bold text-uppercase text-muted mb-4 px-2" style="font-size: 0.75rem; letter-spacing: 1.5px;">Specific Outcomes</h6>
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="d-flex gap-3 p-2">
-                                        <div class="text-success fs-4 mt-1"><i class="fas fa-check-circle"></i></div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Financial Tracking</h6>
-                                            <p class="text-muted small mb-0">Full CRUD support for allowances, expenses, and savings with decimal-precise tracking.</p>
+                            <div class="position-relative z-1">
+                                <div class="d-flex align-items-center gap-4">
+                                    <!-- Logo Container -->
+                                    <div class="bg-app-alt p-2 rounded-4 shadow-sm animate__animated animate__fadeIn d-flex align-items-center justify-content-center" style="width: 75px; height: 75px;">
+                                        <div class="w-100 h-100 rounded-3 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%); border: 1px solid var(--border-theme);">
+                                            <i class="fas fa-wallet text-white fs-4"></i>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex gap-3 p-2">
-                                        <div class="text-primary fs-4 mt-1"><i class="fas fa-tachometer-alt"></i></div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Real-time Dashboard</h6>
-                                            <p class="text-muted small mb-0">Monthly Resets for focused financial monitoring and immediate visibility of net performance.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex gap-3 p-2">
-                                        <div class="text-info fs-4 mt-1"><i class="fas fa-chart-pie"></i></div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Budget Limits</h6>
-                                            <p class="text-muted small mb-0">Category-level caps with interactive progress tracking and AI-suggested limit plans.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex gap-3 p-2">
-                                        <div class="text-warning fs-4 mt-1"><i class="fas fa-shield-alt"></i></div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Hardened Security</h6>
-                                            <p class="text-muted small mb-0">Multi-tier role system, Google OAuth integration, and proactive session guards for data privacy.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex gap-3 p-2">
-                                        <div class="fs-4 mt-1" style="color: #8b5cf6;"><i class="fas fa-robot"></i></div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Contextual AI</h6>
-                                            <p class="text-muted small mb-0">AI Help Desk with grounded data access for personalized financial guidance and reflections.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex gap-3 p-2">
-                                        <div class="text-danger fs-4 mt-1"><i class="fas fa-calculator"></i></div>
-                                        <div>
-                                            <h6 class="fw-bold mb-1">Spending Insight</h6>
-                                            <p class="text-muted small mb-0">Safe-to-Spend Calculator and automated bill tracking for smart daily spending intelligence.</p>
+
+                                    <!-- Title & Version -->
+                                    <div>
+                                        <h2 class="mb-0 fw-bold tracking-tight text-white mb-1" style="font-size: 2.1rem;"><?php echo APP_NAME; ?></h2>
+                                        <div class="badge bg-app-alt text-primary border border-theme rounded-pill px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="font-size: 0.75rem; font-weight: 700;">
+                                            <span class="text-primary" style="opacity: 0.8;">v2.5.0</span>
+                                            <span class="text-muted opacity-25">•</span>
+                                            <span class="text-primary">Enterprise Suite</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 3. Core Features -->
-                        <div class="mb-5">
-                            <h6 class="fw-bold text-uppercase text-muted mb-4 px-2" style="font-size: 0.75rem; letter-spacing: 1.5px;">Core Ecosystem</h6>
-                            <div class="row g-3">
-                                <?php
-                                $features = [
-                                    ['tachometer-alt',      'name' => 'Monthly Dashboard',   'color' => 'indigo'],
-                                    ['layer-group',         'name' => 'Quick Access Hub',    'color' => 'purple'],
-                                    ['file-invoice',        'name' => 'Monthly Statements',  'color' => 'blue'],
-                                    ['receipt',             'name' => 'Precision Expenses',  'color' => 'orange'],
-                                    ['magic',               'name' => 'AI Budget Planner',   'color' => 'pink'],
-                                    ['sliders-h',           'name' => 'Budget Limits',       'color' => 'rose'],
-                                    ['hand-holding-dollar', 'name' => 'Allowance Tracker',   'color' => 'emerald'],
-                                    ['sync',                'name' => 'Savings Sync',        'color' => 'cyan'],
-                                    ['file-invoice-dollar', 'name' => 'Bills Hub',           'color' => 'amber'],
-                                    ['shield-halved',       'name' => 'Safe-to-Spend',       'color' => 'sky'],
-                                    ['bullseye',            'name' => 'Goal Deep Dive',      'color' => 'violet'],
-                                    ['book',                'name' => 'Financial Journal',   'color' => 'slate'],
-                                    ['chart-line',          'name' => 'Expense Trends',      'color' => 'green'],
-                                    ['calendar-alt',        'name' => 'Spending Heatmap',    'color' => 'red'],
-                                    ['robot',               'name' => 'AI Assistant',        'color' => 'fuchsia'],
-                                    ['lock',                'name' => 'Hardened Security',   'color' => 'indigo'],
-                                ];
-                                foreach ($features as $f): ?>
-                                    <div class="col-6 col-md-3">
-                                        <div class="p-4 text-center bg-card border border-theme rounded-4 shadow-sm h-100 hover-lift transition-all">
-                                            <div class="mb-3 fs-3" style="color: var(--bs-<?php echo $f['color'] ?? 'primary'; ?>);"><i class="fas fa-<?php echo $f[0]; ?>"></i></div>
-                                            <div class="small fw-bold text-main" style="font-size: 0.85rem;"><?php echo $f['name']; ?></div>
+                        <div class="card-body p-4 p-md-5">
+                            <!-- 1. General Objectives -->
+                            <div class="mb-5">
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <div class="icon-box-sm bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                                        <i class="fas fa-bullseye shadow-sm"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-0 text-main">General Objectives</h5>
+                                </div>
+                                <div class="p-4 bg-app-alt rounded-4 border-start border-primary border-4 shadow-sm">
+                                    <ul class="text-secondary mb-0 lh-lg list-unstyled" style="font-size: 0.95rem;">
+                                        <li>1. Provide a unified platform for managing allowances, expenses, savings, and historical statements.</li>
+                                        <li>2. Empower users with real-time monthly tracking through automated dashboard resets.</li>
+                                        <li>3. Proactively manage recurring costs with the Bills and Subscriptions Hub.</li>
+                                        <li>4. Deliver real-time daily spending intelligence via the Safe-to-Spend Calculator.</li>
+                                        <li>5. Ensure multi-level security with a 3-tier role system and session guards.</li>
+                                        <li>6. Deliver a premium, mobile-responsive experience with desktop-class animations.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- 2. Specific Objectives -->
+                            <div class="mb-5">
+                                <h6 class="fw-bold text-uppercase text-muted mb-4 px-2" style="font-size: 0.75rem; letter-spacing: 1.5px;">Specific Outcomes</h6>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="d-flex gap-3 p-2">
+                                            <div class="text-success fs-4 mt-1"><i class="fas fa-check-circle"></i></div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Financial Tracking</h6>
+                                                <p class="text-muted small mb-0">Full CRUD support for allowances, expenses, and savings with decimal-precise tracking.</p>
+                                            </div>
                                         </div>
                                     </div>
-                                <?php endforeach; ?>
+                                    <div class="col-md-6">
+                                        <div class="d-flex gap-3 p-2">
+                                            <div class="text-primary fs-4 mt-1"><i class="fas fa-tachometer-alt"></i></div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Real-time Dashboard</h6>
+                                                <p class="text-muted small mb-0">Monthly Resets for focused financial monitoring and immediate visibility of net performance.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex gap-3 p-2">
+                                            <div class="text-info fs-4 mt-1"><i class="fas fa-chart-pie"></i></div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Budget Limits</h6>
+                                                <p class="text-muted small mb-0">Category-level caps with interactive progress tracking and AI-suggested limit plans.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex gap-3 p-2">
+                                            <div class="text-warning fs-4 mt-1"><i class="fas fa-shield-alt"></i></div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Hardened Security</h6>
+                                                <p class="text-muted small mb-0">Multi-tier role system, Google OAuth integration, and proactive session guards for data privacy.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex gap-3 p-2">
+                                            <div class="fs-4 mt-1" style="color: #8b5cf6;"><i class="fas fa-robot"></i></div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Contextual AI</h6>
+                                                <p class="text-muted small mb-0">AI Help Desk with grounded data access for personalized financial guidance and reflections.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex gap-3 p-2">
+                                            <div class="text-danger fs-4 mt-1"><i class="fas fa-calculator"></i></div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Spending Insight</h6>
+                                                <p class="text-muted small mb-0">Safe-to-Spend Calculator and automated bill tracking for smart daily spending intelligence.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mt-5 pt-4 border-top">
-                            <div class="d-flex flex-column align-items-center text-center">
-                                <p class="text-muted mb-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Designed & Engineered by</p>
-                                <div class="d-flex flex-column align-items-center justify-content-center">
-                                    <div class="fw-bold fs-5 text-main mb-1" style="letter-spacing: 1px;">CYBEL JOSH A. GAMIDO</div>
-                                    <div class="small text-primary fw-medium">
-                                        <i class="fas fa-envelope me-1"></i> cjagamido@usm.edu.ph
+                            <!-- 3. Core Features -->
+                            <div class="mb-5">
+                                <h6 class="fw-bold text-uppercase text-muted mb-4 px-2" style="font-size: 0.75rem; letter-spacing: 1.5px;">Core Ecosystem</h6>
+                                <div class="row g-3">
+                                    <?php
+                                    $features = [
+                                        ['tachometer-alt',      'name' => 'Monthly Dashboard',   'color' => 'indigo'],
+                                        ['layer-group',         'name' => 'Quick Access Hub',    'color' => 'purple'],
+                                        ['file-invoice',        'name' => 'Monthly Statements',  'color' => 'blue'],
+                                        ['receipt',             'name' => 'Precision Expenses',  'color' => 'orange'],
+                                        ['magic',               'name' => 'AI Budget Planner',   'color' => 'pink'],
+                                        ['sliders-h',           'name' => 'Budget Limits',       'color' => 'rose'],
+                                        ['hand-holding-dollar', 'name' => 'Allowance Tracker',   'color' => 'emerald'],
+                                        ['sync',                'name' => 'Savings Sync',        'color' => 'cyan'],
+                                        ['file-invoice-dollar', 'name' => 'Bills Hub',           'color' => 'amber'],
+                                        ['shield-halved',       'name' => 'Safe-to-Spend',       'color' => 'sky'],
+                                        ['bullseye',            'name' => 'Goal Deep Dive',      'color' => 'violet'],
+                                        ['book',                'name' => 'Financial Journal',   'color' => 'slate'],
+                                        ['chart-line',          'name' => 'Expense Trends',      'color' => 'green'],
+                                        ['calendar-alt',        'name' => 'Spending Heatmap',    'color' => 'red'],
+                                        ['robot',               'name' => 'AI Assistant',        'color' => 'fuchsia'],
+                                        ['lock',                'name' => 'Hardened Security',   'color' => 'indigo'],
+                                    ];
+                                    foreach ($features as $f): ?>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-4 text-center bg-card border border-theme rounded-4 shadow-sm h-100 hover-lift transition-all">
+                                                <div class="mb-3 fs-3" style="color: var(--bs-<?php echo $f['color'] ?? 'primary'; ?>);"><i class="fas fa-<?php echo $f[0]; ?>"></i></div>
+                                                <div class="small fw-bold text-main" style="font-size: 0.85rem;"><?php echo $f['name']; ?></div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 pt-4 border-top">
+                                <div class="d-flex flex-column align-items-center text-center">
+                                    <p class="text-muted mb-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Designed & Engineered by</p>
+                                    <div class="d-flex flex-column align-items-center justify-content-center">
+                                        <div class="fw-bold fs-5 text-main mb-1" style="letter-spacing: 1px;">CYBEL JOSH A. GAMIDO</div>
+                                        <div class="small text-primary fw-medium">
+                                            <i class="fas fa-envelope me-1"></i> cjagamido@usm.edu.ph
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -517,16 +532,30 @@ include '../includes/header.php';
             const sections = [securitySection, preferencesSection, systemSection, aboutSection].filter(Boolean);
             const buttons = [btnSecurity, btnPreferences, btnSystem, btnAbout].filter(Boolean);
 
-            sections.forEach(s => s.classList.add('d-none'));
+            sections.forEach(s => {
+                s.classList.add('d-none');
+                s.style.display = 'none'; // Forced secondary hide
+            });
+
             buttons.forEach(b => {
-                b.classList.remove('btn-primary', 'text-white');
+                b.classList.remove('btn-primary', 'text-white', 'shadow-sm');
                 b.classList.add('btn-light', 'toggle-btn-inactive');
             });
 
-            if (section) section.classList.remove('d-none');
+            if (section) {
+                section.classList.remove('d-none');
+                section.style.display = 'block'; // Forced secondary show
+                // Smooth Fade-in effect via classes if available, or simple opacity
+                section.style.opacity = 0;
+                setTimeout(() => {
+                    section.style.transition = 'opacity 0.3s ease';
+                    section.style.opacity = 1;
+                }, 10);
+            }
+
             if (btn) {
                 btn.classList.remove('toggle-btn-inactive', 'btn-light');
-                btn.classList.add('btn-primary', 'text-white');
+                btn.classList.add('btn-primary', 'text-white', 'shadow-sm');
             }
         }
 
@@ -609,6 +638,53 @@ include '../includes/header.php';
         if (btnPreferences) btnPreferences.addEventListener('click', () => setActiveSection(btnPreferences, preferencesSection));
         if (btnSystem) btnSystem.addEventListener('click', () => setActiveSection(btnSystem, systemSection));
         if (btnAbout) btnAbout.addEventListener('click', () => setActiveSection(btnAbout, aboutSection));
+
+        // Seed Data Logic (Superadmin Only)
+        const btnSeedData = document.getElementById('btnSeedData');
+        if (btnSeedData) {
+            btnSeedData.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Seed Sample Data?',
+                    text: 'This will add realistic allowance, expense, and goal records for the current month. Existing data will NOT be deleted.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Seed Data',
+                    confirmButtonColor: '#6366f1',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return fetch('<?php echo SITE_URL; ?>api/admin_seed_data.php', {
+                                method: 'POST'
+                            })
+                            .then(response => {
+                                if (!response.ok) throw new Error(response.statusText);
+                                return response.json();
+                            })
+                            .catch(error => {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (result.value.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: result.value.message,
+                                confirmButtonColor: '#6366f1'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Seeding Failed',
+                                text: result.value.message,
+                                confirmButtonColor: '#6366f1'
+                            });
+                        }
+                    }
+                });
+            });
+        }
 
         // 1. Initial Data Load (Profile + Preferences)
         fetch('<?php echo SITE_URL; ?>api/profile.php')

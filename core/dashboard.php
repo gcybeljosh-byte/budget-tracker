@@ -356,6 +356,27 @@ include '../includes/header.php';
             updateElement('dashTotalExpenses', formatCurrency(data.total_expenses));
             updateElement('dashBalance', formatCurrency(data.balance));
 
+            // Empty State Check
+            const alertContainer = document.getElementById('alertContainer');
+            if (data.total_allowance === 0 && data.total_expenses === 0 && data.lifetime_allowance === 0) {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-primary rounded-4 border-0 shadow-sm d-flex align-items-center p-4 mb-4 fade-in">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <i class="fas fa-rocket text-primary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">Welcome to your new Budget Tracker!</h6>
+                            <p class="small mb-0 opacity-75">It looks like you haven't added any financial data yet. To see the dashboard in action, you can <b>add your first allowance</b> or use the <b>Seed Data tool</b> in Settings.</p>
+                        </div>
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold ms-3" onclick="location.href='settings.php?section=system'">
+                            Go to Settings
+                        </button>
+                    </div>
+                `;
+            } else {
+                alertContainer.innerHTML = '';
+            }
+
             renderDashboardWallets(data.source_balances, data.total_savings);
 
 
