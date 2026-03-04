@@ -268,6 +268,14 @@ class AiHelper
                 'How do I add an expense?' => 'Go to the Expenses page, click "+ Add Expense", fill in the details (Amount, Category, Description, Source, Source Type), and click "Save".',
                 'How do I track my savings?' => 'Use the Savings page to add amounts you set aside. These funds are deducted from your wallet balance and tracked separately.',
                 'How do I change my AI Tone?' => 'On the Settings page, under "AI Tone", you can choose between Professional, Friendly, or Concise.',
+                'What is the Recycle Bin?' => 'The Recycle Bin is a safety net for deleted records. When you delete an expense, allowance, savings entry, bill, or goal — it is NOT permanently erased. It is moved to the Recycle Bin where you can restore it or permanently delete it.',
+                'Where is the Recycle Bin?' => 'Go to **Sidebar → Recycle Bin** (near the bottom, under Analysis section). The direct link is [🗑️ Recycle Bin](' . SITE_URL . 'core/recycle_bin.php).',
+                'How do I restore a deleted record?' => 'Go to the **Recycle Bin**, find the record using tabs (Expenses, Allowances, Savings, Bills, Goals) or the search bar. Click the card to open the detail modal, then click **Restore**.',
+                'How do I permanently delete a record?' => 'Go to the **Recycle Bin**, open the record card, and click **Delete Forever**. This action is irreversible.',
+                'Can I recover a deleted expense?' => 'Yes! All deleted records go to the Recycle Bin first. Click **Restore** from the Recycle Bin to bring it back to its original section.',
+                'How long do records stay in the Recycle Bin?' => 'Records stay indefinitely until you either restore them or permanently delete them. A Superadmin can also permanently purge them.',
+                'Can the Superadmin see my deleted records?' => 'No, the Superadmin Recycle Bin only shows deleted USER ACCOUNTS, not individual financial records. Your financial records in the Recycle Bin are private to you.',
+                'What is the Superadmin Recycle Bin?' => 'The Superadmin has a separate Recycle Bin (at admin/recycle_bin.php) that shows only DELETED USER ACCOUNTS — not financial data. Superadmins can restore or permanently remove deleted accounts from there.',
             ],
             'Expert Financial Rules' => [
                 'Rule 1: Savings First' => 'Always treat savings as a non-negotiable expense. Try to save at least 20% of your income.',
@@ -292,6 +300,7 @@ class AiHelper
             'Settings'    => '[⚙️ Settings](' . SITE_URL . 'core/settings.php)',
             'Profile'     => '[👤 My Profile](' . SITE_URL . 'core/profile.php)',
             'History'     => '[📝 Chat History](' . SITE_URL . 'core/history_log.php)',
+            'Recycle Bin' => '[🗑️ Recycle Bin](' . SITE_URL . 'core/recycle_bin.php)',
         ];
     }
 
@@ -542,15 +551,49 @@ class AiHelper
         $prompt .= "- **Theme**: Toggle Light/Dark mode.\n";
         $prompt .= "- **Security**: Change password, manage two-factor options, and reset all financial data (DANGER — irreversible).\n\n";
 
+        $prompt .= "## 🗑️ Recycle Bin (`core/recycle_bin.php`) — For Regular Users & Admins\n";
+        $prompt .= "- **Purpose**: A safety net for accidentally deleted financial records. Records are NEVER gone immediately — they go here first.\n";
+        $prompt .= "- **What's stored here**: Deleted Expenses, Allowances, Savings entries, Bills/Subscriptions, and Financial Goals.\n";
+        $prompt .= "- **Tabs**: Filter by All / Expenses / Allowances / Savings / Bills / Goals. Badges show counts per category.\n";
+        $prompt .= "- **Search**: Use the search bar to find a specific deleted record by name or description.\n";
+        $prompt .= "- **To restore a record**:\n";
+        $prompt .= "  1. Go to **Sidebar → Recycle Bin**.\n";
+        $prompt .= "  2. Click the tab for the record type (e.g., Expenses).\n";
+        $prompt .= "  3. Click the card of the record you want to restore.\n";
+        $prompt .= "  4. A modal will open showing Amount, Date, and Deletion Date.\n";
+        $prompt .= "  5. Click **Restore** — the record instantly moves back to its original section.\n";
+        $prompt .= "- **To permanently delete**:\n";
+        $prompt .= "  1. Open the record card in the Recycle Bin.\n";
+        $prompt .= "  2. Click **Delete Forever**.\n";
+        $prompt .= "  3. Confirm the warning prompt. The record is gone permanently.\n";
+        $prompt .= "- **Important notes**: Your financial records in the Recycle Bin are private — only you can see them. They remain until you restore or permanently delete them.\n\n";
+
         // Admin-only pages
         if ($role === 'admin' || $role === 'superadmin') {
             $prompt .= "## 🛡️ Admin Dashboard (`admin/dashboard.php`)\n";
             $prompt .= "- Overview of all registered users, active accounts, and system-wide transaction counts.\n";
-            $prompt .= "- Manage user roles: Click on a user → Edit Role.\n\n";
+            $prompt .= "- Manage user roles: Click on a user → Edit Role.\n";
+            $prompt .= "- Delete User: Moves the user to the **Superadmin Recycle Bin** (soft delete) — they can be restored anytime.\n\n";
 
             $prompt .= "## 🕐 Activity Logs (`admin/logs.php`)\n";
             $prompt .= "- View a timestamped record of all system actions (expense adds, logins, resets, etc.).\n";
             $prompt .= "- Filter by action type or user.\n\n";
+
+            if ($role === 'superadmin') {
+                $prompt .= "## 🗑️ Superadmin Recycle Bin (`admin/recycle_bin.php`) — Superadmin ONLY\n";
+                $prompt .= "- Shows all soft-deleted USER ACCOUNTS system-wide. Financial records are NOT shown here (they are private to each user).\n";
+                $prompt .= "- Cards display user name, role badge, and deletion timestamp.\n";
+                $prompt .= "- **To restore a deleted user account**:\n";
+                $prompt .= "  1. Go to Admin Sidebar → Recycle Bin.\n";
+                $prompt .= "  2. Find the user (search by name, username, or email).\n";
+                $prompt .= "  3. Click their card to open the detail modal.\n";
+                $prompt .= "  4. Click **Restore User** — their account is fully reactivated and they can log in again.\n";
+                $prompt .= "- **To permanently delete a user account**:\n";
+                $prompt .= "  1. Open the user's card in the Recycle Bin.\n";
+                $prompt .= "  2. Click **Permanently Delete** and confirm the warning.\n";
+                $prompt .= "  3. All their data (expenses, savings, etc.) is erased forever.\n";
+                $prompt .= "- **Note**: Soft-deleted users cannot log in until restored. All their data is preserved during the soft-delete period.\n\n";
+            }
         }
 
         $prompt .= "# EXPERT FINANCIAL GUIDANCE\n";
