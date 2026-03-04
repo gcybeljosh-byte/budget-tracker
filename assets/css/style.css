@@ -1531,19 +1531,55 @@ table.dataTable thead .sorting_desc:after {
         max-width: 50vw;
     }
 
-    /* ─ Stat grid: specific columns go full-width on mobile ─
-       Using named column classes instead of the broad [class*="col-"]
-       selector, so intentional 2-col grids (Quick Hub, row-cols) still work */
-    .col-12,
-    .col-sm-6,
-    .col-md-3:not(.row-cols-2 > .col),
-    .col-md-4:not(.row-cols-2 > .col),
-    .col-md-6:not(.row-cols-2 > .col),
-    .col-lg-4:not(.row-cols-2 > .col),
-    .col-lg-8:not(.row-cols-2 > .col) {
+    /* ─ Stat grid: specific columns go full-width on mobile ─ */
+    .col-md-3:not(.no-mob-stack),
+    .col-md-4:not(.no-mob-stack),
+    .col-md-6:not(.no-mob-stack),
+    .col-lg-4:not(.no-mob-stack),
+    .col-lg-8:not(.no-mob-stack) {
         flex: 0 0 100% !important;
         max-width: 100% !important;
         width: 100% !important;
+    }
+
+    /* ─ Card-style Tables for Mobile ─ */
+    .table-mobile-cards thead {
+        display: none; /* Hide headers on small screens */
+    }
+
+    .table-mobile-cards tbody tr {
+        display: block;
+        background: var(--card-bg);
+        border: 1px solid var(--border-dim);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .table-mobile-cards tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-dim);
+        padding: 0.75rem 0 !important;
+        white-space: normal !important;
+        width: 100% !important;
+        text-align: right;
+    }
+
+    .table-mobile-cards tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .table-mobile-cards tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        float: left;
+        text-align: left;
     }
 
     /* ─ Preserve 2-col for Quick Access Hub and similar ─ */

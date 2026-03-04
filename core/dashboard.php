@@ -234,7 +234,7 @@ include '../includes/header.php';
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table id="dashboardTable" class="table table-hover align-middle mb-0" style="width:100%">
+                            <table id="dashboardTable" class="table table-hover align-middle mb-0 table-mobile-cards" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Type</th>
@@ -739,7 +739,13 @@ include '../includes/header.php';
                 order: [
                     [2, 'desc']
                 ],
-                responsive: true
+                responsive: true,
+                createdRow: function(row, data, dataIndex) {
+                    const labels = ['Type', 'Description', 'Date', 'Amount'];
+                    $('td', row).each(function(i) {
+                        $(this).attr('data-label', labels[i]);
+                    });
+                }
             });
         }
 

@@ -63,7 +63,7 @@ include '../includes/header.php';
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table id="expensesTable" class="table align-middle mb-0 table-hover">
+                    <table id="expensesTable" class="table align-middle mb-0 table-hover table-mobile-cards">
                         <thead class="bg-app-alt">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Date</th>
@@ -450,13 +450,13 @@ include '../includes/header.php';
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="fw-medium text-dark">${item.date}</td>
-                <td><span class="badge bg-secondary-subtle text-secondary rounded-pill text-uppercase small">${item.category}</span></td>
-                <td class="text-secondary">${item.description}</td>
-                <td class="text-end"><span class="badge bg-danger-subtle text-danger rounded-pill fw-bold">-${formatCurrency(item.amount)}</span></td>
-                <td class="text-center"><span class="badge ${sourceBadge} rounded-pill small">${item.source_type}</span></td>
-                <td class="text-center"><span class="badge ${item.expense_source === 'Savings' ? 'bg-success-subtle text-success' : item.expense_source === 'Allowance' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.expense_source}</span></td>
-                <td class="text-end">
+                <td class="fw-medium text-dark" data-label="Date">${item.date}</td>
+                <td data-label="Category"><span class="badge bg-secondary-subtle text-secondary rounded-pill text-uppercase small">${item.category}</span></td>
+                <td class="text-secondary" data-label="Description">${item.description}</td>
+                <td class="text-end" data-label="Amount"><span class="badge bg-danger-subtle text-danger rounded-pill fw-bold">-${formatCurrency(item.amount)}</span></td>
+                <td class="text-center" data-label="Method"><span class="badge ${sourceBadge} rounded-pill small">${item.source_type}</span></td>
+                <td class="text-center" data-label="Source"><span class="badge ${item.expense_source === 'Savings' ? 'bg-success-subtle text-success' : item.expense_source === 'Allowance' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.expense_source}</span></td>
+                <td class="text-end" data-label="Actions">
                     <button class="btn btn-sm btn-light text-primary me-1 rounded-circle" onclick="editExpense(${item.id})">
                         <i class="fas fa-edit"></i>
                     </button>

@@ -40,10 +40,10 @@
                             </div>
                         <?php endif; ?>
 
-                        <!-- Page Action Buttons (Hidden on very small phones to prevent overflow) -->
+                        <!-- Page Action Buttons -->
                         <?php if (isset($extraNavContent)): ?>
-                            <div class="d-none d-sm-flex align-items-center ps-2 me-1">
-                                <?php echo str_replace('ms-auto', '', $extraNavContent); ?>
+                            <div class="d-flex align-items-center ps-1">
+                                <?php echo str_replace(['ms-auto', 'rounded-circle'], ['', 'rounded-3'], $extraNavContent); ?>
                             </div>
                         <?php endif; ?>
 

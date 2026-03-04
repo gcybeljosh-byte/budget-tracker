@@ -61,7 +61,7 @@ include '../includes/db.php';
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table id="allowanceTable" class="table align-middle mb-0 table-hover">
+                    <table id="allowanceTable" class="table align-middle mb-0 table-hover table-mobile-cards">
                         <thead class="bg-app-alt">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Source</th>
@@ -85,7 +85,7 @@ include '../includes/db.php';
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table id="historyTable" class="table align-middle mb-0 table-hover">
+                    <table id="historyTable" class="table align-middle mb-0 table-hover table-mobile-cards">
                         <thead class="bg-app-alt">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Date</th>
@@ -286,10 +286,10 @@ include '../includes/db.php';
                 row.style.cursor = 'pointer';
                 row.onclick = () => fetchSourceHistory(item.source);
                 row.innerHTML = `
-                    <td class="ps-4"><span class="badge ${sourceBadge} rounded-pill fw-bold">${item.source}</span></td>
-                    <td class="text-end fw-bold text-primary">${formatCurrency(item.monthly_allowance)}</td>
-                    <td class="text-end fw-bold text-success">${formatCurrency(item.balance)}</td>
-                    <td class="text-end pe-4">
+                    <td class="ps-4" data-label="Source"><span class="badge ${sourceBadge} rounded-pill fw-bold">${item.source}</span></td>
+                    <td class="text-end fw-bold text-primary" data-label="Allowance">${formatCurrency(item.monthly_allowance)}</td>
+                    <td class="text-end fw-bold text-success" data-label="Balance">${formatCurrency(item.balance)}</td>
+                    <td class="text-end pe-4" data-label="Actions">
                         <button class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold"><i class="fas fa-history me-1"></i> Details</button>
                     </td>`;
                 allowanceTableBody.appendChild(row);
@@ -311,11 +311,11 @@ include '../includes/db.php';
             history.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="ps-4 fw-medium">${item.date}</td>
-                    <td class="text-secondary">${item.description}</td>
-                    <td><span class="badge ${item.source_type !== 'Cash' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.source_type}</span></td>
-                    <td class="text-end fw-bold text-success">+${formatCurrency(item.amount)}</td>
-                    <td class="text-end pe-4">
+                    <td class="ps-4 fw-medium" data-label="Date">${item.date}</td>
+                    <td class="text-secondary" data-label="Description">${item.description}</td>
+                    <td data-label="Source"><span class="badge ${item.source_type !== 'Cash' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.source_type}</span></td>
+                    <td class="text-end fw-bold text-success" data-label="Amount">+${formatCurrency(item.amount)}</td>
+                    <td class="text-end pe-4" data-label="Actions">
                         <button class="btn btn-sm btn-light text-primary me-1 rounded-circle" onclick="editAllowanceFromHistory(${item.id}, '${item.date}', '${item.description}', ${item.amount}, '${item.source_type}')">
                             <i class="fas fa-edit"></i>
                         </button>

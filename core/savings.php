@@ -87,7 +87,7 @@ include '../includes/header.php';
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0" id="savingsTable">
+                            <table class="table table-hover align-middle mb-0 table-mobile-cards" id="savingsTable">
                                 <thead class="bg-app-alt text-muted small text-uppercase fw-bold">
                                     <tr>
                                         <th class="px-4 py-3">Date</th>
@@ -270,12 +270,12 @@ include '../includes/header.php';
 
                             list.innerHTML += `
                             <tr>
-                                <td class="px-4 fw-medium text-dark">${item.date}</td>
-                                <td class="text-secondary">${item.description}</td>
-                                <td>${badge}</td>
-                                <td class="text-start"><span class="badge ${(item.source_type && item.source_type !== 'Cash') ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.source_type || 'Cash'}</span></td>
-                                <td class="text-end fw-bold ${amountClass}">${amountSign}${formatCurrency(item.amount)}</td>
-                                <td class="px-4 text-end">
+                                <td class="px-4 fw-medium text-dark" data-label="Date">${item.date}</td>
+                                <td class="text-secondary" data-label="Description">${item.description}</td>
+                                <td data-label="Type">${badge}</td>
+                                <td class="text-start" data-label="Source"><span class="badge ${(item.source_type && item.source_type !== 'Cash') ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.source_type || 'Cash'}</span></td>
+                                <td class="text-end fw-bold ${amountClass}" data-label="Amount">${amountSign}${formatCurrency(item.amount)}</td>
+                                <td class="px-4 text-end" data-label="Actions">
                                     ${!isWithdrawal ? `
                                         <button class="btn btn-sm btn-light text-primary me-1 edit-savings rounded-circle" 
                                             data-id="${item.id}" 
