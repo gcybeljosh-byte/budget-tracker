@@ -153,7 +153,11 @@ include '../includes/header.php';
             .then(result => {
                 if (result.success && result.data) {
                     const user = result.data;
+                    document.getElementById('firstName').value = user.first_name || '';
+                    document.getElementById('lastName').value = user.last_name || '';
+                    document.getElementById('email').value = user.email || '';
                     document.getElementById('nickname').value = user.nickname || '';
+                    document.getElementById('contactNumber').value = user.contact_number || '';
                     document.getElementById('displayFullName').textContent = user.nickname || `${user.first_name || ''} ${user.last_name || ''}`;
                     document.getElementById('displayUsername').textContent = `@${user.username}`;
 
