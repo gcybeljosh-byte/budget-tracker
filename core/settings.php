@@ -336,18 +336,6 @@ include '../includes/header.php';
                                         <strong>Note:</strong> Enabling maintenance mode will log out all currently active users (except yourself) upon their next request.
                                     </div>
 
-                                    <!-- Seed Sample Data (Superadmin Only) -->
-                                    <div class="card border-0 bg-primary bg-opacity-10 rounded-4 p-4 border-start border-primary border-4">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="fw-bold text-primary mb-1">Functional Readiness Tool</h6>
-                                                <p class="text-muted small mb-0">Quickly populate the database with realistic sample records (Allowances, Expenses, Goals) for the current month to evaluate the dashboard.</p>
-                                            </div>
-                                            <button class="btn btn-primary rounded-pill px-4 fw-bold" id="btnSeedData">
-                                                <i class="fas fa-magic me-2"></i>Seed Sample Data
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -580,8 +568,8 @@ include '../includes/header.php';
             } else if (activeSectionParam === 'system') {
                 setActiveSection(btnSystem, systemSection);
             } else if (userRole === 'superadmin') {
-                // Superadmins default to security
-                setActiveSection(btnSecurity, securitySection);
+                // Superadmins default to system
+                setActiveSection(btnSystem, systemSection);
             } else {
                 // Admins and regular users default to preferences
                 setActiveSection(btnPreferences, preferencesSection);
