@@ -10,10 +10,14 @@ if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['superadmin', 'admi
     exit;
 }
 
-// Self-Healing: If no Superadmin exists, the first Admin to log in becomes one
-$saCheck = $conn->query("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1");
+// Self-Healing: If no active Superadmin exists, the first Admin to log in becomes one
+// Use the safe version - fallback to query without deleted_at if the column doesn't exist yet
 $saCheck = $conn->query("SELECT id FROM users WHERE role = 'superadmin' AND deleted_at IS NULL LIMIT 1");
-if ($saCheck->num_rows === 0 && $_SESSION['role'] === 'admin') {
+if ($saCheck === false) {
+    // deleted_at column doesn't exist yet, fallback
+    $saCheck = $conn->query("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1");
+}
+if ($saCheck && $saCheck->num_rows === 0 && $_SESSION['role'] === 'admin') {
     $currentId = $_SESSION['id'];
     $conn->query("UPDATE users SET role = 'superadmin' WHERE id = $currentId");
     $_SESSION['role'] = 'superadmin';
