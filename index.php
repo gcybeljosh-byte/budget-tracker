@@ -21,6 +21,8 @@ if (isset($_SESSION['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker - Master Your Finances</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -509,8 +511,8 @@ if (isset($_SESSION['id'])) {
     <footer class="py-12 px-6 bg-slate-50 border-t border-slate-100">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 flex items-center justify-center">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
+                <div class="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden shadow-sm border border-slate-200">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-full h-full object-cover">
                 </div>
                 <span class="font-bold text-lg tracking-tight text-slate-800">BudgetTracker</span>
             </div>

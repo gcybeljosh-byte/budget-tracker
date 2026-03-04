@@ -167,8 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float text-indigo-600 text-2xl">
-                    <i class="fas fa-key"></i>
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float overflow-hidden">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-12 h-12 object-cover">
                 </div>
                 <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Recover Account</h2>
                 <p class="text-slate-500 mt-2 font-medium">Follow the steps to reset password</p>

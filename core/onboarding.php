@@ -34,7 +34,7 @@ if ($onboarding_completed == 1) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalize Your Explorer - Budget Tracker</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/images/favicon_rounded.png">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
     <style>
         :root {
             --primary: #6366f1;
