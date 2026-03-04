@@ -24,7 +24,7 @@ include '../includes/header.php';
                 <div class="card h-100 border-0 shadow-sm rounded-4">
                     <div class="card-body p-4">
                         <h6 class="text-secondary small text-uppercase fw-bold mb-3">Total Monthly Commitment</h6>
-                        <h2 class="fw-bold text-dark mb-0" id="totalMonthlyBills"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
+                        <h2 class="fw-bold text-main mb-0" id="totalMonthlyBills"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h2>
                         <p class="small text-muted mt-2 mb-0">Calculated from active monthly subscriptions.</p>
                     </div>
                 </div>
@@ -84,13 +84,13 @@ include '../includes/header.php';
 
                 <div class="row g-3">
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded-3">
+                        <div class="p-3 bg-app-alt rounded-3">
                             <small class="text-muted d-block mb-1">Frequency</small>
                             <span class="fw-bold fs-6" id="billDetailFrequency">-</span>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded-3">
+                        <div class="p-3 bg-app-alt rounded-3">
                             <small class="text-muted d-block mb-1">Source</small>
                             <span class="fw-bold fs-6 text-primary" id="billDetailSource">-</span>
                         </div>
@@ -107,7 +107,7 @@ include '../includes/header.php';
                     </div>
                 </div>
 
-                <div class="mt-3 p-3 bg-light rounded-3">
+                <div class="mt-3 p-3 bg-app-alt rounded-3">
                     <small class="text-muted d-block mb-1">Category</small>
                     <span class="fw-bold" id="billDetailCategory">-</span>
                 </div>
@@ -313,7 +313,7 @@ include '../includes/header.php';
                             <span class="text-muted extra-small text-uppercase fw-bold" style="font-size: 0.65rem;">${bill.category} • ${bill.frequency}</span>
                         </div>
                         <div class="dropdown" onclick="event.stopPropagation()">
-                            <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <button class="btn btn-sm bg-app-alt text-main rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
                                 <li><a class="dropdown-item edit-bill" href="#" data-id="${bill.id}"><i class="fas fa-edit me-2"></i>Edit</a></li>
                                 <li><a class="dropdown-item text-danger delete-bill" href="#" data-id="${bill.id}"><i class="fas fa-trash me-2"></i>Remove</a></li>

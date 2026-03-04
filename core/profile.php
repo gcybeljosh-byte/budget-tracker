@@ -20,16 +20,16 @@ include '../includes/header.php';
             <div class="col-md-10 col-lg-8 col-xl-7">
                 <!-- Personal Information Card -->
                 <div class="card border-0 shadow-sm rounded-4 position-relative">
-                    <button type="button" id="btnToggleEdit" class="btn btn-sm btn-light text-primary position-absolute top-0 end-0 m-3 rounded-pill shadow-sm fw-bold">
+                    <button type="button" id="btnToggleEdit" class="btn btn-sm bg-app-alt text-primary position-absolute top-0 end-0 m-3 rounded-pill shadow-sm fw-bold">
                         <i class="fas fa-pen me-1"></i>Edit Profile
                     </button>
-                    <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
+                    <div class="card-header bg-card border-0 pt-4 pb-0 text-center">
                         <div class="position-relative mx-auto mb-3" style="width: 100px; height: 100px;">
                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden h-100 w-100">
                                 <img id="profileImagePreview" src="" alt="Profile" class="d-none" style="width: 100%; height: 100%; object-fit: cover;">
                                 <i id="defaultProfileIcon" class="fas fa-user" style="font-size: 2.5rem;"></i>
                             </div>
-                            <label for="profileUpload" id="profileUploadLabel" class="position-absolute bottom-0 end-0 bg-white rounded-circle shadow p-2 d-none" style="cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                            <label for="profileUpload" id="profileUploadLabel" class="position-absolute bottom-0 end-0 bg-card rounded-circle shadow p-2 d-none" style="cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-camera text-primary small"></i>
                             </label>
                             <input type="file" id="profileUpload" name="profile_picture" class="d-none" accept="image/*">
@@ -90,7 +90,7 @@ include '../includes/header.php';
                 <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i> Drag to move, scroll to zoom. We'll save the square crop for your profile.</p>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn bg-app-alt text-main rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" id="btnCropAndSave" class="btn btn-primary rounded-pill px-4 fw-bold">Crop & Save</button>
             </div>
         </div>

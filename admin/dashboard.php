@@ -91,19 +91,19 @@ $stmt->close();
         <div class="row mb-3">
             <div class="col-md-4">
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 rounded-pill-start ps-3">
+                    <span class="input-group-text bg-app-alt border-dim rounded-pill-start ps-3">
                         <i class="fas fa-search text-secondary"></i>
                     </span>
-                    <input type="text" id="userSearch" class="form-control border-start-0 rounded-pill-end py-2" placeholder="Search Users...">
+                    <input type="text" id="userSearch" class="form-control bg-app-alt border-dim text-main border-start-0 rounded-pill-end py-2" placeholder="Search Users...">
                 </div>
             </div>
         </div>
 
         <!-- Users Table -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-white py-4 px-4 border-0 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-card py-4 px-4 border-0 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-primary fw-bold" style="letter-spacing: -0.5px;">Registered Users</h5>
-                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 rounded-pill px-3 py-2">
                     <i class="fas fa-users me-1"></i> <?php echo count($users); ?> Members
                 </span>
             </div>
@@ -124,15 +124,15 @@ $stmt->close();
                     }
 
                     .detail-pane {
-                        background-color: #fcfdfe;
+                        background-color: var(--bg-app-alt);
                         border: none !important;
                     }
 
                     .collapse-wrapper {
                         overflow: hidden;
                         transition: all 0.35s ease;
-                        border-top: 1px solid #f1f4f9;
-                        border-bottom: 2px solid #eef2f7;
+                        border-top: 1px solid var(--border-theme);
+                        border-bottom: 2px solid var(--border-theme);
                         box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.01);
                     }
 
@@ -148,7 +148,7 @@ $stmt->close();
                     .info-value {
                         font-size: 0.9rem;
                         font-weight: 600;
-                        color: #1e293b;
+                        color: var(--text-main);
                     }
 
                     .expand-icon {
@@ -171,12 +171,12 @@ $stmt->close();
                 </style>
                 <div class="table-responsive">
                     <table id="usersTable" class="table align-middle mb-0">
-                        <thead class="bg-light">
+                        <thead class="bg-app-alt">
                             <tr>
-                                <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold" style="letter-spacing: 1px; width: 40%;">User Account</th>
-                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-center" style="letter-spacing: 1px;">Role</th>
-                                <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-center" style="letter-spacing: 1px;">Status</th>
-                                <th class="border-0 py-3 pe-4 text-secondary small text-uppercase fw-bold text-end" style="letter-spacing: 1px; width: 40px;"></th>
+                                <th class="border-0 py-3 ps-4 text-muted small text-uppercase fw-bold" style="letter-spacing: 1px; width: 40%;">User Account</th>
+                                <th class="border-0 py-3 text-muted small text-uppercase fw-bold text-center" style="letter-spacing: 1px;">Role</th>
+                                <th class="border-0 py-3 text-muted small text-uppercase fw-bold text-center" style="letter-spacing: 1px;">Status</th>
+                                <th class="border-0 py-3 pe-4 text-muted small text-uppercase fw-bold text-end" style="letter-spacing: 1px; width: 40px;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -197,7 +197,7 @@ $stmt->close();
                                                 <?php endif; ?>
                                             </div>
                                             <div class="user-info-text overflow-hidden">
-                                                <div class="fw-bold text-dark text-truncate mb-0"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></div>
+                                                <div class="fw-bold text-main text-truncate mb-0"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></div>
                                                 <div class="small text-muted text-truncate"><?php echo htmlspecialchars($user['email']); ?></div>
                                             </div>
                                         </div>
@@ -234,7 +234,7 @@ $stmt->close();
             <?php foreach ($users as $user): ?>
                 <div id="tpl_user_<?php echo $user['id']; ?>">
                     <div class="collapse-wrapper">
-                        <div class="p-4 bg-light bg-opacity-10">
+                        <div class="p-4 bg-app-alt bg-opacity-10">
                             <div class="row g-4 mb-4">
                                 <?php if ($_SESSION['role'] === 'superadmin'): ?>
                                     <div class="col-md-3">
@@ -276,7 +276,7 @@ $stmt->close();
                                 </div>
                             </div>
 
-                            <div class="d-flex flex-wrap align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm border border-light gap-3">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between p-3 bg-card rounded-3 shadow-sm border border-theme gap-3">
                                 <div class="d-flex align-items-center">
                                     <div class="form-check form-switch p-0 d-flex align-items-center gap-2">
                                         <span class="info-label mb-0 me-2" style="white-space: nowrap;">Account Status:</span>
@@ -354,7 +354,7 @@ $stmt->close();
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold text-secondary text-uppercase">Username</label>
-                                        <input type="text" class="form-control rounded-3 bg-light" id="editUsername" name="username" readonly>
+                                        <input type="text" class="form-control rounded-3 bg-app-alt border-dim text-main" id="editUsername" name="username" readonly>
                                         <small class="text-muted" style="font-size: 0.6rem;">Username cannot be changed.</small>
                                     </div>
                                     <div class="col-6">

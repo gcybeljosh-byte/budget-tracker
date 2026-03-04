@@ -255,6 +255,13 @@
                         localStorage.setItem('theme', newTheme);
                         updateThemeIcon(newTheme);
 
+                        // Global update for third-party components (like charts)
+                        window.dispatchEvent(new CustomEvent('themeChanged', {
+                            detail: {
+                                theme: newTheme
+                            }
+                        }));
+
                         // Also sync to server via session (optional but good for consistency)
                         fetch('<?php echo SITE_URL; ?>api/update_theme.php?theme=' + newTheme);
                     });

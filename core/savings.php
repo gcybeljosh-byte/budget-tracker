@@ -30,7 +30,7 @@ include '../includes/header.php';
         <div class="row g-4 mb-4">
             <!-- Total Savings -->
             <div class="col-md-4 stagger-item">
-                <div class="card h-100 border-0 shadow-sm rounded-4 bg-light overflow-hidden transition-all hover-lift">
+                <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt overflow-hidden transition-all hover-lift">
                     <div class="card-body d-flex align-items-center p-4">
                         <div class="rounded-circle bg-success-subtle p-3 me-3 text-success shadow-sm">
                             <i class="fas fa-piggy-bank fa-xl"></i>
@@ -44,7 +44,7 @@ include '../includes/header.php';
             </div>
             <!-- This Month -->
             <div class="col-md-4 stagger-item">
-                <div class="card h-100 border-0 shadow-sm rounded-4 bg-light overflow-hidden transition-all hover-lift">
+                <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt overflow-hidden transition-all hover-lift">
                     <div class="card-body d-flex align-items-center p-4">
                         <div class="rounded-circle bg-primary-subtle p-3 me-3 text-primary shadow-sm">
                             <i class="fas fa-calendar-check fa-xl"></i>
@@ -58,7 +58,7 @@ include '../includes/header.php';
             </div>
             <!-- This Year -->
             <div class="col-md-4 stagger-item">
-                <div class="card h-100 border-0 shadow-sm rounded-4 bg-light overflow-hidden transition-all hover-lift">
+                <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt overflow-hidden transition-all hover-lift">
                     <div class="card-body d-flex align-items-center p-4">
                         <div class="rounded-circle bg-info-subtle p-3 me-3 text-info shadow-sm">
                             <i class="fas fa-chart-line fa-xl"></i>
@@ -76,19 +76,19 @@ include '../includes/header.php';
             <!-- Main Content: Recent Savings Table -->
             <div class="col-12">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold text-dark">Savings & Withdrawals</h5>
+                    <div class="card-header bg-card py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-main">Savings & Withdrawals</h5>
                         <div class="d-flex align-items-center gap-2">
                             <div class="input-group" style="max-width: 250px;">
-                                <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted small"></i></span>
-                                <input type="text" class="form-control bg-light border-0 small" id="savingsSearch" placeholder="Search savings...">
+                                <span class="input-group-text bg-app-alt border-0"><i class="fas fa-search text-muted small"></i></span>
+                                <input type="text" class="form-control bg-app-alt border-0 small" id="savingsSearch" placeholder="Search savings...">
                             </div>
                         </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0" id="savingsTable">
-                                <thead class="bg-light text-secondary small text-uppercase fw-bold">
+                                <thead class="bg-app-alt text-muted small text-uppercase fw-bold">
                                     <tr>
                                         <th class="px-4 py-3">Date</th>
                                         <th class="py-3">Description</th>

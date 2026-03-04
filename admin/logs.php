@@ -53,7 +53,7 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
 
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                    <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-circle text-success me-2 small pulse"></i>User Presence</h6>
+                    <h6 class="fw-bold mb-3 text-main"><i class="fas fa-circle text-success me-2 small pulse"></i>User Presence</h6>
                     <div class="d-flex flex-wrap gap-2" id="presenceContainer">
                         <?php
                         $displayLimit = 7;
@@ -65,9 +65,9 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                             $roleBadge = ($u['role'] === 'admin') ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.5rem;">ADMIN</span>' : '';
                             $hiddenClass = ($count > $displayLimit) ? 'd-none presence-extra' : '';
                         ?>
-                            <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill border shadow-sm transition-all <?php echo $hiddenClass; ?>">
+                            <div class="d-flex align-items-center bg-app-alt px-3 py-2 rounded-pill border border-theme shadow-sm transition-all <?php echo $hiddenClass; ?>">
                                 <span class="rounded-circle <?php echo $statusClass; ?> me-2" style="width: 10px; height: 10px; <?php echo $isOnline ? 'box-shadow: 0 0 8px #198754;' : ''; ?>"></span>
-                                <span class="small fw-bold">@<?php echo htmlspecialchars($u['username']); ?><?php echo $roleBadge; ?></span>
+                                <span class="small fw-bold text-main">@<?php echo htmlspecialchars($u['username']); ?><?php echo $roleBadge; ?></span>
                             </div>
                         <?php endforeach; ?>
 
@@ -84,15 +84,15 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
         <!-- Search and Actions Bar -->
         <div class="row mb-4 align-items-center">
             <div class="col-md-4">
-                <div class="input-group overflow-hidden rounded-pill border shadow-sm">
-                    <span class="input-group-text bg-white border-0 ps-3">
+                <div class="input-group overflow-hidden rounded-pill border border-theme shadow-sm">
+                    <span class="input-group-text bg-app-alt border-0 ps-3">
                         <i class="fas fa-search text-secondary"></i>
                     </span>
-                    <input type="text" id="userSearch" class="form-control border-0 py-2 ps-2" placeholder="Search User, Username, Role...">
+                    <input type="text" id="userSearch" class="form-control bg-app-alt border-0 py-2 ps-2 text-main" placeholder="Search User, Username, Role...">
                 </div>
             </div>
             <div class="col-md-8 text-end">
-                <button onclick="window.location.reload()" class="btn btn-light rounded-pill px-4 fw-bold border shadow-sm">
+                <button onclick="window.location.reload()" class="btn bg-app-alt text-main rounded-pill px-4 fw-bold border border-theme shadow-sm">
                     <i class="fas fa-sync-alt me-2 text-primary"></i> Refresh Stats
                 </button>
             </div>
@@ -104,30 +104,30 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0 align-middle" id="usersTable">
-                            <thead class="bg-light">
+                            <thead class="bg-app-alt">
                                 <tr>
-                                    <th class="ps-4 py-3 text-secondary small text-uppercase fw-bold">User</th>
-                                    <th class="py-3 text-secondary small text-uppercase fw-bold">Role</th>
-                                    <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Log Count</th>
-                                    <th class="py-3 text-secondary small text-uppercase fw-bold">Last Activity</th>
-                                    <th class="py-3 text-secondary small text-uppercase fw-bold text-end pe-4">Actions</th>
+                                    <th class="ps-4 py-3 text-muted small text-uppercase fw-bold">User</th>
+                                    <th class="py-3 text-muted small text-uppercase fw-bold">Role</th>
+                                    <th class="py-3 text-muted small text-uppercase fw-bold text-center">Log Count</th>
+                                    <th class="py-3 text-muted small text-uppercase fw-bold">Last Activity</th>
+                                    <th class="py-3 text-muted small text-uppercase fw-bold text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($allUsers as $u): ?>
                                     <tr>
                                         <td class="ps-4">
-                                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($u['first_name'] . ' ' . $u['last_name']); ?></div>
+                                            <div class="fw-bold text-main"><?php echo htmlspecialchars($u['first_name'] . ' ' . $u['last_name']); ?></div>
                                             <div class="small text-muted">@<?php echo htmlspecialchars($u['username']); ?></div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-light text-dark border rounded-pill px-3"><?php echo strtoupper($u['role']); ?></span>
+                                            <span class="badge bg-app-alt text-main border border-theme rounded-pill px-3"><?php echo strtoupper($u['role']); ?></span>
                                         </td>
                                         <td class="text-center">
                                             <span class="badge bg-primary rounded-pill"><?php echo $u['log_count']; ?></span>
                                         </td>
                                         <td>
-                                            <div class="small text-dark fw-bold"><?php echo $u['last_activity'] ? date('M d, Y H:i', strtotime($u['last_activity'])) : 'Never'; ?></div>
+                                            <div class="small text-main fw-bold"><?php echo $u['last_activity'] ? date('M d, Y H:i', strtotime($u['last_activity'])) : 'Never'; ?></div>
                                         </td>
                                         <td class="text-end pe-4">
                                             <button class="btn btn-sm btn-primary rounded-pill px-3 view-logs" data-id="<?php echo $u['id']; ?>" data-name="<?php echo htmlspecialchars($u['first_name']); ?>">
@@ -149,7 +149,7 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
 <div class="modal fade" id="userLogsModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-light border-0 p-4">
+            <div class="modal-header bg-card border-0 p-4">
                 <div>
                     <h5 class="modal-title fw-bold mb-0">Activity History: <span id="modalUserName" class="text-primary"></span></h5>
                     <p class="small text-muted mb-0">Detailed audit trail for this user</p>
@@ -164,12 +164,12 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
             <div class="modal-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="userLogsTable">
-                        <thead class="bg-light sticky-top">
+                        <thead class="bg-card sticky-top">
                             <tr>
-                                <th class="ps-4 py-3 text-secondary small text-uppercase">Timestamp</th>
-                                <th class="py-3 text-secondary small text-uppercase">Action</th>
-                                <th class="py-3 text-secondary small text-uppercase">IP & Device</th>
-                                <th class="py-3 text-secondary small text-uppercase pe-4">Details</th>
+                                <th class="ps-4 py-3 text-muted small text-uppercase">Timestamp</th>
+                                <th class="py-3 text-muted small text-uppercase">Action</th>
+                                <th class="py-3 text-muted small text-uppercase">IP & Device</th>
+                                <th class="py-3 text-muted small text-uppercase pe-4">Details</th>
                             </tr>
                         </thead>
                         <tbody id="userLogsBody">
@@ -272,16 +272,16 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                                 html += `
                                 <tr>
                                     <td class="ps-4">
-                                        <div class="fw-bold text-dark small">${dateStr}</div>
+                                        <div class="fw-bold text-main small">${dateStr}</div>
                                         <div class="text-muted" style="font-size: 0.75rem;">${timeStr}</div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark border rounded-pill px-3 py-1 fw-bold text-uppercase" style="font-size: 0.65rem;">
+                                        <span class="badge bg-app-alt text-main border border-theme rounded-pill px-3 py-1 fw-bold text-uppercase" style="font-size: 0.65rem;">
                                             ${log.action_type.replace(/_/g, ' ')}
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="small text-dark fw-bold">${log.ip_address}</div>
+                                        <div class="small text-main fw-bold">${log.ip_address}</div>
                                         <div class="text-muted text-truncate" style="max-width: 150px; font-size: 0.7rem;" title="${log.user_agent}">
                                             ${log.user_agent}
                                         </div>

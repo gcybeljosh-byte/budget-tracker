@@ -73,6 +73,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    transition: background-color 0.4s ease, color 0.4s ease;
     /* opacity-only: transform on body breaks all position:fixed children */
     animation: bodyFadeIn 0.3s ease both;
 }
@@ -216,6 +217,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 900;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .navbar h2,
@@ -298,7 +300,9 @@ body {
     border-radius: var(--radius-card);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
     transition: transform 0.3s var(--ios-spring),
-        box-shadow 0.3s var(--ios-easing);
+        box-shadow 0.3s var(--ios-easing),
+        background-color 0.4s ease,
+        border-color 0.4s ease;
     overflow: hidden;
 }
 
@@ -802,12 +806,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.12);
+    background: var(--border-strong);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.22);
+    background: var(--text-muted);
 }
 
 /* ─── Text utilities ─────────────────────────────────────── */
@@ -824,8 +828,34 @@ body {
 .border-bottom,
 .border-top,
 .border-start,
-.border-end {
+.border-end,
+.border-theme {
     border-color: var(--border-dim) !important;
+}
+
+/* ─── Theme Utilities ────────────────────────────────────── */
+.bg-card {
+    background-color: var(--card-bg) !important;
+}
+
+.bg-app {
+    background-color: var(--app-bg) !important;
+}
+
+.bg-app-alt {
+    background-color: var(--app-bg-alt) !important;
+}
+
+.text-main {
+    color: var(--text-main) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-body-theme {
+    color: var(--text-main) !important;
 }
 
 /* ─── DataTables ─────────────────────────────────────────── */

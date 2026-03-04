@@ -13,14 +13,22 @@
     <script>
         // Global SweetAlert2 Configuration for Dark Mode
         (function() {
-            const currentTheme = localStorage.getItem('theme') || 'light';
-            const isDark = currentTheme === 'dark';
+            function updateSwalTheme(theme) {
+                const isDark = theme === 'dark';
+                window.Swal = Swal.mixin({
+                    background: isDark ? '#2c2c2e' : '#ffffff',
+                    color: isDark ? '#ffffff' : '#1c1c1e',
+                    confirmButtonColor: '#0a84ff',
+                    cancelButtonColor: '#8e8e93'
+                });
+            }
 
-            window.Swal = Swal.mixin({
-                background: isDark ? '#2c2c2e' : '#ffffff',
-                color: isDark ? '#ffffff' : '#1c1c1e',
-                confirmButtonColor: '#0a84ff',
-                cancelButtonColor: '#8e8e93'
+            // Initial setup
+            updateSwalTheme(localStorage.getItem('theme') || 'light');
+
+            // Reactive update on theme change
+            window.addEventListener('themeChanged', (e) => {
+                updateSwalTheme(e.detail.theme);
             });
         })();
     </script>

@@ -46,7 +46,7 @@ include '../includes/db.php';
         <div class="row mb-3">
             <div class="col-md-4">
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 rounded-pill-start ps-3">
+                    <span class="input-group-text bg-card border-end-0 rounded-pill-start ps-3">
                         <i class="fas fa-search text-secondary"></i>
                     </span>
                     <input type="text" id="allowanceSearch" class="form-control border-start-0 rounded-pill-end py-2" placeholder="Search Date, Description, Source...">
@@ -56,13 +56,13 @@ include '../includes/db.php';
 
         <!-- Sources Table -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-            <div class="card-header bg-white py-3 border-0">
+            <div class="card-header bg-card py-3 border-0">
                 <h6 class="mb-0 fw-bold text-uppercase small text-secondary letter-spacing-1">Your Wallets</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table id="allowanceTable" class="table align-middle mb-0 table-hover">
-                        <thead class="bg-light">
+                        <thead class="bg-app-alt">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Source</th>
                                 <th class="border-0 py-3 text-secondary small text-uppercase fw-bold text-end">Monthly Allowance</th>
@@ -80,13 +80,13 @@ include '../includes/db.php';
 
         <!-- Full Allowance History Table -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-card py-3 border-0 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-bold text-uppercase small text-secondary letter-spacing-1">Allowance History</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table id="historyTable" class="table align-middle mb-0 table-hover">
-                        <thead class="bg-light">
+                        <thead class="bg-app-alt">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Date</th>
                                 <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Description</th>

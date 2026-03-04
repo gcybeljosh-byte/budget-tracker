@@ -35,37 +35,60 @@ if ($onboarding_completed == 1) {
     <title>Personalize Your Explorer - Budget Tracker</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Apply theme immediately to prevent flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
     <style>
         :root {
             --primary: #6366f1;
             --secondary: #a855f7;
             --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        .dark:root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
         }
 
         body {
             background-color: var(--bg);
+            color: var(--text-main);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.3s ease;
         }
 
         .onboarding-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 1.5rem;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             width: 100%;
             max-width: 600px;
             overflow: hidden;
-            border: none;
+            border: 1px solid var(--border);
         }
 
         .step-indicator {
             height: 6px;
-            background: #e2e8f0;
+            background: var(--border);
             display: flex;
         }
 
@@ -118,10 +141,12 @@ if ($onboarding_completed == 1) {
             padding: 0.5rem 1rem;
             margin: 0.25rem;
             border-radius: 2rem;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border);
             display: inline-block;
             transition: all 0.2s;
             font-size: 0.9rem;
+            background: transparent;
+            color: var(--text-main);
         }
 
         .category-chip.selected {
@@ -142,6 +167,36 @@ if ($onboarding_completed == 1) {
             justify-content: center;
             margin: 0 auto 2rem;
             font-size: 2rem;
+        }
+
+        .form-select,
+        .form-control {
+            background-color: var(--card-bg);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .form-select:focus,
+        .form-control:focus {
+            background-color: var(--card-bg);
+            border-color: var(--primary);
+            color: var(--text-main);
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+        }
+
+        .input-group-text {
+            background-color: var(--bg);
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        .bg-light {
+            background-color: var(--bg) !important;
+            border-color: var(--border) !important;
+        }
+
+        .text-dark {
+            color: var(--text-main) !important;
         }
     </style>
 </head>

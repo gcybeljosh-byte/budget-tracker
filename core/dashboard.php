@@ -60,7 +60,7 @@ include '../includes/header.php';
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
                     <!-- Journal -->
                     <div class="col">
-                        <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3 transition-all hover-lift border-bottom border-primary border-3" onclick="location.href='journal.php'" style="cursor: pointer;">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 transition-all hover-lift border-bottom border-primary border-3" onclick="location.href='journal.php'" style="cursor: pointer;">
                             <div class="d-flex align-items-center">
                                 <div class="rounded-circle bg-primary-subtle p-2 me-3 text-primary">
                                     <i class="fas fa-book-open fa-sm"></i>
@@ -74,7 +74,7 @@ include '../includes/header.php';
                     </div>
                     <!-- Bills -->
                     <div class="col">
-                        <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3 transition-all hover-lift border-bottom border-secondary border-3" onclick="location.href='bills.php'" style="cursor: pointer;">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 transition-all hover-lift border-bottom border-secondary border-3" onclick="location.href='bills.php'" style="cursor: pointer;">
                             <div class="d-flex align-items-center">
                                 <div class="rounded-circle bg-secondary-subtle p-2 me-3 text-secondary">
                                     <i class="fas fa-file-invoice-dollar fa-sm"></i>
@@ -88,7 +88,7 @@ include '../includes/header.php';
                     </div>
                     <!-- Goals -->
                     <div class="col">
-                        <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3 transition-all hover-lift border-bottom border-success border-3" onclick="location.href='goals.php'" style="cursor: pointer;">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 transition-all hover-lift border-bottom border-success border-3" onclick="location.href='goals.php'" style="cursor: pointer;">
                             <div class="d-flex align-items-center">
                                 <div class="rounded-circle bg-success-subtle p-2 me-3 text-success">
                                     <i class="fas fa-bullseye fa-sm"></i>
@@ -102,7 +102,7 @@ include '../includes/header.php';
                     </div>
                     <!-- Analytics/Trends -->
                     <div class="col">
-                        <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3 transition-all hover-lift border-bottom border-danger border-3" onclick="location.href='analytics.php'" style="cursor: pointer;">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 transition-all hover-lift border-bottom border-danger border-3" onclick="location.href='analytics.php'" style="cursor: pointer;">
                             <div class="d-flex align-items-center">
                                 <div class="rounded-circle bg-danger-subtle p-2 me-3 text-danger">
                                     <i class="fas fa-chart-line fa-sm"></i>
@@ -610,10 +610,10 @@ include '../includes/header.php';
             }
             bills.forEach(bill => {
                 const item = document.createElement('div');
-                item.className = 'list-group-item border-0 border-bottom d-flex justify-content-between align-items-center py-3 px-4 transition-all hover-bg-light';
+                item.className = 'list-group-item border-0 border-bottom d-flex justify-content-between align-items-center py-3 px-4 transition-all';
                 item.innerHTML = `
                 <div>
-                    <div class="fw-bold small text-dark">${bill.title}</div>
+                    <div class="fw-bold small text-main">${bill.title}</div>
                     <div class="text-muted extra-small">${bill.due_date} • ${bill.category}</div>
                 </div>
                 <div class="fw-bold text-primary small">${formatCurrency(bill.amount)}</div>
@@ -638,7 +638,7 @@ include '../includes/header.php';
             const existingChart = Chart.getChart(canvas);
             if (existingChart) existingChart.destroy();
 
-            const isDark = document.body.getAttribute('data-bs-theme') === 'dark';
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const textColor = isDark ? '#ffffff' : '#1c1c1e';
 
             new Chart(ctx, {
@@ -729,6 +729,14 @@ include '../includes/header.php';
         window.addEventListener('storage', function(e) {
             if (e.key === 'budget_tracker_ai_action') {
                 fetchDashboardData();
+            }
+        });
+
+        // Theme Change Listener
+        window.addEventListener('themeChanged', function() {
+            // Re-render chart to update colors
+            if (window.lastCategorySpending) {
+                renderDashboardChart(window.lastCategorySpending);
             }
         });
 

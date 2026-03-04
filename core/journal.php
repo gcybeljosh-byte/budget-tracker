@@ -15,19 +15,19 @@ include '../includes/header.php';
 
 <style>
     .bg-orange {
-        background-color: #f97316 !important;
+        background-color: var(--warning) !important;
     }
 
     .text-orange {
-        color: #f97316 !important;
+        color: var(--warning) !important;
     }
 
     .bg-orange-subtle {
-        background-color: #ffedd5 !important;
+        background-color: var(--bg-warning-subtle) !important;
     }
 
     .text-orange-subtle {
-        color: #ea580c !important;
+        color: var(--text-warning) !important;
     }
 
     /* Tag Checkbox Styling */
@@ -41,11 +41,49 @@ include '../includes/header.php';
         color: white !important;
     }
 
-    /* Modern Select2 Styling overrides */
+    /* Modern Select2 Styling overrides for Dark Mode */
+    [data-theme='dark'] .select2-container--bootstrap-5 .select2-selection {
+        background-color: var(--app-bg-alt) !important;
+        border-color: var(--border-strong) !important;
+        color: var(--text-main) !important;
+    }
+
+    [data-theme='dark'] .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-dim) !important;
+        color: var(--text-main) !important;
+    }
+
+    [data-theme='dark'] .select2-container--bootstrap-5 .select2-dropdown {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-strong) !important;
+    }
+
+    [data-theme='dark'] .select2-container--bootstrap-5 .select2-results__option {
+        background-color: var(--card-bg) !important;
+        color: var(--text-main) !important;
+        border-bottom-color: var(--border-dim) !important;
+    }
+
+    [data-theme='dark'] .select2-container--bootstrap-5 .select2-results__option[aria-selected="true"] {
+        background-color: var(--bg-app-alt) !important;
+        color: var(--text-muted) !important;
+    }
+
+    [data-theme='dark'] .select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--primary) !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme='dark'] .select2-search__field {
+        background-color: var(--app-bg) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-dim) !important;
+    }
+
     .select2-container--bootstrap-5 .select2-selection {
         border: 1px solid #dee2e6 !important;
         border-radius: 0.75rem !important;
-        /* rounded-3 equivalent / pill-like */
         padding: 0.375rem 0.75rem !important;
         min-height: 48px;
         box-shadow: none !important;
@@ -470,11 +508,11 @@ include '../includes/header.php';
                 <i class="fas fa-tags me-2"></i>Manage Tags
             </button>
             <?php if ($budgetGoal > 0): ?>
-                <div class="bg-white rounded-pill px-3 py-1 shadow-sm border d-flex align-items-center" role="button" data-bs-toggle="modal" data-bs-target="#budgetGoalModal">
+                <div class="bg-card rounded-pill px-3 py-1 shadow-sm border border-theme d-flex align-items-center" role="button" data-bs-toggle="modal" data-bs-target="#budgetGoalModal">
                     <i class="fas fa-bullseye text-primary me-2"></i>
                     <div>
                         <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; display: block; line-height: 1;">Monthly Goal</small>
-                        <span class="fw-bold text-dark" style="font-size: 0.9rem;"><?php echo $currencySymbol . number_format($budgetGoal, 2); ?></span>
+                        <span class="fw-bold text-main" style="font-size: 0.9rem;"><?php echo $currencySymbol . number_format($budgetGoal, 2); ?></span>
                     </div>
                 </div>
             <?php else: ?>
@@ -591,10 +629,10 @@ include '../includes/header.php';
             ?>
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-lift transition-all">
-                                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-start">
+                                <div class="card-header bg-card border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-start">
                                     <div class="d-flex align-items-center">
-                                        <div class="text-center me-3 border-end pe-3">
-                                            <h3 class="fw-bold mb-0 text-dark" style="line-height:1;"><?php echo $displayDate; ?></h3>
+                                        <div class="text-center me-3 border-end pe-3 border-theme">
+                                            <h3 class="fw-bold mb-0 text-main" style="line-height:1;"><?php echo $displayDate; ?></h3>
                                             <small class="text-uppercase text-muted fw-bold" style="font-size:0.7rem;"><?php echo $dateMonth; ?></small>
                                         </div>
                                         <div>
@@ -648,8 +686,8 @@ include '../includes/header.php';
                                         </button>
                                     </div>
                                 </div>
-                                <div class="card-footer bg-light border-0 py-2 px-4 text-end">
-                                    <small class="text-muted" style="font-size: 0.75rem;">Created: <?php echo date('h:i A', strtotime($row['created_at'])); ?></small>
+                                <div class="card-footer bg-app-alt border-0 py-2 px-4 text-end text-muted">
+                                    <small style="font-size: 0.75rem;">Created: <?php echo date('h:i A', strtotime($row['created_at'])); ?></small>
                                 </div>
                             </div>
                         </div>
@@ -686,9 +724,9 @@ include '../includes/header.php';
                                         <?php if (!empty($lines)): ?>
                                             <div class="mt-4">
                                                 <h6 class="fw-bold text-secondary text-uppercase small mb-3">Journal Entries</h6>
-                                                <div class="table-responsive rounded-3 border">
+                                                <div class="table-responsive rounded-3 border border-theme">
                                                     <table class="table table-borderless table-striped mb-0 small">
-                                                        <thead class="bg-light border-bottom">
+                                                        <thead class="bg-app-alt border-bottom border-theme">
                                                             <tr>
                                                                 <th class="ps-3">Account Title</th>
                                                                 <th class="text-end pe-3">Amount</th>
@@ -707,13 +745,13 @@ include '../includes/header.php';
                                                             ?>
                                                                 <tr>
                                                                     <td class="ps-3 fw-medium"><?php echo htmlspecialchars($line['account_title']); ?></td>
-                                                                    <td class="text-end pe-3 text-dark <?php echo $val < 0 ? 'text-danger' : ''; ?>">
+                                                                    <td class="text-end pe-3 text-main <?php echo $val < 0 ? 'text-danger' : ''; ?>">
                                                                         <?php echo $currencySymbol . number_format($val, 2); ?>
                                                                     </td>
                                                                 </tr>
                                                             <?php endforeach; ?>
                                                         </tbody>
-                                                        <tfoot class="border-top fw-bold bg-light">
+                                                        <tfoot class="border-top border-theme fw-bold bg-app-alt">
                                                             <tr>
                                                                 <td class="ps-3">Total</td>
                                                                 <td class="text-end pe-3"><?php echo $currencySymbol . number_format($totalAmount, 2); ?></td>
@@ -765,7 +803,7 @@ include '../includes/header.php';
                                                     Ledger Entries
                                                     <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" onclick="addLedgerRow('editLedgerTable<?php echo $row['id']; ?>')">+ Add Line</button>
                                                 </label>
-                                                <div class="p-2 bg-light rounded-3 border">
+                                                <div class="p-2 bg-app-alt rounded-3 border border-theme">
                                                     <table class="table table-borderless table-sm mb-0" id="editLedgerTable<?php echo $row['id']; ?>">
                                                         <thead>
                                                             <tr class="text-secondary" style="font-size:0.75rem;">
@@ -781,8 +819,8 @@ include '../includes/header.php';
                                                                     $val = ($line['amount'] != 0) ? $line['amount'] : ($line['debit'] - $line['credit']);
                                                             ?>
                                                                     <tr>
-                                                                        <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-white" placeholder="Account" value="<?php echo htmlspecialchars($line['account_title']); ?>" required></td>
-                                                                        <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00" value="<?php echo $val; ?>"></td>
+                                                                        <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-card text-main" placeholder="Account" value="<?php echo htmlspecialchars($line['account_title']); ?>" required></td>
+                                                                        <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-card text-main" placeholder="0.00" value="<?php echo $val; ?>"></td>
                                                                         <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
                                                                     </tr>
                                                                 <?php
@@ -790,8 +828,8 @@ include '../includes/header.php';
                                                             } else {
                                                                 ?>
                                                                 <tr>
-                                                                    <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-white" placeholder="Account" required></td>
-                                                                    <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-white" placeholder="0.00"></td>
+                                                                    <td><input type="text" name="lines_account[]" class="form-control form-control-sm border-0 bg-card text-main" placeholder="Account" required></td>
+                                                                    <td><input type="number" step="0.01" name="lines_amount[]" class="form-control form-control-sm border-0 bg-card text-main" placeholder="0.00"></td>
                                                                     <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
                                                                 </tr>
                                                             <?php

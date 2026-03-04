@@ -109,13 +109,13 @@ if ($_SESSION['role'] === 'superadmin') {
 
                 <div class="row g-3">
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded-3">
+                        <div class="p-3 bg-app-alt rounded-3">
                             <small class="text-muted d-block mb-1">Target Amount</small>
                             <span class="fw-bold fs-5" id="detailTarget">₱0.00</span>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-3 bg-light rounded-3">
+                        <div class="p-3 bg-app-alt rounded-3">
                             <small class="text-muted d-block mb-1">Saved Amount</small>
                             <span class="fw-bold fs-5 text-success" id="detailSaved">₱0.00</span>
                         </div>
@@ -136,10 +136,10 @@ if ($_SESSION['role'] === 'superadmin') {
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-secondary small fw-bold text-uppercase">Timeline</span>
-                    <span id="detailDeadline" class="badge rounded-pill bg-light text-dark border">No Deadline</span>
+                    <span id="detailDeadline" class="badge rounded-pill bg-app-alt text-main border border-theme">No Deadline</span>
                 </div>
 
-                <div id="detailTimelineInfo" class="small text-muted mb-4 text-center p-2 bg-light rounded-2">
+                <div id="detailTimelineInfo" class="small text-muted mb-4 text-center p-2 bg-app-alt rounded-2">
                     Establish a deadline to track your daily required savings.
                 </div>
 
@@ -203,18 +203,18 @@ if ($_SESSION['role'] === 'superadmin') {
     }
 
     .goal-status-active {
-        background: #d1fae5;
-        color: #065f46;
+        background: var(--bg-success-subtle);
+        color: var(--text-success);
     }
 
     .goal-status-completed {
-        background: #dbeafe;
-        color: #1e40af;
+        background: var(--bg-primary-subtle);
+        color: var(--text-primary);
     }
 
     .goal-status-overdue {
-        background: #fee2e2;
-        color: #991b1b;
+        background: var(--bg-danger-subtle);
+        color: var(--text-danger);
     }
 </style>
 
@@ -266,7 +266,7 @@ if ($_SESSION['role'] === 'superadmin') {
                         ${statusBadge}
                     </div>
                     <div class="dropdown" onclick="event.stopPropagation()">
-                        <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                        <button class="btn btn-sm bg-app-alt text-main rounded-circle" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
                             <li><a class="dropdown-item edit-goal-btn" href="#" data-id="${g.id}"><i class="fas fa-edit me-2 text-primary"></i>Edit Goal</a></li>
                             <li><a class="dropdown-item contribute-btn" href="#" data-id="${g.id}" data-title="${g.title}"><i class="fas fa-plus me-2 text-success"></i>Add Funds</a></li>
@@ -375,13 +375,13 @@ if ($_SESSION['role'] === 'superadmin') {
 
         if (g.deadline) {
             deadlineEl.textContent = g.deadline;
-            deadlineEl.className = 'badge rounded-pill bg-white text-primary border border-primary';
+            deadlineEl.className = 'badge rounded-pill bg-app-alt text-primary border border-primary';
 
             const days = getDaysLeft(g.deadline);
             if (days > 0) {
                 const dailyReq = remaining / days;
                 timelineInfo.innerHTML = `<i class="fas fa-info-circle me-1"></i> You need to save <strong>${formatPHP(dailyReq)}</strong> daily to reach this goal.`;
-                timelineInfo.className = 'small text-dark mb-4 text-center p-2 bg-info-subtle rounded-2';
+                timelineInfo.className = 'small text-main mb-4 text-center p-2 bg-info-subtle rounded-2';
             } else if (days === 0) {
                 timelineInfo.textContent = "Goal is due today!";
                 timelineInfo.className = 'small text-warning mb-4 text-center p-2 bg-warning-subtle rounded-2';

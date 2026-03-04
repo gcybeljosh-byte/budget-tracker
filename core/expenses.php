@@ -43,7 +43,7 @@ include '../includes/header.php';
         <div class="row mb-3 align-items-center">
             <div class="col-md-4">
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 rounded-pill-start ps-3">
+                    <span class="input-group-text bg-card border-end-0 rounded-pill-start ps-3">
                         <i class="fas fa-search text-secondary"></i>
                     </span>
                     <input type="text" id="expenseSearch" class="form-control border-start-0 rounded-pill-end py-2" placeholder="Search Date, Category, Description...">
@@ -64,7 +64,7 @@ include '../includes/header.php';
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table id="expensesTable" class="table align-middle mb-0 table-hover">
-                        <thead class="bg-light">
+                        <thead class="bg-app-alt">
                             <tr>
                                 <th class="border-0 py-3 ps-4 text-secondary small text-uppercase fw-bold">Date</th>
                                 <th class="border-0 py-3 text-secondary small text-uppercase fw-bold">Category</th>

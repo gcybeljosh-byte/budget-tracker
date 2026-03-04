@@ -58,7 +58,7 @@ include '../includes/header.php';
             <!-- Data Analytics Cards -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3 stagger-item">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-light">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt">
                         <div class="card-body text-center p-4">
                             <h6 class="text-secondary small text-uppercase fw-bold mb-3">Total Allowance</h6>
                             <h3 class="fw-bold text-success mb-0" id="reportIncome"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h3>
@@ -66,7 +66,7 @@ include '../includes/header.php';
                     </div>
                 </div>
                 <div class="col-md-3 stagger-item">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-light">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt">
                         <div class="card-body text-center p-4">
                             <h6 class="text-secondary small text-uppercase fw-bold mb-3">Total Expenses</h6>
                             <h3 class="fw-bold text-danger mb-0" id="reportExpenses"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h3>
@@ -74,7 +74,7 @@ include '../includes/header.php';
                     </div>
                 </div>
                 <div class="col-md-3 stagger-item">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-light">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt">
                         <div class="card-body text-center p-4">
                             <h5 class="card-title text-opacity-75"><i class="fas fa-hand-holding-dollar me-2"></i>Total Saved (<?php echo $_SESSION['user_currency'] ?? 'PHP'; ?>)</h5>
                             <h3 class="fw-bold text-primary mb-0" id="reportSavings"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>0.00</h3>
@@ -82,10 +82,10 @@ include '../includes/header.php';
                     </div>
                 </div>
                 <div class="col-md-3 stagger-item">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-light">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 bg-app-alt">
                         <div class="card-body text-center p-4">
                             <h6 class="text-secondary small text-uppercase fw-bold mb-3">Savings Rate</h6>
-                            <h4 class="fw-bold text-dark mb-0" id="reportSavingsRate">0%</h4>
+                            <h4 class="fw-bold text-main mb-0" id="reportSavingsRate">0%</h4>
                         </div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@ include '../includes/header.php';
 
             <!-- Chart -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                <div class="card-header bg-white py-3 px-4 border-bottom">
+                <div class="card-header bg-card py-3 px-4 border-bottom">
                     <h5 class="mb-0 fw-bold">Financial Analysis - <span id="reportLabel" class="text-primary"></span></h5>
                 </div>
                 <div class="card-body p-4">
@@ -274,6 +274,10 @@ include '../includes/header.php';
                 });
             }
 
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#98989d' : '#1c1c1e';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -285,20 +289,39 @@ include '../includes/header.php';
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                color: isDark ? '#ffffff' : '#1c1c1e'
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
+                            grid: {
+                                color: gridColor
+                            },
                             ticks: {
+                                color: textColor,
                                 callback: value => '₱' + value.toLocaleString()
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                display: false
                             }
                         }
                     }
                 }
             });
         }
+
+        window.addEventListener('themeChanged', function() {
+            fetchReportData();
+        });
 
         function updateAIRecommendation(data) {
             const tipEl = document.getElementById('aiQuickTip');

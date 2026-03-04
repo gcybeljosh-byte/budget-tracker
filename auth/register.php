@@ -196,28 +196,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
-                        <input type="email" name="email" placeholder="john@example.com" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                        <input type="email" name="email" placeholder="john@example.com" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Contact Number</label>
-                        <input type="text" name="contact_number" placeholder="09123456789" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                        <input type="text" name="contact_number" placeholder="09123456789" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-200 space-y-6">
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 space-y-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Username</label>
-                        <input type="text" name="username" placeholder="johndoe123" class="w-full px-5 py-4 bg-white border-transparent focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                        <input type="text" name="username" placeholder="johndoe123" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Password</label>
-                            <input type="password" name="password" placeholder="••••••••" class="w-full px-5 py-4 bg-white border-transparent focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                            <input type="password" name="password" placeholder="••••••••" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Password</label>
-                            <input type="password" name="confirm_password" placeholder="••••••••" class="w-full px-5 py-4 bg-white border-transparent focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
+                            <input type="password" name="confirm_password" placeholder="••••••••" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
                         </div>
                     </div>
                 </div>

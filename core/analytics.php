@@ -104,7 +104,7 @@ if ($_SESSION['role'] === 'superadmin') {
         cursor: default;
         position: relative;
         transition: transform 0.15s;
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-dim);
     }
 
     .heatmap-day:hover {
@@ -118,9 +118,11 @@ if ($_SESSION['role'] === 'superadmin') {
         bottom: 110%;
         left: 50%;
         transform: translateX(-50%);
-        background: #1e293b;
-        color: #fff;
+        background: var(--card-bg);
+        color: var(--text-main);
         padding: 4px 8px;
+        border: 1px solid var(--border-dim);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         border-radius: 6px;
         white-space: nowrap;
         font-size: 0.65rem;
@@ -174,7 +176,7 @@ if ($_SESSION['role'] === 'superadmin') {
             <div class="col-md-3">
                 <div class="forecast-card text-center">
                     <div class="text-muted small mb-1">Daily Avg Spend</div>
-                    <div class="fs-4 fw-bold text-dark">${sym}${d.daily_avg_spend.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
+                    <div class="fs-4 fw-bold text-main">${sym}${d.daily_avg_spend.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -193,39 +195,64 @@ if ($_SESSION['role'] === 'superadmin') {
                 document.getElementById('trendsEmpty').classList.remove('d-none');
                 return;
             }
-            new Chart(document.getElementById('trendsChart'), {
-                type: 'bar',
-                data: {
-                    labels: d.labels,
-                    datasets: d.datasets
+            renderTrendsChart(d.labels, d.datasets);
+        });
+
+    function renderTrendsChart(labels, datasets) {
+        const canvas = document.getElementById('trendsChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) existingChart.destroy();
+
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#98989d' : '#8e8e93';
+        const gridColor = isDark ? 'rgba(255,255,255,0.1)' : '#f0f0f0';
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: isDark ? '#ffffff' : '#1c1c1e'
+                        }
+                    }
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top'
+                scales: {
+                    x: {
+                        stacked: false,
+                        grid: {
+                            display: false
                         },
-                        tooltip: {
-                            mode: 'index'
+                        ticks: {
+                            color: textColor
                         }
                     },
-                    scales: {
-                        x: {
-                            stacked: false,
-                            grid: {
-                                display: false
-                            }
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
                         },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: '#f0f0f0'
-                            }
+                        ticks: {
+                            color: textColor
                         }
                     }
                 }
-            });
+            }
         });
+    }
+
+    window.addEventListener('themeChanged', function() {
+        // Re-render chart and heatmap if we have data
+        location.reload(); // Simple way for analytics to handle multiple charts/heatmaps
+    });
 
     // ─── Heatmap ─────────────────────────────────────────────────
     fetch(SITE_URL + 'api/analytics.php?action=heatmap')
@@ -246,14 +273,16 @@ if ($_SESSION['role'] === 'superadmin') {
                 const amount = data[dateKey] || 0;
                 const ratio = max > 0 ? amount / max : 0;
                 const ci = amount === 0 ? 0 : Math.min(4, Math.ceil(ratio * 4));
-                const bg = amount === 0 ? '#f8f9fa' : colors[ci];
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+                const bg = amount === 0 ? (isDark ? 'rgba(255,255,255,0.05)' : '#f8f9fa') : colors[ci];
                 const isToday = day === today;
 
                 const el = document.createElement('div');
                 el.className = 'heatmap-day';
                 el.style.background = bg;
-                el.style.color = ci >= 3 ? '#fff' : '#334155';
-                if (isToday) el.style.outline = '2px solid #334155';
+                el.style.color = ci >= 3 ? '#fff' : (isDark ? '#cbd5e1' : '#334155');
+                if (isToday) el.style.outline = isDark ? '2px solid #fff' : '2px solid #334155';
                 el.innerHTML = `
                     ${day}
                     <div class="tooltip-hover">Day ${day}: ₱${amount.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
