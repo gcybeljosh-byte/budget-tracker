@@ -85,7 +85,7 @@ if (isset($_SESSION['id'])) {
         <div class="max-w-6xl mx-auto flex items-center justify-between glass px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl ios-shadow">
             <div class="flex items-center gap-2 md:gap-3">
                 <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full overflow-hidden shadow-sm bg-white">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-full h-full object-cover">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-full h-full object-cover rounded-full">
                 </div>
                 <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 whitespace-nowrap">BudgetTracker</span>
             </div>
@@ -512,7 +512,7 @@ if (isset($_SESSION['id'])) {
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden shadow-sm border border-slate-200">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-full h-full object-cover">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-full h-full object-cover rounded-full">
                 </div>
                 <span class="font-bold text-lg tracking-tight text-slate-800">BudgetTracker</span>
             </div>

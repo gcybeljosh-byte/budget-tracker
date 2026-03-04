@@ -48,7 +48,7 @@ define('AI_API_KEY', $__finalKey);
 /**
  * AI_MODEL: Specify which AI model to use
  * 
- * Recommended for Budget Tracking: 'gemini-2.0-flash'
+ * Recommended for Budget Tracking: 'gemini-2.5-flash'
  */
 define('AI_MODEL', 'gemini-2.5-flash');
 
