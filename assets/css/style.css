@@ -66,6 +66,13 @@ body {
     }
 }
 
+/* Rounded Logo Utility */
+.rounded-logo {
+    border-radius: 50%;
+    object-fit: cover;
+    overflow: hidden;
+}
+
 /* ─── Layout ─────────────────────────────────────────────── */
 #wrapper {
     display: flex;

@@ -2,7 +2,7 @@ const CACHE_NAME = 'budget-tracker-v1';
 const ASSETS_TO_CACHE = [
   '/core/dashboard.php',
   '/assets/css/style.css',
-  '/assets/images/favicon.png',
+  '/assets/images/favicon_rounded.png',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];

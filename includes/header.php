@@ -66,7 +66,7 @@ if (isset($_SESSION['id'])) {
     <!-- PWA Support -->
     <link rel="manifest" href="<?php echo SITE_URL; ?>manifest.json">
     <meta name="theme-color" content="#6366f1">
-    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
+    <link rel="apple-touch-icon" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
 
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' . $appName : $appName; ?></title>
     <!-- Bootstrap 5 CSS -->
@@ -76,7 +76,7 @@ if (isset($_SESSION['id'])) {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>assets/css/style.css?v=<?php echo time(); ?>">
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
+    <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png">
     <!-- Currency Configuration -->
     <?php
     require_once __DIR__ . '/CurrencyHelper.php';

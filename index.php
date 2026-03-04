@@ -82,8 +82,8 @@ if (isset($_SESSION['id'])) {
     <nav class="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4">
         <div class="max-w-6xl mx-auto flex items-center justify-between glass px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl ios-shadow">
             <div class="flex items-center gap-2 md:gap-3">
-                <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
+                <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full overflow-hidden shadow-sm bg-white">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-full h-full object-cover">
                 </div>
                 <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 whitespace-nowrap">BudgetTracker</span>
             </div>

@@ -173,8 +173,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
 
         <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow relative overflow-hidden">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float overflow-hidden">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" class="w-12 h-12 object-cover">
                 </div>
                 <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
                 <p class="text-slate-500 mt-2 font-medium">Continue your financial journey</p>

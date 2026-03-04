@@ -6,8 +6,8 @@
             $dashUrl = ($roleStr === 'superadmin') ? SITE_URL . 'admin/dashboard.php' : SITE_URL . 'core/dashboard.php';
             ?>
             <a href="<?php echo $dashUrl; ?>" class="sidebar-heading pb-2 text-decoration-none" style="color: inherit; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                <div class="premium-logo-container me-3" style="width: 40px; height: 40px;">
-                    <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                <div class="premium-logo-container me-3 rounded-circle overflow-hidden shadow-sm" style="width: 40px; height: 40px; background: white;">
+                    <img src="<?php echo SITE_URL; ?>assets/images/favicon_rounded.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div>
                     <div style="line-height: 1;"><?php echo defined('APP_NAME') ? APP_NAME : $appName; ?></div>
