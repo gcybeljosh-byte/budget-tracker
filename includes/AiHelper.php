@@ -407,9 +407,12 @@ class AiHelper
         $prompt .= "You were built by **Cybel Josh A. Gamido** (Superadmin) from USM. You are knowledgeable, friendly, and genuinely helpful.\n";
         $prompt .= "Your purpose is to **guide, advise, and educate** — not to perform system actions. You NEVER add, edit, or delete records.\n\n";
 
-        $prompt .= "# YOUR PERSONALITY\n";
+        $prompt .= "# YOUR PERSONALITY & CONVERSATIONAL FLOW\n";
         $prompt .= "- Tone: {$tone} — but always warm, approachable, and never robotic.\n";
         $prompt .= "- Greet users by name on the first message of a session.\n";
+        $prompt .= "- **PROACTIVITY IS KEY**: Don't just answer; suggest the next logical step.\n";
+        $prompt .= "  - *Example*: \"You have ₱1,500 left. Would you like me to check which upcoming bills might eat into that, or suggest a daily spending limit?\"\n";
+        $prompt .= "- **HANDLE FLOW**: If a user says \"Yes\", \"Sure\", \"Proceed\", or \"Tell me more\", look at your PREVIOUS MESSAGE in the chat history. Follow through on the suggestion you made.\n";
         $prompt .= "- Use clear formatting: bullet points, bold headings, step-by-step lists for how-tos.\n";
         $prompt .= "- Keep responses concise but complete. Don't pad with filler words.\n";
         $prompt .= "- When asked about features you can't do (adding/editing records), politely redirect them to the correct page with exact navigation steps.\n\n";
@@ -642,10 +645,19 @@ class AiHelper
             ];
         }
 
-        $messages = [
-            ['role' => 'system', 'content' => $prompt],
-            ['role' => 'user',   'content' => $userMessage]
-        ];
+        $history = $this->getLastChatHistory(5);
+        $messages = [['role' => 'system', 'content' => $prompt]];
+
+        // Add history for context
+        foreach ($history as $h) {
+            $messages[] = ['role' => 'user', 'content' => $h['message']];
+            if (!empty($h['response'])) {
+                $messages[] = ['role' => 'assistant', 'content' => $h['response']];
+            }
+        }
+
+        // Add current message
+        $messages[] = ['role' => 'user', 'content' => $userMessage];
 
         $rawResponse = $this->callLLM($messages);
         return $this->processResponse($rawResponse);
@@ -820,6 +832,17 @@ class AiHelper
 
         $apiError = $json['error']['message'] ?? 'Unknown OpenAI Error';
         return json_encode(['response_message' => "⚠️ OpenAI API Error: $apiError (HTTP $http_code)", 'error' => true]);
+    }
+
+    public function getLastChatHistory($limit = 5)
+    {
+        $stmt = $this->conn->prepare("SELECT message, response FROM ai_chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT ?");
+        $stmt->bind_param("ii", $this->user_id, $limit);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $history = ($res) ? $res->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        return array_reverse($history); // Return in chronological order
     }
 
     // ========================================================================
