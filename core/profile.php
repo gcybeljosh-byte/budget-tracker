@@ -35,7 +35,10 @@ include '../includes/header.php';
                             <input type="file" id="profileUpload" name="profile_picture" class="d-none" accept="image/*">
                         </div>
                         <h4 class="mb-0 fw-bold" id="displayFullName">Loading...</h4>
-                        <p class="text-muted" id="displayUsername">@loading</p>
+                        <p class="text-muted mb-1" id="displayUsername">@loading</p>
+                        <div class="badge bg-secondary-subtle text-secondary rounded-pill extra-small px-3 py-1" style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;">
+                            <i class="fas fa-id-badge me-1"></i>Logged in as: <?php echo ucfirst($_SESSION['role']); ?>
+                        </div>
                     </div>
                     <div class="card-body p-4">
                         <form id="profileForm">

@@ -1006,22 +1006,18 @@ include '../includes/header.php';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <form action="journal.php" method="POST">
-                    <input type="hidden" name="action" value="update_goal">
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Monthly Limit</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?></span>
-                            <input type="number" step="0.01" class="form-control border-start-0 ps-0" name="monthly_budget_goal" required placeholder="0.00" value="<?php echo ($budgetGoal > 0) ? $budgetGoal : ''; ?>">
-                        </div>
-                        <div class="form-text small">This goal helps the AI track your progress.</div>
+                <div class="text-center mb-3">
+                    <div class="display-6 fw-bold text-primary mb-1">
+                        <?php echo CurrencyHelper::getSymbol($_SESSION['user_currency'] ?? 'PHP'); ?>
+                        <?php echo number_format($budgetGoal, 2); ?>
                     </div>
+                    <div class="text-muted small">Current Monthly Limit</div>
+                </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2">Update Goal</button>
-                    </div>
-                </form>
+                <div class="alert alert-info rounded-3 border-0 small mb-0">
+                    <i class="fas fa-info-circle me-2"></i> To change your monthly limit, please go to
+                    <a href="settings.php?section=preferences" class="fw-bold text-decoration-none">Settings > Preferences</a>.
+                </div>
             </div>
         </div>
     </div>

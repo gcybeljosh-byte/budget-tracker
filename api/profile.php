@@ -113,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Default 'info' action
     $first_name = trim($_POST['first_name'] ?? '');
     $last_name = trim($_POST['last_name'] ?? '');
+    $nickname = trim($_POST['nickname'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $contact_number = trim($_POST['contact_number'] ?? '');
 
@@ -153,16 +154,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     if ($profile_pic_path) {
-        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, contact_number = ?, profile_picture = ? WHERE id = ?");
-        $stmt->bind_param("sssssi", $first_name, $last_name, $email, $contact_number, $profile_pic_path, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, nickname = ?, email = ?, contact_number = ?, profile_picture = ? WHERE id = ?");
+        $stmt->bind_param("ssssssi", $first_name, $last_name, $nickname, $email, $contact_number, $profile_pic_path, $user_id);
     } else {
-        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, contact_number = ? WHERE id = ?");
-        $stmt->bind_param("ssssi", $first_name, $last_name, $email, $contact_number, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, nickname = ?, email = ?, contact_number = ? WHERE id = ?");
+        $stmt->bind_param("sssssi", $first_name, $last_name, $nickname, $email, $contact_number, $user_id);
     }
 
     if ($stmt->execute()) {
         $_SESSION['first_name'] = $first_name;
         $_SESSION['last_name'] = $last_name;
+        $_SESSION['nickname'] = $nickname;
         if ($profile_pic_path) $_SESSION['profile_picture'] = $profile_pic_path;
 
         echo json_encode([
@@ -170,7 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'message' => 'Profile updated successfully.',
             'profile_picture' => $profile_pic_path,
             'first_name' => $first_name,
-            'last_name' => $last_name
+            'last_name' => $last_name,
+            'nickname' => $nickname
         ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Error updating profile.']);
