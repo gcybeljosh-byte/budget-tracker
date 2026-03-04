@@ -107,7 +107,7 @@ include '../includes/header.php';
                 </style>
 
                 <!-- Security Settings Section -->
-                <div id="securitySection" class="settings-section">
+                <div id="securitySection" class="settings-section d-none">
                     <div class="d-flex justify-content-between align-items-center mb-4 px-1">
                         <div>
                             <h4 class="fw-bold mb-0">Identity & Security</h4>
@@ -209,7 +209,7 @@ include '../includes/header.php';
 
             <?php if ($_SESSION['role'] !== 'superadmin'): ?>
                 <!-- App Preferences Section -->
-                <div id="preferencesSection" class="settings-section">
+                <div id="preferencesSection" class="settings-section d-none">
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
                         <div class="card-header bg-card border-0 pt-4 pb-0 d-flex justify-content-between align-items-center px-4">
                             <div>
@@ -331,7 +331,7 @@ include '../includes/header.php';
             <?php endif; ?>
 
             <!-- About System Section -->
-            <div id="aboutSection" class="settings-section">
+            <div id="aboutSection" class="settings-section d-none">
                 <div class="card border-0 shadow-lg rounded-4 mb-4 overflow-hidden bg-card">
                     <!-- Premium Header -->
                     <div class="p-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 0 0 25px 25px;">

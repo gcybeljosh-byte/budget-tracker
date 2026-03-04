@@ -74,23 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Budget Tracker</title>
     <link rel="icon" type="image/png" href="<?php echo SITE_URL; ?>assets/images/favicon.png">
-    <script>
-        // Apply theme immediately to prevent flashing
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f0f4f8;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -108,20 +92,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
             padding: 2rem 1rem;
         }
 
-        .dark body {
-            background-color: #0f172a;
-        }
 
         .glass {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         .ios-shadow {
@@ -263,19 +239,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        // Global SweetAlert2 Configuration for Dark Mode
+        // Global SweetAlert2 Configuration
         (function() {
-            const currentTheme = localStorage.getItem('theme') || 'light';
-            const isDark = currentTheme === 'dark';
-
             window.Swal = Swal.mixin({
-                background: isDark ? '#1e293b' : '#ffffff',
-                color: isDark ? '#ffffff' : '#1e293b',
-                confirmButtonColor: '#4f46e5',
-                cancelButtonColor: '#64748b',
+                background: '#ffffff',
+                color: '#1e293b',
+                confirmButtonColor: '#6366f1',
+                cancelButtonColor: '#94a3b8',
                 customClass: {
-                    popup: 'rounded-[2rem]',
-                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                    popup: 'rounded-[1.5rem] shadow-xl border-0',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold transition-all hover:scale-105',
+                    cancelButton: 'rounded-xl px-6 py-2.5 font-bold transition-all hover:scale-105'
                 }
             });
         })();

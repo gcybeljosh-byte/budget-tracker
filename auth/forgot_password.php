@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f0f4f8;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -109,10 +109,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         .ios-shadow {
@@ -252,20 +252,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Alert handle for backend success from redirected page if any
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('reset') === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Your password has been reset.',
-                confirmButtonColor: '#4f46e5',
+        // Global SweetAlert2 Configuration
+        (function() {
+            window.Swal = Swal.mixin({
+                background: '#ffffff',
+                color: '#1e293b',
+                confirmButtonColor: '#6366f1',
+                cancelButtonColor: '#94a3b8',
                 customClass: {
-                    popup: 'rounded-[2rem]',
-                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold'
+                    popup: 'rounded-[1.5rem] shadow-xl border-0',
+                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold transition-all hover:scale-105',
+                    cancelButton: 'rounded-xl px-6 py-2.5 font-bold transition-all hover:scale-105'
                 }
             });
-        }
+        })();
     </script>
 </body>
 
