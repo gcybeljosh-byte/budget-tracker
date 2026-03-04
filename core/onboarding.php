@@ -345,8 +345,7 @@ if ($onboarding_completed == 1) {
                 });
             });
 
-            // Initialize with all chips selected
-            categoryChips.forEach(chip => chip.classList.add('selected'));
+            // Start with no categories selected (User will choose)
             updateSelectedCategories();
 
             function updateSelectedCategories() {
