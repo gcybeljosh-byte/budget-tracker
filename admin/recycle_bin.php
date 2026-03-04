@@ -18,12 +18,8 @@ if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'superadmin') {
 
     <div class="container-fluid px-4 py-4">
 
-        <!-- Page Header -->
-        <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
-            <div>
-                <h4 class="fw-bold mb-1"><i class="fas fa-trash-restore me-2 text-danger"></i>Recycle Bin</h4>
-                <p class="text-secondary small mb-0">Manage soft-deleted user accounts. Restore or permanently remove them.</p>
-            </div>
+        <!-- Page Header (Empty - Title is in Navbar) -->
+        <div class="d-flex align-items-center justify-content-end mb-4 fade-up">
             <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 rounded-pill px-3 py-2" id="deletedCountBadge">
                 <i class="fas fa-users me-1"></i> <span id="deletedCount">0</span> Deleted Users
             </span>

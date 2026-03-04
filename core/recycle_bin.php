@@ -16,13 +16,8 @@ if (!isset($_SESSION['id'])) {
 
     <div class="container-fluid px-4 py-4">
 
-        <!-- Page Header -->
-        <div class="d-flex align-items-start justify-content-between mb-4 fade-up flex-wrap gap-3">
-            <div>
-                <h4 class="fw-bold mb-1"><i class="fas fa-trash-restore me-2 text-danger"></i>Recycle Bin</h4>
-                <p class="text-secondary small mb-0">Review, restore, or permanently delete your soft-deleted records.</p>
-            </div>
-        </div>
+        <!-- Page Header (Empty - Title is in Navbar) -->
+        <div class="mb-4"></div>
 
         <!-- Filter Tabs -->
         <ul class="nav nav-pills gap-2 mb-4 flex-wrap" id="binTabs">
