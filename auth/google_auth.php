@@ -50,7 +50,7 @@ ensureColumnExists($conn, 'users', 'auth_method', "VARCHAR(20) DEFAULT 'Local'")
 
 if ($email) {
     // 1. Check if email exists
-    $stmt = $conn->prepare("SELECT id, username, first_name, last_name, nickname, profile_picture, role, currency, status FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, username, first_name, last_name, nickname, profile_picture, role, currency, status FROM users WHERE email = ? AND deleted_at IS NULL");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();

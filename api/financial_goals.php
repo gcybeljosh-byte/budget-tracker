@@ -13,6 +13,9 @@ if (!isset($_SESSION['id'])) {
 $user_id = $_SESSION['id'];
 $response = ['success' => false, 'message' => 'Invalid request'];
 
+// Auto-migrate: Ensure soft-delete column exists
+ensureColumnExists($conn, 'financial_goals', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+
 // Auto-update overdue goals
 $conn->query("UPDATE financial_goals SET status = 'overdue'
               WHERE user_id = $user_id AND status = 'active' AND deadline < CURDATE() AND saved_amount < target_amount");
@@ -20,7 +23,7 @@ $conn->query("UPDATE financial_goals SET status = 'completed'
               WHERE user_id = $user_id AND saved_amount >= target_amount");
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $stmt = $conn->prepare("SELECT * FROM financial_goals WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt = $conn->prepare("SELECT * FROM financial_goals WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $response = ['success' => true, 'data' => $stmt->get_result()->fetch_all(MYSQLI_ASSOC)];
@@ -114,13 +117,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'delete':
             $id = intval($data['id'] ?? 0);
             if ($id) {
-                $stmt = $conn->prepare("DELETE FROM financial_goals WHERE id = ? AND user_id = ?");
+                $stmt = $conn->prepare("UPDATE financial_goals SET deleted_at = NOW() WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
                 $stmt->bind_param("ii", $id, $user_id);
-                if ($stmt->execute()) {
+                if ($stmt->execute() && $stmt->affected_rows > 0) {
                     $response = ['success' => true, 'message' => 'Goal deleted'];
-                    logActivity($conn, $user_id, 'goal_delete', "Deleted goal ID $id");
+                    logActivity($conn, $user_id, 'goal_delete', "Soft-deleted goal ID $id");
                 } else {
-                    $response = ['success' => false, 'message' => $conn->error];
+                    $response = ['success' => false, 'message' => 'Goal not found or already deleted'];
                 }
                 $stmt->close();
             }

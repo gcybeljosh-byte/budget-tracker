@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
     if (empty($username) || empty($password)) {
         $error = "Please fill in all fields.";
     } else {
-        $stmt = $conn->prepare("SELECT id, password, first_name, last_name, nickname, profile_picture, role, status, currency FROM users WHERE username = ?");
+        $stmt = $conn->prepare("SELECT id, password, first_name, last_name, nickname, profile_picture, role, status, currency FROM users WHERE username = ? AND deleted_at IS NULL");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $stmt->store_result();

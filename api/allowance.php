@@ -16,6 +16,9 @@ if (!isset($_SESSION['id'])) {
 $user_id = $_SESSION['id'];
 $response = ['success' => false, 'message' => 'Invalid request'];
 
+// Auto-migrate: Ensure soft-delete column exists
+ensureColumnExists($conn, 'allowances', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -73,15 +76,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'delete':
             $id = $_POST['id'] ?? '';
             if ($id) {
-                $stmt = $conn->prepare("DELETE FROM allowances WHERE id = ? AND user_id = ?");
+                $stmt = $conn->prepare("UPDATE allowances SET deleted_at = NOW() WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
                 $stmt->bind_param("ii", $id, $user_id);
 
-                if ($stmt->execute()) {
+                if ($stmt->execute() && $stmt->affected_rows > 0) {
                     $response = ['success' => true, 'message' => 'Allowance deleted successfully'];
                     $balanceHelper->syncBudgetLimits($user_id);
-                    logActivity($conn, $user_id, 'allowance_delete', "Deleted allowance ID $id");
+                    logActivity($conn, $user_id, 'allowance_delete', "Soft-deleted allowance ID $id");
                 } else {
-                    $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
+                    $response = ['success' => false, 'message' => 'Record not found or already deleted'];
                 }
                 $stmt->close();
             } else {
@@ -107,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $history = [];
         // 1. Get Allowances
-        $sql1 = "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ?";
+        $sql1 = "SELECT id, date, description, amount, 'Allowance' as type FROM allowances WHERE user_id = ? AND source_type = ? AND deleted_at IS NULL";
         $stmt = $conn->prepare($sql1);
         $stmt->bind_param("is", $user_id, $source);
         $stmt->execute();
@@ -137,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response = ['success' => true, 'data' => $history];
     } else {
         // Default: Solo Budgeter - Fetch full record history
-        $stmt = $conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? ORDER BY date DESC, id DESC");
+        $stmt = $conn->prepare("SELECT id, date, description, amount, source_type FROM allowances WHERE user_id = ? AND deleted_at IS NULL ORDER BY date DESC, id DESC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();

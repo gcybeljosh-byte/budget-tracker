@@ -29,9 +29,12 @@ $conn->query("CREATE TABLE IF NOT EXISTS recurring_payments (
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? 'list';
 
+// Auto-migrate: Ensure soft-delete column exists
+ensureColumnExists($conn, 'recurring_payments', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+
 if ($method === 'GET') {
     if ($action === 'list') {
-        $stmt = $conn->prepare("SELECT * FROM recurring_payments WHERE user_id = ? ORDER BY due_date ASC");
+        $stmt = $conn->prepare("SELECT * FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL ORDER BY due_date ASC");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -54,7 +57,7 @@ if ($method === 'GET') {
     }
 } elseif ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
-    
+
     if ($action === 'add') {
         $title = $data['title'] ?? '';
         $amount = (float)($data['amount'] ?? 0);
@@ -70,7 +73,7 @@ if ($method === 'GET') {
 
         $stmt = $conn->prepare("INSERT INTO recurring_payments (user_id, title, amount, category, due_date, frequency, source_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("isdssss", $user_id, $title, $amount, $category, $due_date, $frequency, $source);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Bill added successfully']);
         } else {
@@ -92,7 +95,7 @@ if ($method === 'GET') {
 
         $stmt = $conn->prepare("UPDATE recurring_payments SET title = ?, amount = ?, category = ?, due_date = ?, frequency = ?, source_type = ? WHERE id = ? AND user_id = ?");
         $stmt->bind_param("sdssssii", $title, $amount, $category, $due_date, $frequency, $source, $id, $user_id);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Bill updated successfully']);
         } else {
@@ -100,13 +103,13 @@ if ($method === 'GET') {
         }
     } elseif ($action === 'pay') {
         $bill_id = (int)($data['id'] ?? 0);
-        
+
         // 1. Fetch bill details
         $stmt = $conn->prepare("SELECT * FROM recurring_payments WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $bill_id, $user_id);
         $stmt->execute();
         $bill = $stmt->get_result()->fetch_assoc();
-        
+
         if (!$bill) {
             echo json_encode(['success' => false, 'message' => 'Bill not found']);
             exit;
@@ -116,7 +119,7 @@ if ($method === 'GET') {
         $desc = "Paid Bill: " . $bill['title'];
         $stmt_exp = $conn->prepare("INSERT INTO expenses (user_id, category, description, amount, date, source_type, expense_source) VALUES (?, ?, ?, ?, CURDATE(), ?, 'Allowance')");
         $stmt_exp->bind_param("issds", $user_id, $bill['category'], $desc, $bill['amount'], $bill['source_type']);
-        
+
         if ($stmt_exp->execute()) {
             // 3. Update bill due date based on frequency
             $current_due = new DateTime($bill['due_date']);
@@ -139,14 +142,13 @@ if ($method === 'GET') {
         }
     } elseif ($action === 'delete') {
         $bill_id = (int)($data['id'] ?? 0);
-        $stmt = $conn->prepare("DELETE FROM recurring_payments WHERE id = ? AND user_id = ?");
+        $stmt = $conn->prepare("UPDATE recurring_payments SET deleted_at = NOW() WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
         $stmt->bind_param("ii", $bill_id, $user_id);
-        if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Bill deleted']);
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Bill moved to recycle bin']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Delete failed']);
+            echo json_encode(['success' => false, 'message' => 'Delete failed or already deleted']);
         }
     }
 }
 $conn->close();
-?>

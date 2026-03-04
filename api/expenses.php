@@ -13,6 +13,9 @@ if (!isset($_SESSION['id'])) {
 $user_id = $_SESSION['id'];
 $response = ['success' => false, 'message' => 'Invalid request'];
 
+// Auto-migrate: Ensure soft-delete column exists
+ensureColumnExists($conn, 'expenses', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $balanceHelper = new BalanceHelper($conn);
@@ -105,14 +108,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'delete':
             $id = $_POST['id'] ?? 0;
             if ($id > 0) {
-                $stmt = $conn->prepare("DELETE FROM expenses WHERE id = ? AND user_id = ?");
+                $stmt = $conn->prepare("UPDATE expenses SET deleted_at = NOW() WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
                 $stmt->bind_param("ii", $id, $user_id);
 
-                if ($stmt->execute()) {
+                if ($stmt->execute() && $stmt->affected_rows > 0) {
                     $response = ['success' => true, 'message' => 'Expense deleted successfully'];
-                    logActivity($conn, $user_id, 'expense_delete', "Deleted expense ID $id");
+                    logActivity($conn, $user_id, 'expense_delete', "Soft-deleted expense ID $id");
                 } else {
-                    $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
+                    $response = ['success' => false, 'message' => 'Record not found or already deleted'];
                 }
                 $stmt->close();
             } else {
@@ -125,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Fetch all for the user
-    $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC");
+    $stmt = $conn->prepare("SELECT * FROM expenses WHERE user_id = ? AND deleted_at IS NULL ORDER BY date DESC");
     $stmt->bind_param("i", $user_id);
 
     $stmt->execute();

@@ -16,6 +16,9 @@ if (!isset($_SESSION['id'])) {
 $user_id = $_SESSION['id'];
 $response = ['success' => false, 'message' => 'Invalid request'];
 
+// Auto-migrate: Ensure soft-delete column exists
+ensureColumnExists($conn, 'savings', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -54,13 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'delete':
             $id = $_POST['id'] ?? 0;
-            $stmt = $conn->prepare("DELETE FROM savings WHERE id = ? AND user_id = ?");
+            $stmt = $conn->prepare("UPDATE savings SET deleted_at = NOW() WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
             $stmt->bind_param("ii", $id, $user_id);
-            if ($stmt->execute()) {
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
                 $response = ['success' => true, 'message' => 'Savings deleted successfully'];
-                logActivity($conn, $user_id, 'savings_delete', "Deleted savings ID $id");
+                logActivity($conn, $user_id, 'savings_delete', "Soft-deleted savings ID $id");
             } else {
-                $response = ['success' => false, 'message' => 'Failed to delete record'];
+                $response = ['success' => false, 'message' => 'Record not found or already deleted'];
             }
             $stmt->close();
             break;
@@ -127,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $response = ['success' => true, 'data' => $stats];
     } else {
-        $sql = "(SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ?) UNION ALL (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings') ORDER BY date DESC, id DESC";
+        $sql = "(SELECT id, date, amount, description, source_type, 'deposit' as type FROM savings WHERE user_id = ? AND deleted_at IS NULL) UNION ALL (SELECT id, date, amount, description, source_type, 'withdrawal' as type FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND deleted_at IS NULL) ORDER BY date DESC, id DESC";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ii", $user_id, $user_id);
         $stmt->execute();

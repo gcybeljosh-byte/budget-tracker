@@ -986,8 +986,8 @@ include '../includes/header.php';
             const btnDeleteAccount = document.getElementById('btnDeleteAccount');
             btnDeleteAccount.addEventListener('click', function() {
                 Swal.fire({
-                    title: 'Close Account Forever?',
-                    text: "This action is permanent and will wipe all your budget data, expenses, and history. Are you absolutely sure?",
+                    title: 'Close Your Account?',
+                    text: "Your account will be deactivated and moved to the Recycle Bin. A Superadmin can restore your account and all your data within this period.",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, proceed to confirm',
@@ -997,17 +997,17 @@ include '../includes/header.php';
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire({
-                            title: 'Type DELETE to confirm',
-                            text: 'To prevent accidental deletion, please type "DELETE" below to permanently close your account.',
+                            title: 'Type CLOSE to confirm',
+                            text: 'To prevent accidents, please type "CLOSE" below to close your account. A Superadmin can restore it later.',
                             input: 'text',
-                            inputPlaceholder: 'DELETE',
+                            inputPlaceholder: 'CLOSE',
                             showCancelButton: true,
-                            confirmButtonText: 'Permanently Delete Account',
+                            confirmButtonText: 'Close My Account',
                             confirmButtonColor: '#d33',
                             showLoaderOnConfirm: true,
                             preConfirm: (input) => {
-                                if (input.toUpperCase() !== 'DELETE') {
-                                    Swal.showValidationMessage('Please type "DELETE" exactly to confirm.');
+                                if (input.toUpperCase() !== 'CLOSE') {
+                                    Swal.showValidationMessage('Please type "CLOSE" exactly to confirm.');
                                     return false;
                                 }
 
@@ -1027,8 +1027,8 @@ include '../includes/header.php';
                             if (finalResult.isConfirmed && finalResult.value.success) {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Account Deleted',
-                                    text: 'Your account and data have been removed. Redirecting you to home...',
+                                    title: 'Account Closed',
+                                    text: 'Your account has been closed. A Superadmin can restore your account if needed. Redirecting...',
                                     showConfirmButton: false,
                                     confirmButtonColor: '#6366f1',
                                     timer: 3000

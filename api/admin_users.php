@@ -100,13 +100,12 @@ if ($action === 'update') {
         exit;
     }
 
-    // Delete user (and related data via ON DELETE CASCADE if configured, or manually if not)
-    // Assuming foreign keys are set up to cascade or we just delete the user for now.
-    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    // Soft Delete user
+    $stmt = $conn->prepare("UPDATE users SET deleted_at = NOW() WHERE id = ?");
     $stmt->bind_param("i", $user_id);
 
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
+        echo json_encode(['success' => true, 'message' => 'User soft-deleted successfully']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to delete user']);
     }

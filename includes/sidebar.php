@@ -38,6 +38,9 @@
                         <a href="<?php echo SITE_URL; ?>admin/logs.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'logs.php') ? 'active' : ''; ?>">
                             <i class="fas fa-history me-2"></i> Activity Logs
                         </a>
+                        <a href="<?php echo SITE_URL; ?>admin/recycle_bin.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'recycle_bin.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-trash-restore me-2"></i> Recycle Bin
+                        </a>
                     <?php endif; ?>
                 <?php endif; ?>
 
@@ -74,6 +77,9 @@
                     </a>
                     <a href="<?php echo SITE_URL; ?>core/history_log.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
                         <i class="fas fa-history me-2" style="width: 20px;"></i> Chat History
+                    </a>
+                    <a href="<?php echo SITE_URL; ?>core/recycle_bin.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'recycle_bin.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-trash-restore me-2" style="width: 20px;"></i> Recycle Bin
                     </a>
                 <?php endif; ?>
             </div>

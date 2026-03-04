@@ -12,14 +12,15 @@ if (!isset($_SESSION['id']) || !in_array($_SESSION['role'], ['superadmin', 'admi
 
 // Self-Healing: If no Superadmin exists, the first Admin to log in becomes one
 $saCheck = $conn->query("SELECT id FROM users WHERE role = 'superadmin' LIMIT 1");
+$saCheck = $conn->query("SELECT id FROM users WHERE role = 'superadmin' AND deleted_at IS NULL LIMIT 1");
 if ($saCheck->num_rows === 0 && $_SESSION['role'] === 'admin') {
     $currentId = $_SESSION['id'];
     $conn->query("UPDATE users SET role = 'superadmin' WHERE id = $currentId");
     $_SESSION['role'] = 'superadmin';
 }
 
-// Fetch all users - Superadmins first, then Admins, then by creation date
-$stmt = $conn->prepare("SELECT id, username, first_name, last_name, email, contact_number, profile_picture, created_at, role, status, plaintext_password, last_activity FROM users ORDER BY (role = 'superadmin') DESC, (role = 'admin') DESC, created_at DESC");
+// Fetch all users - Superadmins first, then Admins, then by creation date (Excluding soft-deleted)
+$stmt = $conn->prepare("SELECT id, username, first_name, last_name, email, contact_number, profile_picture, created_at, role, status, plaintext_password, last_activity FROM users WHERE deleted_at IS NULL ORDER BY (role = 'superadmin') DESC, (role = 'admin') DESC, created_at DESC");
 $stmt->execute();
 $result = $stmt->get_result();
 $users = [];
@@ -581,7 +582,7 @@ $stmt->close();
 
                     Swal.fire({
                         title: 'Delete User?',
-                        text: "This action cannot be undone!",
+                        text: "The user's account will be moved to the Recycle Bin. You can restore them later from the Recycle Bin.",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Yes, delete it!',
