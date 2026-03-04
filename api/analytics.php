@@ -69,6 +69,16 @@ if ($action === 'trends') {
     $balanceHelper = new BalanceHelper($conn);
     $currentBalance = $balanceHelper->getTotalBalance($user_id, true);
 
+    // Fetch User Preferences (Currency and Budget Goal)
+    $stmtPref = $conn->prepare("SELECT preferred_currency, monthly_budget_goal FROM users WHERE id = ?");
+    $stmtPref->bind_param("i", $user_id);
+    $stmtPref->execute();
+    $pref = $stmtPref->get_result()->fetch_assoc();
+    $stmtPref->close();
+
+    $currency = $pref['preferred_currency'] ?? 'PHP';
+    $budgetGoal = (float)($pref['monthly_budget_goal'] ?? 0);
+
     // 1. Get Monthly Allowance
     $monthlyAllowance = 0;
     $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
@@ -104,16 +114,19 @@ if ($action === 'trends') {
     $pSpendRemaining = $dailyAvg * $daysLeft;
     $totalProjectedSpend = $spent + $pSpendRemaining;
 
-    // Logic: Is on track if total projected spend <= monthly allowance
-    $isOnTrack = ($monthlyAllowance > 0) ? ($totalProjectedSpend <= $monthlyAllowance) : true;
+    // Logic: Is on track if total projected spend <= monthly budget goal (or allowance if goal is 0)
+    $targetBudget = ($budgetGoal > 0) ? $budgetGoal : $monthlyAllowance;
+    $isOnTrack = ($targetBudget > 0) ? ($totalProjectedSpend <= $targetBudget) : true;
 
     // Balanced Projection: current wallet balance minus what we PREDICT will be spent from now to end of month
     $projectedEndOfMonthBalance = $currentBalance - $pSpendRemaining;
 
     echo json_encode([
         'success'           => true,
+        'currency'          => $currency,
         'current_balance'   => $currentBalance,
         'monthly_allowance' => $monthlyAllowance,
+        'monthly_budget_goal' => $budgetGoal,
         'daily_avg_spend'   => round($dailyAvg, 2),
         'days_left'         => $daysLeft,
         'projected_spend'   => round($pSpendRemaining, 2),

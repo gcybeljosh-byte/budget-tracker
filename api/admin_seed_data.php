@@ -12,6 +12,9 @@ $user_id = $_SESSION['id'];
 $current_date = date('Y-m-d');
 $month_start = date('Y-m-01');
 
+// Integrate Achievement Initialization
+require_once 'init_achievements.php';
+
 try {
     // 1. Clear existing sample data for THIS month to prevent duplicates (Optional but recommended for seeding)
     // We only clear if specifically asked or just add more. Let's just add.

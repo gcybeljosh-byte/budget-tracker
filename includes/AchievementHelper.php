@@ -91,7 +91,8 @@ class AchievementHelper
             $stmt->close();
 
             if ($ach) {
-                $stmt = $this->conn->prepare("INSERT IGNORE INTO user_achievements (user_id, achievement_id) VALUES (?, ?)");
+                // Modified: explicitly set is_notified to 0 for new unlocks
+                $stmt = $this->conn->prepare("INSERT IGNORE INTO user_achievements (user_id, achievement_id, is_notified) VALUES (?, ?, 0)");
                 if ($stmt) {
                     $stmt->bind_param("ii", $user_id, $ach['id']);
                     $stmt->execute();
@@ -108,10 +109,36 @@ class AchievementHelper
         return false;
     }
 
+    public function getUnnotifiedAchievements($user_id)
+    {
+        if (!$this->conn) return [];
+        $stmt = $this->conn->prepare("SELECT a.*, ua.achievement_id FROM achievements a JOIN user_achievements ua ON a.id = ua.achievement_id WHERE ua.user_id = ? AND ua.is_notified = 0");
+        if ($stmt) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            return $res->fetch_all(MYSQLI_ASSOC);
+        }
+        return [];
+    }
+
+    public function markAsNotified($user_id, $achievement_id)
+    {
+        if (!$this->conn) return false;
+        $stmt = $this->conn->prepare("UPDATE user_achievements SET is_notified = 1 WHERE user_id = ? AND achievement_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("ii", $user_id, $achievement_id);
+            $success = $stmt->execute();
+            $stmt->close();
+            return $success;
+        }
+        return false;
+    }
+
     public function getUserAchievements($user_id)
     {
         if (!$this->conn) return [];
-        $stmt = $this->conn->prepare("SELECT a.*, (ua.unlocked_at IS NOT NULL) as is_unlocked, ua.unlocked_at FROM achievements a LEFT JOIN user_achievements ua ON a.id = ua.achievement_id AND ua.user_id = ? ORDER BY a.id ASC");
+        $stmt = $this->conn->prepare("SELECT a.*, (ua.unlocked_at IS NOT NULL) as is_unlocked, ua.unlocked_at, ua.is_notified FROM achievements a LEFT JOIN user_achievements ua ON a.id = ua.achievement_id AND ua.user_id = ? ORDER BY a.id ASC");
         if ($stmt) {
             $stmt->bind_param("i", $user_id);
             $stmt->execute();

@@ -147,7 +147,29 @@ if ($_SESSION['role'] === 'superadmin') {
     fetch(SITE_URL + 'api/analytics.php?action=forecast')
         .then(r => r.json()).then(d => {
             if (!d.success) return;
-            const sym = '₱';
+
+            const currencySymbols = {
+                'PHP': '₱',
+                'USD': '$',
+                'EUR': '€',
+                'JPY': '¥',
+                'GBP': '£'
+            };
+            const locales = {
+                'PHP': 'en-PH',
+                'USD': 'en-US',
+                'EUR': 'de-DE',
+                'JPY': 'ja-JP',
+                'GBP': 'en-GB'
+            };
+
+            const sym = currencySymbols[d.currency] || '₱';
+            const locale = locales[d.currency] || 'en-PH';
+
+            // Store for other fetches
+            window.userCurrencySymbol = sym;
+            window.userLocale = locale;
+
             const statusColor = d.is_on_track ? 'success' : 'danger';
             const trendBadge = d.is_on_track ?
                 '<span class="badge bg-success-subtle text-success rounded-pill extra-small"><i class="fas fa-check-circle me-1"></i>On Track</span>' :
@@ -160,13 +182,13 @@ if ($_SESSION['role'] === 'superadmin') {
             <div class="col-md-3">
                 <div class="forecast-card text-center">
                     <div class="text-muted small mb-1">Current Balance</div>
-                    <div class="fs-4 fw-bold text-primary">${sym}${d.current_balance.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
+                    <div class="fs-4 fw-bold text-primary">${sym}${d.current_balance.toLocaleString(locale, {minimumFractionDigits:2})}</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="forecast-card text-center">
                     <div class="text-muted small mb-1">Projected End-of-Month</div>
-                    <div class="fs-4 fw-bold text-${statusColor}">${sym}${d.projected_balance.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
+                    <div class="fs-4 fw-bold text-${statusColor}">${sym}${d.projected_balance.toLocaleString(locale, {minimumFractionDigits:2})}</div>
                     <div class="mt-1">${trendBadge}</div>
                     <div class="extra-small text-muted mt-2" style="font-size: 0.6rem;" title="${d.basis}">
                         <i class="fas fa-info-circle me-1"></i>Basis: Run rate projection
@@ -176,7 +198,7 @@ if ($_SESSION['role'] === 'superadmin') {
             <div class="col-md-3">
                 <div class="forecast-card text-center">
                     <div class="text-muted small mb-1">Daily Avg Spend</div>
-                    <div class="fs-4 fw-bold text-main">${sym}${d.daily_avg_spend.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
+                    <div class="fs-4 fw-bold text-main">${sym}${d.daily_avg_spend.toLocaleString(locale, {minimumFractionDigits:2})}</div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -241,7 +263,10 @@ if ($_SESSION['role'] === 'superadmin') {
                             color: gridColor
                         },
                         ticks: {
-                            color: textColor
+                            color: textColor,
+                            callback: function(value, index, ticks) {
+                                return (window.userCurrencySymbol || '₱') + value.toLocaleString(window.userLocale || 'en-PH');
+                            }
                         }
                     }
                 }
@@ -285,7 +310,7 @@ if ($_SESSION['role'] === 'superadmin') {
                 if (isToday) el.style.outline = isDark ? '2px solid #fff' : '2px solid #334155';
                 el.innerHTML = `
                     ${day}
-                    <div class="tooltip-hover">Day ${day}: ₱${amount.toLocaleString('en-PH', {minimumFractionDigits:2})}</div>
+                    <div class="tooltip-hover">Day ${day}: ${window.userCurrencySymbol || '₱'}${amount.toLocaleString(window.userLocale || 'en-PH', {minimumFractionDigits:2})}</div>
                 `;
                 grid.appendChild(el);
             }

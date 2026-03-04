@@ -575,7 +575,7 @@ include '../includes/header.php';
                 }
             }
 
-            // Update Achievements
+            // Update Achievements Grid
             const list = document.getElementById('dashAchievementList');
             const countBadge = document.getElementById('achievementCount');
             list.innerHTML = '';
@@ -589,24 +589,26 @@ include '../includes/header.php';
                 item.title = `${ach.name}: ${ach.description}`;
                 item.style.backgroundColor = ach.is_unlocked ? ach.badge_color : '#e2e8f0';
                 item.innerHTML = `<i class="${ach.icon}"></i>`;
-
-                // Check if we should notify user of a NEWLY unlocked achievement
-                if (ach.is_unlocked && !localStorage.getItem(`ach_${ach.slug}`)) {
-                    localStorage.setItem(`ach_${ach.slug}`, 'seen');
-                    showAchievementCelebration(ach);
-                }
-
                 list.appendChild(item);
             });
             countBadge.textContent = `${unlockedCount}/${data.achievements.length}`;
+
+            // --- New Backend-Driven Alerts ---
+            if (data.unnotified && data.unnotified.length > 0) {
+                // Show alerts sequentially for all unnotified achievements
+                let promise = Promise.resolve();
+                data.unnotified.forEach(ach => {
+                    promise = promise.then(() => showAchievementCelebration(ach));
+                });
+            }
         }
 
         function showAchievementCelebration(ach) {
-            Swal.fire({
+            return Swal.fire({
                 title: '🏆 Achievement Unlocked!',
                 html: `
-                    <div class="text-center mb-3">
-                        <div class="achievement-badge-large" style="background: ${ach.badge_color}">
+                    <div class="text-center mb-0">
+                        <div class="achievement-badge-large mb-3" style="background: ${ach.badge_color}">
                             <i class="${ach.icon} fa-2x"></i>
                         </div>
                     </div>
@@ -617,8 +619,10 @@ include '../includes/header.php';
                 confirmButtonText: 'Awesome!',
                 confirmButtonColor: '#6366f1',
                 backdrop: `rgba(99, 102, 241, 0.2)`
+            }).then(() => {
+                // Mark as notified on the backend after the user dismisses the alert
+                return fetch(`<?php echo SITE_URL; ?>api/gamification.php?action=mark_notified&id=${ach.id || ach.achievement_id}`);
             });
-            // Trigger confetti if available (optional)
         }
 
         function renderUpcomingBillsSide(bills) {
