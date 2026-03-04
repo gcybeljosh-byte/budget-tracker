@@ -82,10 +82,8 @@ if ($email) {
         $_SESSION['login_time'] = date("Y-m-d H:i:s");
 
         // Redirect based on role
-        if ($role === 'superadmin') {
+        if (in_array($role, ['superadmin', 'admin'])) {
             header("Location: " . SITE_URL . "admin/dashboard.php");
-        } else if ($role === 'admin') {
-            header("Location: " . SITE_URL . "core/dashboard.php");
         } else {
             header("Location: " . SITE_URL . "core/dashboard.php");
         }
