@@ -22,6 +22,11 @@ $map = [
     'goals'          => ['table' => 'financial_goals',    'label_col' => 'title',        'amount_col' => 'target_amount', 'date_col' => 'created_at'],
 ];
 
+// Ensure columns exist to prevent MySQL warnings that break JSON output
+foreach ($map as $info) {
+    ensureColumnExists($conn, $info['table'], 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+}
+
 if ($action === 'list') {
     $result = [];
     foreach ($map as $typeKey => $info) {

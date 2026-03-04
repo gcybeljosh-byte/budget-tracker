@@ -22,7 +22,7 @@ if ($action === 'trends') {
     }
 
     $placeholders = implode(',', array_fill(0, count($months), '?'));
-    $stmt = $conn->prepare("SELECT DATE_FORMAT(date, '%Y-%m') as month, category, SUM(amount) as total FROM expenses WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') IN ($placeholders) GROUP BY month, category ORDER BY month ASC, total DESC");
+    $stmt = $conn->prepare("SELECT DATE_FORMAT(date, '%Y-%m') as month, category, SUM(amount) as total FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND DATE_FORMAT(date, '%Y-%m') IN ($placeholders) GROUP BY month, category ORDER BY month ASC, total DESC");
     if ($stmt) {
         $stmt->bind_param("i" . str_repeat('s', count($months)), $user_id, ...$months);
         $stmt->execute();
@@ -54,7 +54,7 @@ if ($action === 'trends') {
     }
     echo json_encode(['success' => true, 'labels' => $labels, 'datasets' => $datasets]);
 } elseif ($action === 'heatmap') {
-    $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND date BETWEEN ? AND ? GROUP BY date");
+    $stmt = $conn->prepare("SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND date BETWEEN ? AND ? GROUP BY date");
     $start = date('Y-m-01');
     $end = date('Y-m-t');
     $data = [];
@@ -81,7 +81,7 @@ if ($action === 'trends') {
 
     // 1. Get Monthly Allowance
     $monthlyAllowance = 0;
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
     if ($stmt) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
@@ -91,7 +91,7 @@ if ($action === 'trends') {
 
     $day = (int)date('j');
     $spent = 0;
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND expense_source = 'Allowance'");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND expense_source = 'Allowance'");
     if ($stmt) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
@@ -100,7 +100,7 @@ if ($action === 'trends') {
     }
 
     $lastMonthTotal = 0;
-    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01') AND expense_source = 'Allowance'");
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01') AND expense_source = 'Allowance'");
     if ($stmt) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();

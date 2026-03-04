@@ -16,9 +16,9 @@ class BalanceHelper
 
         $sql = "
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND $sourcePart $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND $sourcePart AND expense_source = 'Allowance' $dateFilter) -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND $sourcePart $dateFilter) as balance
+                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart $dateFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart AND expense_source = 'Allowance' $dateFilter) -
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart $dateFilter) as balance
         ";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("iii", $user_id, $user_id, $user_id);
@@ -35,9 +35,9 @@ class BalanceHelper
 
         $sql = "
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND source_type IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type IN ('GCash', 'Maya', 'Bank', 'Electronic') AND expense_source = 'Allowance' $dateFilter) -
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter) as balance
+                (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND source_type IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND source_type IN ('GCash', 'Maya', 'Bank', 'Electronic') AND expense_source = 'Allowance' $dateFilter) -
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND source_type IN ('GCash', 'Maya', 'Bank', 'Electronic') $dateFilter) as balance
         ";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("iii", $user_id, $user_id, $user_id);
@@ -55,8 +55,8 @@ class BalanceHelper
 
         $sql = "
             SELECT 
-                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? $sourceFilter $dateFilter) - 
-                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' $sourceFilter $dateFilter) as total
+                (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL $sourceFilter $dateFilter) - 
+                (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND expense_source = 'Savings' $sourceFilter $dateFilter) as total
         ";
         $stmt = $this->conn->prepare($sql);
         if ($source_type) {
@@ -102,10 +102,10 @@ class BalanceHelper
         if ($expense_source === 'Savings') {
             $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ?) as total_saved,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Savings') as total_spent,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND source_type = ? $monthFilter) as monthly_saved,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND source_type = ? AND expense_source = 'Savings' $monthFilter) as monthly_spent
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND source_type = ?) as total_saved,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND source_type = ? AND expense_source = 'Savings') as total_spent,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND source_type = ? $monthFilter) as monthly_saved,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND source_type = ? AND expense_source = 'Savings' $monthFilter) as monthly_spent
             ";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("isisisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
@@ -126,12 +126,12 @@ class BalanceHelper
 
             $sql = "
                 SELECT 
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND $sourcePart) as total_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND $sourcePart AND expense_source = 'Allowance') as total_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND $sourcePart) as total_savings,
-                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND $sourcePart $monthFilter) as monthly_allowance,
-                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND $sourcePart AND expense_source = 'Allowance' $monthFilter) as monthly_expense,
-                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND $sourcePart $monthFilter) as monthly_savings
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart) as total_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart AND expense_source = 'Allowance') as total_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart) as total_savings,
+                    (SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart $monthFilter) as monthly_allowance,
+                    (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart AND expense_source = 'Allowance' $monthFilter) as monthly_expense,
+                    (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND $sourcePart $monthFilter) as monthly_savings
             ";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("isisisisisis", $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type, $user_id, $source_type);
@@ -157,7 +157,7 @@ class BalanceHelper
         $sources = ['Cash', 'GCash', 'Maya', 'Bank', 'Electronic'];
 
         // Supplement with any other sources found in the database for this user
-        $stmt = $this->conn->prepare("SELECT DISTINCT source_type FROM allowances WHERE user_id = ?");
+        $stmt = $this->conn->prepare("SELECT DISTINCT source_type FROM allowances WHERE user_id = ? AND deleted_at IS NULL");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
@@ -197,7 +197,7 @@ class BalanceHelper
 
     public function syncBudgetLimits($user_id)
     {
-        $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+        $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $newGoal = (float)$stmt->get_result()->fetch_assoc()['total'];

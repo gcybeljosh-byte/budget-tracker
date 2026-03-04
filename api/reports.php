@@ -54,12 +54,13 @@ if ($type === 'yearly') {
 }
 
 // Fetch Totals
-function getSum($conn, $table, $user_id, $startDate, $endDate, $source = null) {
+function getSum($conn, $table, $user_id, $startDate, $endDate, $source = null)
+{
     if ($table === 'expenses' && $source !== null) {
-        $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM $table WHERE user_id = ? AND expense_source = ? AND date BETWEEN ? AND ?");
+        $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM $table WHERE user_id = ? AND deleted_at IS NULL AND expense_source = ? AND date BETWEEN ? AND ?");
         $stmt->bind_param("isss", $user_id, $source, $startDate, $endDate);
     } else {
-        $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM $table WHERE user_id = ? AND date BETWEEN ? AND ?");
+        $stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM $table WHERE user_id = ? AND deleted_at IS NULL AND date BETWEEN ? AND ?");
         $stmt->bind_param("iss", $user_id, $startDate, $endDate);
     }
     $stmt->execute();
@@ -68,8 +69,9 @@ function getSum($conn, $table, $user_id, $startDate, $endDate, $source = null) {
     return (float)$res['total'];
 }
 
-function getDetails($conn, $table, $user_id, $startDate, $endDate) {
-    $stmt = $conn->prepare("SELECT * FROM $table WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date ASC, id ASC");
+function getDetails($conn, $table, $user_id, $startDate, $endDate)
+{
+    $stmt = $conn->prepare("SELECT * FROM $table WHERE user_id = ? AND deleted_at IS NULL AND date BETWEEN ? AND ? ORDER BY date ASC, id ASC");
     $stmt->bind_param("iss", $user_id, $startDate, $endDate);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -111,4 +113,3 @@ $uStmt->close();
 
 echo json_encode($response);
 $conn->close();
-?>

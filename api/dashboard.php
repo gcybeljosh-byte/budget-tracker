@@ -45,7 +45,7 @@ try {
 }
 
 $lifetime_allowance = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL");
 $stmt->bind_param("i", $user_id);
 if ($stmt->execute()) {
     $lifetime_allowance = (float)$stmt->get_result()->fetch_row()[0];
@@ -53,7 +53,7 @@ if ($stmt->execute()) {
 $stmt->close();
 
 $lifetime_expenses = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND deleted_at IS NULL");
 $stmt->bind_param("i", $user_id);
 if ($stmt->execute()) {
     $lifetime_expenses = (float)$stmt->get_result()->fetch_row()[0];
@@ -76,7 +76,7 @@ $response = [
 ];
 
 // 1. Monthly Allowance
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM allowances WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
@@ -87,7 +87,7 @@ if ($stmt) {
 }
 
 // 2. Monthly Expenses
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
@@ -108,7 +108,7 @@ $response['total_savings'] = $balanceHelper->getTotalSavings($user_id);
 $response['balance'] = $balanceHelper->getTotalBalance($user_id, false);
 
 // 4. Category Spending
-$stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
+$stmt = $conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
@@ -123,7 +123,7 @@ if ($stmt) {
 // 5. Advanced Analytics
 $expenses_this_month = $response['total_expenses'];
 $expenses_last_month = 0;
-$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND date < DATE_FORMAT(NOW(), '%Y-%m-01')");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
@@ -148,7 +148,7 @@ $response['analytics'] = [
 
 // 6. Bills & Hub logic (Personal Only)
 $upcoming_bills = [];
-$stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
+$stmt = $conn->prepare("SELECT title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL AND due_date >= DATE_FORMAT(NOW(), '%Y-%m-01') AND due_date <= LAST_DAY(NOW()) AND (last_paid_at IS NULL OR last_paid_at < DATE_FORMAT(NOW(), '%Y-%m-01')) ORDER BY due_date ASC");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
@@ -164,7 +164,7 @@ $response['upcoming_bills'] = $upcoming_bills;
 // 7. Safe-to-Spend Calculation (Refined)
 // Include all active unpaid bills whose due date has passed or is within the current month
 $stmt = $conn->prepare("SELECT SUM(amount) FROM recurring_payments 
-                       WHERE user_id = ? AND is_active = 1 
+                       WHERE user_id = ? AND deleted_at IS NULL AND is_active = 1 
                        AND (last_paid_at IS NULL OR DATE_FORMAT(last_paid_at, '%Y-%m') < DATE_FORMAT(NOW(), '%Y-%m'))
                        AND (due_date <= LAST_DAY(NOW()))");
 $stmt->bind_param("i", $user_id);
@@ -194,11 +194,11 @@ $response['analytics']['safe_to_spend'] = [
 
 // 7. Recent Transactions
 $sql = "
-    (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE user_id = ?)
+    (SELECT 'allowances' as type, id, date, description, amount FROM allowances WHERE user_id = ? AND deleted_at IS NULL)
     UNION ALL
-    (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE user_id = ?)
+    (SELECT 'expenses' as type, id, date, description, amount FROM expenses WHERE user_id = ? AND deleted_at IS NULL)
     UNION ALL
-    (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE user_id = ?)
+    (SELECT 'savings' as type, id, date, description, amount FROM savings WHERE user_id = ? AND deleted_at IS NULL)
     ORDER BY date DESC, id DESC
     LIMIT 10
 ";
@@ -222,7 +222,7 @@ $conn->query("UPDATE financial_goals SET status = 'overdue'
 $conn->query("UPDATE financial_goals SET status = 'completed' 
               WHERE user_id = $user_id AND saved_amount >= target_amount");
 
-$stmt = $conn->prepare("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM financial_goals WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM financial_goals WHERE user_id = ? AND deleted_at IS NULL");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
@@ -267,7 +267,7 @@ $response['reports_count'] = $reports_count;
 
 // 11. Top Category Insight
 $top_category = 'None';
-$stmt = $conn->prepare("SELECT category FROM expenses WHERE user_id = ? AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1");
+$stmt = $conn->prepare("SELECT category FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {
