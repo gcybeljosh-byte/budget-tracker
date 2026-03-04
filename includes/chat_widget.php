@@ -45,12 +45,13 @@
 
 <script>
     // Toggle Widget Visibility
-    function toggleChatWidget() {
+    function toggleChatWidget(saveState = true) {
         const widget = document.getElementById('aiChatWidget');
         const fab = document.querySelector('.ai-fab');
         if (widget.style.display === 'none') {
             widget.style.display = 'flex';
             if (fab) fab.style.display = 'none';
+            if (saveState) localStorage.setItem('chat_widget_open', 'true');
             // Only focus when input is enabled (not in maintenance mode for non-superadmin)
             setTimeout(() => {
                 const inp = document.getElementById('widgetUserMessage');
@@ -59,10 +60,16 @@
         } else {
             widget.style.display = 'none';
             if (fab) fab.style.display = 'flex';
+            if (saveState) localStorage.setItem('chat_widget_open', 'false');
         }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Restore state
+        if (localStorage.getItem('chat_widget_open') === 'true') {
+            toggleChatWidget(false);
+        }
+
         const chatForm = document.getElementById('widgetChatForm');
         const userMessageInput = document.getElementById('widgetUserMessage');
         const chatContainer = document.getElementById('widgetChatContainer');
@@ -76,25 +83,21 @@
         function fetchChatHistory() {
             if (!chatMessagesDiv) return;
 
-            const now = Date.now();
-            if (now - lastActivityTime > 600000) {
-                chatMessagesDiv.innerHTML = '';
-                localStorage.setItem('chat_last_activity', now);
-                lastActivityTime = now;
-            }
-
             fetch('<?php echo SITE_URL; ?>api/history_log.php?mode=widget')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
+                        chatMessagesDiv.innerHTML = '';
                         if (data.data.length > 0) {
                             if (chatPlaceholder) chatPlaceholder.remove();
-                            chatMessagesDiv.innerHTML = '';
-                            data.data.forEach(msg => {
-                                appendMessageToWidget(msg.message, msg.sender, false);
+                            data.data.forEach(pair => {
+                                // 1. Render User Message
+                                appendMessageToWidget(pair.message, 'user', false);
+                                // 2. Render Bot Response
+                                if (pair.response) {
+                                    appendMessageToWidget(pair.response, 'bot', false);
+                                }
                             });
-                        } else {
-                            chatMessagesDiv.innerHTML = '';
                         }
                         scrollToBottom();
                     }

@@ -12,29 +12,32 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 
-// --- Self-Healing: Ensure chat history table exists ---
+// --- Self-Healing: Ensure chat history table and columns exist ---
 $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     message TEXT NOT NULL,
-    sender ENUM('user', 'bot') NOT NULL,
+    response TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
 
-// Handle POST Request (Save Message or Delete Fallback)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check for delete action fallback (for shared hosting that blocks DELETE)
-    $action = $_POST['action'] ?? '';
+// Migration: If table exists but missing 'response' column
+$check = $conn->query("SHOW COLUMNS FROM ai_chat_history LIKE 'response'");
+if ($check && $check->num_rows == 0) {
+    $conn->query("ALTER TABLE ai_chat_history ADD COLUMN response TEXT DEFAULT NULL AFTER message");
+}
 
-    // If not in $_POST, it might be in JSON body
-    if (empty($action)) {
-        $json = json_decode(file_get_contents('php://input'), true);
-        $action = $json['action'] ?? '';
-        $data = $json;
-    } else {
-        $data = $_POST;
-    }
+// Migration: Remove old 'sender' column if it exists
+$check = $conn->query("SHOW COLUMNS FROM ai_chat_history LIKE 'sender'");
+if ($check && $check->num_rows > 0) {
+    $conn->query("ALTER TABLE ai_chat_history DROP COLUMN sender");
+}
+
+// Handle POST Request (Delete Fallback)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $json = json_decode(file_get_contents('php://input'), true);
+    $action = $json['action'] ?? $_POST['action'] ?? '';
 
     if ($action === 'delete') {
         $stmt = $conn->prepare("DELETE FROM ai_chat_history WHERE user_id = ?");
@@ -47,32 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         exit;
     }
-
-    // Default Save Message Logic
-    if (!isset($data['message']) || !isset($data['sender'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing fields']);
-        exit;
-    }
-
-    $message = trim($data['message']);
-    $sender = $data['sender']; // 'user' or 'bot'
-
-    // Basic Validation
-    if (empty($message) || !in_array($sender, ['user', 'bot'])) {
-        echo json_encode(['success' => false, 'message' => 'Invalid data']);
-        exit;
-    }
-
-    $stmt = $conn->prepare("INSERT INTO ai_chat_history (user_id, message, sender) VALUES (?, ?, ?)");
-    $stmt->bind_param("iss", $user_id, $message, $sender);
-
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Message saved']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Database error']);
-    }
-    $stmt->close();
-    exit;
 }
 
 // Handle GET Request (Fetch History)
@@ -80,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $aiHelper = new AiHelper($conn, $user_id);
     $aiHelper->enforceChatTimeout(10);
 
-    $sql = "SELECT message, sender, created_at FROM ai_chat_history WHERE user_id = ?";
+    $sql = "SELECT message, response, created_at FROM ai_chat_history WHERE user_id = ?";
     $params = ["i", $user_id];
 
     // Filter by session if requested for widget
@@ -89,9 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $sql .= " AND created_at >= ?";
             $params[0] .= "s";
             $params[] = $_SESSION['login_time'];
-        } else {
-            // Fallback for current session if not logged out yet: show all or limit?
-            // Let's show all for now to avoid empty chat on immediate reload without re-login
         }
     }
 
