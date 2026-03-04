@@ -19,7 +19,7 @@ mysqli_query($conn, "SET time_zone = '+08:00'");
 
 // Production Error Handling - SET TO 1 FOR DEBUGGING
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 // Helper Functions
 if (!function_exists('logActivity')) {
