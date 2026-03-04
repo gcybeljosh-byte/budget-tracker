@@ -60,9 +60,9 @@ class BalanceHelper
         ";
         $stmt = $this->conn->prepare($sql);
         if ($source_type) {
-            $stmt->bind_param("isssisss", $user_id, $source_type, $source_type, $user_id, $source_type, $source_type);
+            $stmt->bind_param("isssis", $user_id, $source_type, $source_type, $user_id, $source_type, $source_type);
         } else {
-            $stmt->bind_param("isssisss", $user_id, $source_type, $source_type, $user_id, $source_type, $source_type); // Handle potential null bind
+            $stmt->bind_param("isssis", $user_id, $source_type, $source_type, $user_id, $source_type, $source_type); // Handle potential null bind
         }
 
         $stmt->execute();
