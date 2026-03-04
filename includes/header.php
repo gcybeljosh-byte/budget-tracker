@@ -130,7 +130,7 @@ if (isset($_SESSION['id'])) {
 
 </head>
 
-<body class="bg-body-tertiary">
+<body class="bg-app">
     <!-- Help Desk FAB -->
     <button onclick="toggleChatWidget()" class="ai-fab shadow-lg" title="Help Desk">
         <i class="fas fa-robot"></i>

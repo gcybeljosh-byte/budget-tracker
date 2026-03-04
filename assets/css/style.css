@@ -64,6 +64,42 @@
     --primary-hover: #409cff;
 }
 
+/* ─── Global Consistency Overrides for Dark Mode ────────── */
+[data-theme='dark'] .bg-white,
+[data-theme='dark'] .bg-light,
+[data-theme='dark'] .bg-body-tertiary {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+}
+
+[data-theme='dark'] .text-dark {
+    color: var(--text-main) !important;
+}
+
+[data-theme='dark'] .border-success-subtle,
+[data-theme='dark'] .bg-success-subtle {
+    border-color: rgba(52, 199, 89, 0.2) !important;
+    background-color: rgba(52, 199, 89, 0.1) !important;
+}
+
+[data-theme='dark'] .border-info-subtle,
+[data-theme='dark'] .bg-info-subtle {
+    border-color: rgba(10, 132, 255, 0.2) !important;
+    background-color: rgba(10, 132, 255, 0.1) !important;
+}
+
+[data-theme='dark'] .border-warning-subtle,
+[data-theme='dark'] .bg-warning-subtle {
+    border-color: rgba(255, 149, 0, 0.2) !important;
+    background-color: rgba(255, 149, 0, 0.1) !important;
+}
+
+[data-theme='dark'] .border-danger-subtle,
+[data-theme='dark'] .bg-danger-subtle {
+    border-color: rgba(255, 59, 48, 0.2) !important;
+    background-color: rgba(255, 59, 48, 0.1) !important;
+}
+
 /* ─── Page Transition ────────────────────────────────────── */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -264,10 +300,10 @@ body {
    when the sidebar is hidden behind a blurred overlay */
 @media (max-width: 991px) {
     .navbar-burger-btn {
-        background: rgba(255, 255, 255, 0.72);
+        background: var(--card-bg);
         backdrop-filter: blur(12px) saturate(160%);
         -webkit-backdrop-filter: blur(12px) saturate(160%);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         border: 1px solid var(--border-dim);
         color: var(--text-main);
     }
@@ -967,7 +1003,7 @@ table.dataTable thead .sorting_desc:after {
 /* ─── Notification Badge ─────────────────────────────────── */
 #notificationDropdown .badge {
     background-color: var(--danger-color) !important;
-    border: 2px solid white;
+    border: 2px solid var(--card-bg);
 }
 
 /* ─── AI Chat Widget ─────────────────────────────────────── */
@@ -1378,7 +1414,7 @@ table.dataTable thead .sorting_desc:after {
         right: 0;
         height: auto;
         min-height: 62px;
-        background: rgba(255, 255, 255, 0.92);
+        background: var(--navbar-bg);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border-top: 1px solid var(--border-dim);

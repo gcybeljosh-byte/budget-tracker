@@ -2,11 +2,11 @@
 <div id="aiChatWidget" class="card shadow-lg border-0" style="position: fixed; bottom: 20px; right: 20px; width: 350px; height: 500px; z-index: 1050; display: none; flex-direction: column; transition: all 0.3s ease; overflow: hidden; <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'filter: grayscale(0.5);' : ''; ?>">
     <?php if (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin'): ?>
         <!-- Maintenance Overlay -->
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
             <div class="bg-warning-subtle text-warning p-3 rounded-circle mb-3 shadow-sm">
                 <i class="fas fa-tools fa-2x"></i>
             </div>
-            <h5 class="fw-bold text-dark mb-2">Under Maintenance</h5>
+            <h5 class="fw-bold text-white mb-2">Under Maintenance</h5>
             <p class="text-secondary small mb-3">Our AI Assistant is currently undergoing scheduled improvements to serve you better. We'll be back shortly!</p>
             <button onclick="toggleChatWidget()" class="btn btn-sm btn-outline-secondary rounded-pill px-4">Close Hub</button>
         </div>
@@ -27,13 +27,13 @@
     </div>
 
     <!-- Body -->
-    <div class="card-body p-3 overflow-auto bg-light flex-grow-1" id="widgetChatContainer">
+    <div class="card-body p-3 overflow-auto bg-app-alt flex-grow-1" id="widgetChatContainer">
         <div class="d-flex flex-column gap-3" id="widgetChatMessages">
         </div>
     </div>
 
     <!-- Footer -->
-    <div class="card-footer bg-white border-top p-3 shadow-sm">
+    <div class="card-footer bg-card border-top p-3 shadow-sm">
         <form id="widgetChatForm" class="d-flex gap-2 align-items-center">
             <input type="text" id="widgetUserMessage" class="form-control form-control-sm flex-grow-1" placeholder="<?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'System offline...' : 'Type your question...'; ?>" required autocomplete="off" style="border-radius: 20px;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'disabled' : ''; ?>>
             <button type="submit" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 35px; height: 35px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'disabled' : ''; ?>>
@@ -206,7 +206,7 @@
             const isUser = sender === 'user';
             const align = isUser ? 'align-self-end text-end' : 'align-self-start text-start';
             // Using gradients/colors matching the theme
-            const bg = isUser ? 'text-white' : 'bg-white border text-dark';
+            const bg = isUser ? 'text-white' : 'bg-card border text-main';
             const style = isUser ? 'background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);' : '';
             const radius = isUser ? '15px 15px 0 15px' : '15px 15px 15px 0';
 
