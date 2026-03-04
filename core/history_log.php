@@ -9,7 +9,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     message TEXT NOT NULL,
-    sender ENUM('user', 'bot') NOT NULL,
+    response TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
@@ -17,7 +17,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
 // Fetch Chat History
 $user_id = $_SESSION['id'];
 $messages = [];
-$stmt = $conn->prepare("SELECT id, message, sender, created_at FROM ai_chat_history WHERE user_id = ? ORDER BY created_at ASC");
+$stmt = $conn->prepare("SELECT id, message, response, created_at FROM ai_chat_history WHERE user_id = ? ORDER BY created_at ASC");
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
@@ -109,38 +109,46 @@ ksort($groupedMessages);
 
                             <div class="d-flex flex-column gap-4">
                                 <?php foreach ($msgs as $msg): ?>
-                                    <?php
-                                    $isUser = $msg['sender'] === 'user';
-                                    $align = $isUser ? 'align-self-end' : 'align-self-start';
-                                    $bubbleClass = $isUser ? 'bg-primary text-white' : 'bg-white border text-dark';
-                                    $bubbleRadius = $isUser ? 'rounded-start-4 rounded-top-4' : 'rounded-end-4 rounded-top-4';
-                                    $avatar = $isUser ? 'fas fa-user-circle' : 'fas fa-robot';
-                                    $avatarColor = $isUser ? 'text-primary' : 'text-success';
-                                    ?>
-                                    <div class="message-wrapper d-flex gap-3 <?php echo $align; ?> <?php echo $isUser ? 'flex-row-reverse' : ''; ?>" style="max-width: 85%;" data-content="<?php echo htmlspecialchars(strtolower($msg['message'])); ?>">
+                                    <!-- User Message Bubble -->
+                                    <div class="message-wrapper d-flex gap-3 align-self-end flex-row-reverse" style="max-width: 85%;" data-content="<?php echo htmlspecialchars(strtolower($msg['message'])); ?>">
                                         <div class="avatar-sm flex-shrink-0 mt-auto mb-1">
                                             <div class="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
-                                                <i class="<?php echo $avatar; ?> <?php echo $avatarColor; ?> small"></i>
+                                                <i class="fas fa-user-circle text-primary small"></i>
                                             </div>
                                         </div>
-                                        <div class="bubble-container d-flex flex-column <?php echo $isUser ? 'align-items-end' : 'align-items-start'; ?>">
-                                            <div class="px-3 py-2 shadow-sm <?php echo $bubbleClass; ?> <?php echo $bubbleRadius; ?> mb-1" style="font-size: 0.95rem; line-height: 1.5;">
-                                                <?php
-                                                $formattedMsg = htmlspecialchars($msg['message']);
-                                                // Bold
-                                                $formattedMsg = preg_replace('/\*\*(.*?)\*\*/', '<strong class="fw-bold">$1</strong>', $formattedMsg);
-                                                // Bullet lists
-                                                if (strpos($formattedMsg, "\n* ") !== false || strpos($formattedMsg, "* ") === 0) {
-                                                    $formattedMsg = preg_replace('/^\* (.*)/m', '• $1', $formattedMsg);
-                                                }
-                                                echo nl2br($formattedMsg);
-                                                ?>
+                                        <div class="bubble-container d-flex flex-column align-items-end">
+                                            <div class="px-3 py-2 shadow-sm bg-primary text-white rounded-start-4 rounded-top-4 mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                                <?php echo nl2br(htmlspecialchars($msg['message'])); ?>
                                             </div>
                                             <div class="message-time text-muted px-1" style="font-size: 0.7rem;">
                                                 <?php echo date('h:i A', strtotime($msg['created_at'])); ?>
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Bot Response Bubble -->
+                                    <?php if (!empty($msg['response'])): ?>
+                                        <div class="message-wrapper d-flex gap-3 align-self-start" style="max-width: 85%;" data-content="<?php echo htmlspecialchars(strtolower($msg['response'])); ?>">
+                                            <div class="avatar-sm flex-shrink-0 mt-auto mb-1">
+                                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
+                                                    <i class="fas fa-robot text-success small"></i>
+                                                </div>
+                                            </div>
+                                            <div class="bubble-container d-flex flex-column align-items-start">
+                                                <div class="px-3 py-2 shadow-sm bg-white border text-dark rounded-end-4 rounded-top-4 mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                                    <?php
+                                                    $formattedMsg = htmlspecialchars($msg['response']);
+                                                    // Bold
+                                                    $formattedMsg = preg_replace('/\*\*(.*?)\*\*/', '<strong class="fw-bold">$1</strong>', $formattedMsg);
+                                                    // Bullet lists
+                                                    if (strpos($formattedMsg, "\n* ") !== false || strpos($formattedMsg, "* ") === 0) {
+                                                        $formattedMsg = preg_replace('/^\* (.*)/m', '• $1', $formattedMsg);
+                                                    }
+                                                    echo nl2br($formattedMsg);
+                                                    ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
