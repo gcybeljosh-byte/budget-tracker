@@ -8,5 +8,8 @@ if (isset($_GET['auto'])) {
 if (isset($_GET['maintenance'])) {
     $redirect .= "&maintenance=1";
 }
+if (isset($_GET['timeout'])) {
+    $redirect .= "&timeout=1";
+}
 header("Location: " . $redirect);
 exit;

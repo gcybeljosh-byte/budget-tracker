@@ -134,6 +134,93 @@
         })();
     </script>
 
+    <!-- Session Timeout Script -->
+    <script>
+        (function() {
+            // Minutes of inactivity before warning (5 minutes)
+            const INACTIVITY_LIMIT = 5 * 60 * 1000;
+            // Seconds to wait for a response after warning (60 seconds)
+            const GRACE_PERIOD = 60;
+
+            let idleTimer;
+            let warningTimer;
+            let countdown = GRACE_PERIOD;
+            let isWarningVisible = false;
+
+            function resetIdleTimer() {
+                if (isWarningVisible) return;
+
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(showTimeoutWarning, INACTIVITY_LIMIT);
+            }
+
+            function showTimeoutWarning() {
+                isWarningVisible = true;
+                countdown = GRACE_PERIOD;
+
+                Swal.fire({
+                    title: 'Session Expiring',
+                    html: `You have been inactive for 5 minutes. You will be logged out in <strong id="timeout-countdown">${countdown}</strong> seconds for your security.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Stay Logged In',
+                    cancelButtonText: 'Logout',
+                    confirmButtonColor: '#6366f1',
+                    cancelButtonColor: '#d33',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        warningTimer = setInterval(() => {
+                            countdown--;
+                            const timerDisplay = document.getElementById('timeout-countdown');
+                            if (timerDisplay) timerDisplay.textContent = countdown;
+
+                            if (countdown <= 0) {
+                                clearInterval(warningTimer);
+                                performForcedLogout();
+                            }
+                        }, 1000);
+                    }
+                }).then((result) => {
+                    clearInterval(warningTimer);
+                    if (result.isConfirmed) {
+                        keepSessionAlive();
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        window.location.href = '<?php echo SITE_URL; ?>auth/logout.php';
+                    }
+                });
+            }
+
+            function keepSessionAlive() {
+                fetch('<?php echo SITE_URL; ?>api/session_keep_alive.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            isWarningVisible = false;
+                            resetIdleTimer();
+                        } else {
+                            // If keep-alive fails (e.g. session already lost), force logout
+                            performForcedLogout();
+                        }
+                    })
+                    .catch(() => performForcedLogout());
+            }
+
+            function performForcedLogout() {
+                window.location.href = '<?php echo SITE_URL; ?>auth/logout.php?auto=1';
+            }
+
+            // Events that count as activity
+            const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+            activityEvents.forEach(evt => {
+                document.addEventListener(evt, resetIdleTimer, true);
+            });
+
+            // Start the timer
+            resetIdleTimer();
+        })();
+    </script>
+
     </body>
 
     </html>
