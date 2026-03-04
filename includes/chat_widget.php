@@ -23,7 +23,10 @@
             <i class="fas fa-robot"></i>
             <h6 class="mb-0 fw-bold">Budget Assistant</h6>
         </div>
-        <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="toggleChatWidget()"></button>
+        <div class="d-flex align-items-center gap-2">
+            <span id="promptLimitBadge" class="badge rounded-pill bg-white text-primary px-2" style="font-size: 0.65rem; opacity: 0.9; cursor: help;" title="Free daily AI prompts remaining">-- / 10</span>
+            <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="toggleChatWidget()"></button>
+        </div>
     </div>
 
     <!-- Body -->
@@ -34,11 +37,16 @@
 
     <!-- Footer -->
     <div class="card-footer bg-white border-top p-3 shadow-sm">
-        <form id="widgetChatForm" class="d-flex gap-2 align-items-center">
-            <input type="text" id="widgetUserMessage" class="form-control form-control-sm flex-grow-1" placeholder="<?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'System offline...' : 'Type your question...'; ?>" required autocomplete="off" style="border-radius: 20px;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'disabled' : ''; ?>>
-            <button type="submit" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 35px; height: 35px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'disabled' : ''; ?>>
-                <i class="fas fa-paper-plane text-white" style="font-size: 0.85rem;"></i>
-            </button>
+        <form id="widgetChatForm" class="d-flex flex-column gap-2">
+            <div class="d-flex gap-2 align-items-center">
+                <input type="text" id="widgetUserMessage" class="form-control form-control-sm flex-grow-1" placeholder="<?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'System offline...' : 'Type your question...'; ?>" required autocomplete="off" style="border-radius: 20px;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'disabled' : ''; ?>>
+                <button type="submit" id="widgetSendBtn" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 35px; height: 35px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none;" <?php echo (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && ($_SESSION['role'] ?? '') !== 'superadmin') ? 'disabled' : ''; ?>>
+                    <i class="fas fa-paper-plane text-white" style="font-size: 0.85rem;"></i>
+                </button>
+            </div>
+            <div id="aiLimitReminder" class="text-center" style="font-size: 0.65rem; color: #94a3b8;">
+                <i class="fas fa-info-circle me-1"></i> Limit: 10 daily prompts. <span id="promptsRemainingText">--</span> remaining.
+            </div>
         </form>
     </div>
 </div>
@@ -112,8 +120,41 @@
                 .catch(err => console.error('Error fetching chat:', err));
         }
 
+        function updatePromptLimit() {
+            const badge = document.getElementById('promptLimitBadge');
+            const reminderText = document.getElementById('promptsRemainingText');
+            if (!badge || !reminderText) return;
+
+            fetch('<?php echo SITE_URL; ?>api/ai_assistant.php?action=count_prompts')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const count = data.count || 0;
+                        const remaining = Math.max(0, 10 - count);
+                        badge.textContent = `${remaining} / 10`;
+                        reminderText.textContent = remaining;
+
+                        // Visual feedback if limit is close
+                        if (remaining <= 2) {
+                            badge.classList.remove('text-primary');
+                            badge.classList.add('text-danger', 'fw-bold');
+                        }
+
+                        // Disable form if limit reached
+                        if (remaining === 0 && '<?php echo $_SESSION['role']; ?>' !== 'superadmin') {
+                            userMessageInput.disabled = true;
+                            userMessageInput.placeholder = "Daily limit reached!";
+                            const btn = chatForm.querySelector('button[type="submit"]');
+                            if (btn) btn.disabled = true;
+                        }
+                    }
+                })
+                .catch(err => console.error('Error fetching prompt count:', err));
+        }
+
         // Call it immediately to populate if there's history
         fetchChatHistory();
+        updatePromptLimit();
 
         chatForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -176,6 +217,7 @@
                 .finally(() => {
                     btn.disabled = false;
                     btn.innerHTML = icon;
+                    updatePromptLimit(); // Refresh limit count
                     scrollToBottom();
                 });
         });

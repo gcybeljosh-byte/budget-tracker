@@ -386,10 +386,10 @@ include '../includes/header.php';
                                         <ul class="text-secondary mb-0 lh-lg list-unstyled" style="font-size: 0.95rem;">
                                             <li>1. Provide a unified platform for managing allowances, expenses, savings, and historical statements.</li>
                                             <li>2. Empower users with real-time monthly tracking through automated dashboard resets.</li>
-                                            <li>3. Proactively manage recurring costs with the Bills and Subscriptions Hub.</li>
-                                            <li>4. Deliver real-time daily spending intelligence via the Safe-to-Spend Calculator.</li>
-                                            <li>5. Ensure multi-level security with a 3-tier role system and session guards.</li>
-                                            <li>6. Deliver a premium, mobile-responsive experience with desktop-class animations.</li>
+                                            <li>3. Enable real-time spending intelligence via the **Safe-to-Spend** calculation engine.</li>
+                                            <li>4. Proactively manage recurring costs with the automated Bills and Subscriptions Hub.</li>
+                                            <li>5. Ensure multi-level security with a 3-tier role system and proactive session guards.</li>
+                                            <li>6. Deliver a premium, mobile-responsive experience with a world-class UI design system.</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -452,6 +452,15 @@ include '../includes/header.php';
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex gap-3 p-2">
+                                                <div class="text-secondary fs-4 mt-1"><i class="fas fa-trash-alt"></i></div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Data Safety</h6>
+                                                    <p class="text-muted small mb-0">Integrated Recycle Bin safety net for recovering accidentally deleted financial records and goals.</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -470,6 +479,7 @@ include '../includes/header.php';
                                             ['hand-holding-dollar', 'name' => 'Allowance Tracker',   'color' => 'emerald'],
                                             ['sync',                'name' => 'Savings Sync',        'color' => 'cyan'],
                                             ['file-invoice-dollar', 'name' => 'Bills Hub',           'color' => 'amber'],
+                                            ['recycle',             'name' => 'Recycle Bin',         'color' => 'danger'],
                                             ['shield-halved',       'name' => 'Safe-to-Spend',       'color' => 'sky'],
                                             ['bullseye',            'name' => 'Goal Deep Dive',      'color' => 'violet'],
                                             ['book',                'name' => 'Financial Journal',   'color' => 'slate'],

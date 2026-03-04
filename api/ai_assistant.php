@@ -26,6 +26,28 @@ if (defined('AI_MAINTENANCE_MODE') && AI_MAINTENANCE_MODE && $userRole !== 'supe
 
 $user_id = $_SESSION['id'];
 
+// ── GET Actions ─────────────────────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $action = $_GET['action'] ?? '';
+
+    if ($action === 'count_prompts') {
+        $today = date('Y-m-d');
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM ai_chat_history WHERE user_id = ? AND DATE(created_at) = ?");
+        $stmt->bind_param("is", $user_id, $today);
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+
+        echo json_encode([
+            'success' => true,
+            'count' => $count,
+            'limit' => 10
+        ]);
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. Receive User Message
     $data = json_decode(file_get_contents('php://input'), true);
@@ -34,6 +56,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($userMessage)) {
         echo json_encode(['success' => false, 'message' => 'Empty message']);
         exit;
+    }
+
+    // ── AI Prompt Limit Guard (10 prompts per day) ──────────────────────────
+    // Superadmin is exempt from limits for testing
+    if ($userRole !== 'superadmin') {
+        $today = date('Y-m-d');
+        $stmtLimit = $conn->prepare("SELECT COUNT(*) FROM ai_chat_history WHERE user_id = ? AND DATE(created_at) = ?");
+        $stmtLimit->bind_param("is", $user_id, $today);
+        $stmtLimit->execute();
+        $stmtLimit->bind_result($promptCount);
+        $stmtLimit->fetch();
+        $stmtLimit->close();
+
+        if ($promptCount >= 10) {
+            echo json_encode([
+                'success' => false,
+                'message' => '🚀 **Daily Limit Reached!** You have used your 10 free AI prompts for today. Upgrade your knowledge by reviewing your History Log, or come back tomorrow for more advice!'
+            ]);
+            exit;
+        }
     }
 
     // --- Self-Healing: Ensure chat history table and columns exist ---

@@ -6,62 +6,45 @@ A premium, enterprise-grade personal finance ecosystem that transforms spending 
 
 ## Project Objectives
 
-### General Goals
-1. Provide a unified platform for managing allowances, expenses, savings, and historical statements.
-2. Empower users with real-time monthly tracking through automated dashboard resets and past-performance reviews.
-3. Proactively manage recurring costs with the Bills & Subscriptions Hub.
-4. Deliver real-time daily spending intelligence via the Safe-to-Spend Calculator.
-5. Ensure multi-level security with a 3-tier role system and proactive session timeouts.
-6. Deliver a premium, mobile-responsive experience with smooth desktop-class animations and a Unified Dashboard Hub.
+### General Objectives
+1. **Unified Command Center**: Provide a secure, centralized platform for managing allowances, expenses, savings, and historical financial statements.
+2. **Real-time Intelligence**: Empower users with automated daily spending limits via the **Safe-to-Spend** calculation engine.
+3. **Data-Driven Focused**: Facilitate zero-based budgeting through automated monthly resets and clear visibility of net performance.
+4. **Proactive Management**: Simplify recurring financial obligations with an automated Bills & Subscriptions Hub.
+5. **Security First**: Ensure multi-level data protection with a 3-tier role architecture and proactive session guards.
+6. **Premium Experience**: Deliver a world-class, mobile-responsive ecosystem with smooth desktop-class animations and a unified design system.
 
 ### Specific Outcomes
-1. Full CRUD support for allowances, expenses, and savings with decimal-precise tracking.
-2. Real-time Dashboard with Monthly Resets for focused financial monitoring.
-3. Statement of Accounts engine for reviewing historical monthly summaries and net performance.
-4. Category-level budget limits with interactive progress tracking and AI-suggested limit plans.
-5. Goal-setting engine with target deadlines, contribution logs, and daily savings requirements.
-6. Visual analytics powered by Chart.js and day-intensity heatmaps for spending habits.
-7. Context-aware AI Help Desk (Gemini/OpenAI) with grounded data access and 10-minute inactivity timeout.
-8. Professional double-entry Financial Journal with AI-driven reflection and compound entry generation.
-9. Multi-currency architecture supporting global formatting and symbol-aware display.
-10. Hardened security via .htaccess protection, anti-inspection measures, Google OAuth, and session guards.
-11. Bills & Subscriptions Hub with Automated Tracker for recurring payments.
-12. Safe-to-Spend Calculator for real-time daily spending intelligence.
+1. **Precision Tracking**: Full CRUD support for all financial records with decimal-precise accuracy (0.01).
+2. **Monthly Statement Engine**: Generate bank-grade summaries of monthly performance and net savings automatically.
+3. **Interactive Budgeting**: Category-level spending caps with live visual progress bars and overspend alerts.
+4. **Grounded AI Advice**: Context-aware AI Help Desk with access to personal financial data for bespoke guidance.
+5. **Goal-Oriented Savings**: Goal-setting engine with target deadlines and intelligent daily contribution requirements.
+6. **Visual Habiting**: Comprehensive spending heatmaps and historical trend analytics powered by Chart.js.
+7. **Soft-Delete Safety**: Dedicated Recycle Bin for recovering accidentally deleted expenses or financial goals.
+8. **Automated Reminders**: Multi-channel notification center for low balances and upcoming bills.
 
 ---
 
-## Key Features
+## Core Features
 
-### Finance & Budgeting
-1. Monthly Reset Dashboard: Features a consolidated 4-card metric row (Allowance, Expenses, Balance, Safe-to-Spend) that resets every 1st of the month.
-2. Quick Access Hub: Dedicated horizontal bar for fast navigation to Journal, Bills, Goals, Reports, and Trends.
-3. Statement of Accounts: Dedicated page for reviewing historical data (Income vs Spent) with net savings summaries.
-4. Precision Expense Engine: Log expenses with decimal support (0.01) across multiple payment sources (Cash, GCash, Maya, Bank).
-5. AI Budget Planner: Automated suggestions for category limits based on your allowance and 3-month spending history.
-6. Budget Limits: Monthly spending caps per category with live color-coded progress bars.
-7. Allowance Tracker: Track recurring income and receive AI-driven plan prompts after every addition.
-8. Savings Integration: Dedicated savings tracking with automatic allowance synchronization.
+### Finance & Ecosystem
+1. **Monthly Reset Dashboard**: Consolidated 4-card metric row (Allowance, Expenses, Balance, Safe-to-Spend) that resets every 1st of the month.
+2. **Quick Access Hub**: Dedicated navigation bar for fast access to Journal, Bills, Goals, Reports, and Trends.
+3. **Statement of Accounts**: Professional-grade page for reviewing historical data with net savings summaries.
+4. **AI Help Desk**: Context-aware assistant grounded in your real financial data (Limited to 10 free daily prompts).
+5. **Recycle Bin**: Safety net for all financial records—restore anything accidentally deleted with one click.
+6. **Precision Expense Engine**: Advanced logging with source-type tracking (Cash, GCash, Maya, Bank).
+7. **Safe-to-Spend**: Tells you exactly how much you can spend today without going broke before month-end.
 
-### Planning & Insights
-1. Bills Hub: Automated tracker for recurring payments (Rent, Netflix, Utilities) that logs expenses and calculates next due dates.
-2. Safe-to-Spend Calculator: Real-time intelligent card showing exactly how much can be safely spent today.
-3. Financial Goal Deep Dive: Target tracking with intelligent daily savings requirement calculations.
-4. Financial Journal: AI-assisted ledger reflections with overspending detection.
-5. Expense Trends: Historical spending visualizations and monthly comparison.
-6. Spending Heatmap: Visual intensity calendar of daily spending habits.
-
-### AI Help Desk
-1. Context-Aware Assistant: Floating FAB grounded in your real financial data.
-2. Privacy First: Automatically clears chat history after 10 minutes of inactivity.
-3. Smart Allowance Support: Grounds advice in your monthly allowance and spending context.
-4. Smart Commands: Log expenses or create goals naturally through chat.
-
-### Security & Admin
-1. Hardened Infrastructure: Directory-level .htaccess protection and client-side anti-inspection logic.
-2. Identity: One-tap Google OAuth login and multi-tier security guards.
-3. Access Control: 3-tier roles (Superadmin, Admin, User) with session guards.
-4. Admin Panel: User management, activity logs, and credential visibility.
-5. Your Wallets: Sidebar widget for all-time balances (Cash, Digital, Savings) distinct from monthly metrics.
+### Planning & Identity
+1. **Bills Hub**: Recurring payment tracker (Netflix, Rent, Utilities) with automatic expense logging.
+2. **Goal Deep Dive**: Intelligent target tracking with precise daily savings requirement calculations.
+3. **Financial Journal**: Double-entry ledger reflections for formal financial transaction logging.
+4. **Expense Trends**: Dynamic historical visualizations and category-level HABIT analysis.
+5. **Spending Heatmap**: Visual intensity calendar showing exactly when you spend the most.
+6. **3-Tier Identity**: Granular access control for Superadmins, Admins, and Regular Users.
+7. **Production Hardened**: Built with anti-inspection guards, session timeouts, and encrypted local storage sync.
 
 ---
 
