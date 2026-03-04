@@ -11,26 +11,6 @@
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Global SweetAlert2 Configuration for Dark Mode
-        (function() {
-            function updateSwalTheme(theme) {
-                const isDark = theme === 'dark';
-                window.Swal = Swal.mixin({
-                    background: isDark ? '#2c2c2e' : '#ffffff',
-                    color: isDark ? '#ffffff' : '#1c1c1e',
-                    confirmButtonColor: '#0a84ff',
-                    cancelButtonColor: '#8e8e93'
-                });
-            }
-
-            // Initial setup
-            updateSwalTheme(localStorage.getItem('theme') || 'light');
-
-            // Reactive update on theme change
-            window.addEventListener('themeChanged', (e) => {
-                updateSwalTheme(e.detail.theme);
-            });
-        })();
     </script>
     <script type="module" src="<?php echo SITE_URL; ?>assets/js/app.js"></script>
     <script src="<?php echo SITE_URL; ?>assets/js/clock.js"></script>

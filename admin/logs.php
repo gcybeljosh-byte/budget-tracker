@@ -62,7 +62,7 @@ $allUsers = $usersStmt->fetch_all(MYSQLI_ASSOC);
                             $count++;
                             $isOnline = ($u['last_activity'] && strtotime($u['last_activity']) > strtotime('-5 minutes'));
                             $statusClass = $isOnline ? 'bg-success' : 'bg-secondary';
-                            $roleBadge = ($u['role'] === 'admin') ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.5rem;">ADMIN</span>' : '';
+                            $roleBadge = ($u['role'] === 'admin') ? '<span class="badge bg-warning ms-1" style="font-size:0.5rem;">ADMIN</span>' : '';
                             $hiddenClass = ($count > $displayLimit) ? 'd-none presence-extra' : '';
                         ?>
                             <div class="d-flex align-items-center bg-app-alt px-3 py-2 rounded-pill border border-theme shadow-sm transition-all <?php echo $hiddenClass; ?>">

@@ -174,55 +174,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
 
         <div class="glass p-8 md:p-12 rounded-[2.5rem] ios-shadow">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Join Budget Tracker</h2>
-                <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Start your journey to financial freedom</p>
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Join Budget Tracker</h2>
+                <p class="text-slate-500 mt-2 font-medium">Start your journey to financial freedom</p>
             </div>
 
             <form method="POST" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">First Name</label>
-                        <input type="text" name="first_name" placeholder="John" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                        <input type="text" name="first_name" placeholder="John" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Last Name</label>
-                        <input type="text" name="last_name" placeholder="Doe" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                        <input type="text" name="last_name" placeholder="Doe" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
-                        <input type="email" name="email" placeholder="john@example.com" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                        <input type="email" name="email" placeholder="john@example.com" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Contact Number</label>
-                        <input type="text" name="contact_number" placeholder="09123456789" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                        <input type="text" name="contact_number" placeholder="09123456789" class="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 space-y-6">
+                <div class="bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-200 space-y-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Username</label>
-                        <input type="text" name="username" placeholder="johndoe123" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                        <input type="text" name="username" placeholder="johndoe123" class="w-full px-5 py-4 bg-white border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Password</label>
-                            <input type="password" name="password" placeholder="••••••••" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                            <input type="password" name="password" placeholder="••••••••" class="w-full px-5 py-4 bg-white border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Confirm Password</label>
-                            <input type="password" name="confirm_password" placeholder="••••••••" class="w-full px-5 py-4 bg-white dark:bg-slate-800 border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" required>
+                            <input type="password" name="confirm_password" placeholder="••••••••" class="w-full px-5 py-4 bg-white border-transparent focus:bg-indigo-500/5 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" required>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-slate-900 dark:bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 dark:shadow-none hover:bg-slate-800 dark:hover:bg-indigo-700 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-4">
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-4">
                     Create Account <i class="fas fa-check-circle text-xs"></i>
                 </button>
             </form>

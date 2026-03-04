@@ -194,11 +194,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
 
         <div class="glass p-8 md:p-10 rounded-[2.5rem] ios-shadow relative overflow-hidden">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl ios-shadow animate-float">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-10 h-10 object-contain">
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Welcome Back</h2>
-                <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Continue your financial journey</p>
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
+                <p class="text-slate-500 mt-2 font-medium">Continue your financial journey</p>
             </div>
 
             <form method="POST" class="space-y-6">
@@ -208,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 ios-transition">
                             <i class="fas fa-user"></i>
                         </span>
-                        <input type="text" name="username" class="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" placeholder="Enter your username" required>
+                        <input type="text" name="username" class="w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="Enter your username" required>
                     </div>
                 </div>
 
@@ -221,14 +221,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['google_auth'])) {
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 ios-transition">
                             <i class="fas fa-lock"></i>
                         </span>
-                        <input type="password" name="password" id="password" class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 dark:text-slate-200 border" placeholder="••••••••" required>
+                        <input type="password" name="password" id="password" class="w-full pl-12 pr-12 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl ios-transition outline-none font-medium text-slate-700 border" placeholder="••••••••" required>
                         <button type="button" onclick="togglePassword('password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 ios-transition">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-slate-900 dark:bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 dark:shadow-none hover:bg-slate-800 dark:hover:bg-indigo-700 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-8">
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 active:scale-[0.98] ios-transition flex items-center justify-center gap-3 mt-8">
                     Sign In <i class="fas fa-arrow-right text-xs"></i>
                 </button>
             </form>

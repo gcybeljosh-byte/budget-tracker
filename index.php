@@ -21,23 +21,7 @@ if (isset($_SESSION['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker - Master Your Finances</title>
-    <script>
-        // Apply theme immediately to prevent flashing
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,9 +33,6 @@ if (isset($_SESSION['id'])) {
             transition: background-color 0.4s ease;
         }
 
-        .dark body {
-            background-color: #0f172a;
-        }
 
         .glass {
             background: rgba(255, 255, 255, 0.7);
@@ -60,10 +41,6 @@ if (isset($_SESSION['id'])) {
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
 
         .ios-transition {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -100,7 +77,7 @@ if (isset($_SESSION['id'])) {
     </style>
 </head>
 
-<body class="text-slate-900 dark:text-slate-100 overflow-x-hidden">
+<body class="text-slate-900 overflow-x-hidden">
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4">
         <div class="max-w-6xl mx-auto flex items-center justify-between glass px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl ios-shadow">
@@ -108,14 +85,10 @@ if (isset($_SESSION['id'])) {
                 <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 dark:text-white whitespace-nowrap">BudgetTracker</span>
+                <span class="font-bold text-lg md:text-xl tracking-tight text-slate-800 whitespace-nowrap">BudgetTracker</span>
             </div>
             <div class="flex items-center gap-1 md:gap-4">
-                <button id="theme-toggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 ios-transition">
-                    <i class="fas fa-moon dark:hidden"></i>
-                    <i class="fas fa-sun hidden dark:block"></i>
-                </button>
-                <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 dark:text-slate-400 font-bold text-sm md:text-base hover:text-indigo-600 ios-transition px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">Login</a>
+                <a href="<?php echo SITE_URL; ?>auth/login.php" class="text-slate-600 font-bold text-sm md:text-base hover:text-indigo-600 ios-transition px-3 py-2 rounded-xl hover:bg-slate-50">Login</a>
                 <a href="<?php echo SITE_URL; ?>auth/register.php" class="bg-indigo-600 text-white text-xs md:text-sm font-bold px-4 md:px-6 py-2 md:py-2.5 rounded-xl md:rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-0.5 ios-transition whitespace-nowrap">Sign Up</a>
             </div>
         </div>
@@ -164,13 +137,13 @@ if (isset($_SESSION['id'])) {
                                 <i class="fas fa-user-circle text-2xl"></i>
                             </div>
                             <div class="text-left">
-                                <p class="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Signed in as</p>
-                                <h5 class="font-bold text-slate-800 dark:text-slate-100 leading-tight">Alex Thompson <span class="hidden md:inline text-indigo-500 ml-1 text-xs px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">Pro</span></h5>
+                                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Signed in as</p>
+                                <h5 class="font-bold text-slate-800 leading-tight">Alex Thompson <span class="hidden md:inline text-indigo-500 ml-1 text-xs px-2 py-0.5 bg-indigo-50 rounded-full">Pro</span></h5>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-700 self-start md:self-auto">
+                        <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100 self-start md:self-auto">
                             <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            <span class="text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-400">February 2026 Overview</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-600">February 2026 Overview</span>
                         </div>
                     </div>
 
@@ -179,15 +152,15 @@ if (isset($_SESSION['id'])) {
                         <div class="md:col-span-2 flex flex-col gap-6">
                             <!-- Animated Balance Cards -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="p-4 md:p-6 bg-white dark:bg-slate-800 rounded-3xl ios-shadow border border-slate-50 dark:border-slate-700 float-animation">
-                                    <p class="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 md:mb-2">Total Balance</p>
-                                    <h4 class="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-100">₱45,250.00</h4>
+                                <div class="p-4 md:p-6 bg-white rounded-3xl ios-shadow border border-slate-50 float-animation">
+                                    <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Total Balance</p>
+                                    <h4 class="text-xl md:text-2xl font-extrabold text-slate-800">₱45,250.00</h4>
                                     <div class="mt-3 md:mt-4 flex items-center gap-2">
                                         <span class="px-2 py-0.5 bg-green-100 text-green-600 text-[9px] md:text-[10px] font-bold rounded-full">+12.5%</span>
                                         <span class="text-[9px] md:text-[10px] text-slate-400">vs last month</span>
                                     </div>
                                 </div>
-                                <div class="p-4 md:p-6 bg-slate-900 dark:bg-slate-950 rounded-3xl shadow-xl float-animation" style="animation-delay: 0.5s;">
+                                <div class="p-4 md:p-6 bg-slate-900 rounded-3xl shadow-xl float-animation" style="animation-delay: 0.5s;">
                                     <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 md:mb-2 text-slate-500">Monthly Spend</p>
                                     <h4 class="text-xl md:text-2xl font-extrabold text-white">₱12,800.00</h4>
                                     <div class="mt-3 md:mt-4 w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
@@ -197,20 +170,20 @@ if (isset($_SESSION['id'])) {
                             </div>
 
                             <!-- Animated Chart Preview -->
-                            <div class="flex-1 p-6 bg-white dark:bg-slate-800 rounded-3xl ios-shadow border border-slate-50 dark:border-slate-700">
+                            <div class="flex-1 p-6 bg-white rounded-3xl ios-shadow border border-slate-50">
                                 <div class="flex items-center justify-between mb-6">
-                                    <h5 class="font-bold text-slate-800 dark:text-slate-100">Spending Overview</h5>
+                                    <h5 class="font-bold text-slate-800">Spending Overview</h5>
                                     <div class="flex gap-1">
                                         <div class="w-12 h-2 bg-indigo-500 rounded-full"></div>
                                         <div class="w-12 h-2 bg-slate-100 rounded-full"></div>
                                     </div>
                                 </div>
                                 <div class="flex items-end justify-between h-32 gap-3 px-2">
-                                    <div class="w-full bg-slate-50 dark:bg-slate-700 rounded-t-xl transition-all duration-1000 h-[40%]" style="transition-delay: 0.2s;"></div>
+                                    <div class="w-full bg-slate-50 rounded-t-xl transition-all duration-1000 h-[40%]" style="transition-delay: 0.2s;"></div>
                                     <div class="w-full bg-indigo-500 rounded-t-xl transition-all duration-1000 h-[70%]" style="transition-delay: 0.4s;"></div>
-                                    <div class="w-full bg-slate-50 dark:bg-slate-700 rounded-t-xl transition-all duration-1000 h-[50%]" style="transition-delay: 0.6s;"></div>
+                                    <div class="w-full bg-slate-50 rounded-t-xl transition-all duration-1000 h-[50%]" style="transition-delay: 0.6s;"></div>
                                     <div class="w-full bg-purple-500 rounded-t-xl transition-all duration-1000 h-[90%]" style="transition-delay: 0.8s;"></div>
-                                    <div class="w-full bg-slate-50 dark:bg-slate-700 rounded-t-xl transition-all duration-1000 h-[60%]" style="transition-delay: 1.0s;"></div>
+                                    <div class="w-full bg-slate-50 rounded-t-xl transition-all duration-1000 h-[60%]" style="transition-delay: 1.0s;"></div>
                                     <div class="w-full bg-indigo-600 rounded-t-xl transition-all duration-1000 h-[30%]" style="transition-delay: 1.2s;"></div>
                                 </div>
                             </div>
@@ -218,27 +191,27 @@ if (isset($_SESSION['id'])) {
 
                         <!-- Sidebar / Transactions Column -->
                         <div class="flex flex-col gap-6">
-                            <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl ios-shadow border border-slate-50 dark:border-slate-700 flex-1 flex flex-col gap-4 overflow-hidden relative">
-                                <h5 class="font-bold text-slate-800 dark:text-slate-100 mb-2">Recent Activity</h5>
+                            <div class="p-6 bg-white rounded-3xl ios-shadow border border-slate-50 flex-1 flex flex-col gap-4 overflow-hidden relative">
+                                <h5 class="font-bold text-slate-800 mb-2">Recent Activity</h5>
 
                                 <!-- Simulated Transactions -->
                                 <div class="space-y-4">
-                                    <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 ios-transition cursor-default">
-                                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center">
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 ios-transition cursor-default">
+                                        <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
                                             <i class="fas fa-shopping-cart text-sm"></i>
                                         </div>
                                         <div class="flex-1 text-left">
-                                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300">Groceries</p>
+                                            <p class="text-xs font-bold text-slate-700">Groceries</p>
                                             <p class="text-[10px] text-slate-400 tracking-tight">2 mins ago</p>
                                         </div>
                                         <p class="text-xs font-bold text-red-500">-₱450</p>
                                     </div>
-                                    <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 ios-transition cursor-default">
-                                        <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center">
+                                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 ios-transition cursor-default">
+                                        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
                                             <i class="fas fa-wallet text-sm"></i>
                                         </div>
                                         <div class="flex-1 text-left">
-                                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300">Salary</p>
+                                            <p class="text-xs font-bold text-slate-700">Salary</p>
                                             <p class="text-[10px] text-slate-400 tracking-tight">1 hour ago</p>
                                         </div>
                                         <p class="text-xs font-bold text-green-500">+₱5k</p>
@@ -505,7 +478,7 @@ if (isset($_SESSION['id'])) {
                 </svg>
             </div>
 
-            <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-10 relative">
+            <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-10 relative">
                 <span class="font-['Caveat'] text-indigo-600 block mb-2 transform -rotate-2">Command</span>
                 your <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">wealth journey</span>
             </h2>
@@ -533,13 +506,13 @@ if (isset($_SESSION['id'])) {
     </section>
 
     <!-- Footer -->
-    <footer class="py-12 px-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+    <footer class="py-12 px-6 bg-slate-50 border-t border-slate-100">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 flex items-center justify-center">
                     <img src="<?php echo SITE_URL; ?>assets/images/favicon.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="font-bold text-lg tracking-tight text-slate-800 dark:text-slate-100">BudgetTracker</span>
+                <span class="font-bold text-lg tracking-tight text-slate-800">BudgetTracker</span>
             </div>
             <p class="text-slate-400 text-sm font-medium">© 2026 Budget Tracker. Precision & Simplicity.</p>
             <div class="flex items-center gap-6">
@@ -597,18 +570,6 @@ if (isset($_SESSION['id'])) {
                     }, 150);
                 }, index * 30);
             });
-        });
-
-        // Theme Toggle Logic
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
         });
     </script>
 </body>

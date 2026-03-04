@@ -49,17 +49,6 @@ if (!isset($appName)) {
     $appName = defined('APP_NAME') ? APP_NAME : 'Budget Tracker';
 }
 
-// --- Theme Persistence Fallback ---
-if (!isset($_SESSION['theme'])) {
-    $themeStmt = $conn->prepare("SELECT theme FROM users WHERE id = ?");
-    $themeStmt->bind_param("i", $_SESSION['id']);
-    $themeStmt->execute();
-    $themeResult = $themeStmt->get_result();
-    if ($themeRow = $themeResult->fetch_assoc()) {
-        $_SESSION['theme'] = $themeRow['theme'] ?? 'light';
-    }
-    $themeStmt->close();
-}
 
 // Update last activity for logged in users
 if (isset($_SESSION['id'])) {
@@ -94,12 +83,6 @@ if (isset($_SESSION['id'])) {
     $currencyConfig = CurrencyHelper::getJSConfig($_SESSION['user_currency'] ?? 'PHP');
     ?>
     <script>
-        // Apply theme immediately to prevent flashing
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-
         window.SITE_URL = "<?php echo SITE_URL; ?>";
         window.userCurrency = <?php echo json_encode($currencyConfig); ?>;
         window.seenTutorials = <?php echo json_encode($seen_tutorials); ?>;
@@ -130,7 +113,7 @@ if (isset($_SESSION['id'])) {
 
 </head>
 
-<body class="bg-app">
+<body class="bg-body-tertiary">
     <!-- Help Desk FAB -->
     <button onclick="toggleChatWidget()" class="ai-fab shadow-lg" title="Help Desk">
         <i class="fas fa-robot"></i>

@@ -35,17 +35,6 @@ if ($onboarding_completed == 1) {
     <title>Personalize Your Explorer - Budget Tracker</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
-    <script>
-        // Apply theme immediately to prevent flashing
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
-    </script>
     <style>
         :root {
             --primary: #6366f1;
@@ -55,14 +44,6 @@ if ($onboarding_completed == 1) {
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
-        }
-
-        .dark:root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #334155;
         }
 
         body {

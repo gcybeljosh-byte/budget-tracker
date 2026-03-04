@@ -33,7 +33,7 @@
                         <!-- Desktop-only: Online Indicator -->
                         <?php if ($isDashboard): ?>
                             <div class="d-none d-lg-flex align-items-center me-1">
-                                <div class="d-flex align-items-center bg-card rounded-pill px-3 py-1 shadow-sm border border-theme">
+                                <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm border border-success-subtle">
                                     <div class="bg-success rounded-circle me-2" style="width: 8px; height: 8px; animation: glow-pulse 2s infinite;"></div>
                                     <span class="text-success small fw-bold" style="font-size: 0.7rem;">Online</span>
                                 </div>
@@ -81,7 +81,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0 overflow-hidden notification-dropdown-menu"
                                     aria-labelledby="notificationDropdown">
-                                    <li class="p-3 bg-app-alt border-bottom d-flex justify-content-between align-items-center">
+                                    <li class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
                                         <h6 class="mb-0 fw-bold small text-uppercase text-secondary">Notifications</h6>
                                         <button class="btn btn-link p-0 text-decoration-none small fw-bold <?php echo $unreadCount === 0 ? 'd-none' : ''; ?>"
                                             id="markAllRead" style="font-size: 0.75rem;">Mark all as Read</button>
@@ -126,17 +126,13 @@
                                             <?php endforeach; ?>
                                         <?php endif; ?>
                                     </div>
-                                    <li class="p-2 text-center bg-app-alt <?php echo $unreadCount > 0 ? 'd-none' : ''; ?>" id="noNotifications">
+                                    <li class="p-2 text-center bg-light <?php echo $unreadCount > 0 ? 'd-none' : ''; ?>" id="noNotifications">
                                         <span class="text-muted small">No new notifications</span>
                                     </li>
                                 </ul>
                             </div>
                         <?php endif; ?>
 
-                        <!-- Theme Toggle -->
-                        <button class="btn btn-link nav-link px-2 me-1" id="theme-toggle" title="Toggle Dark Mode">
-                            <i class="fas fa-moon text-secondary fs-5" id="theme-icon"></i>
-                        </button>
 
                         <!-- Profile Avatar (always visible on tablet + mobile) -->
                         <?php if (isset($_SESSION['id']) && $isDashboard): ?>
@@ -145,7 +141,7 @@
                                     id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <div id="navbarProfilePicContainer"
                                         class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
-                                        style="width: 36px; height: 36px; border: 2px solid var(--border-strong); flex-shrink: 0;">
+                                        style="width: 36px; height: 36px; border: 2px solid #fff; flex-shrink: 0;">
                                         <?php if (isset($_SESSION['profile_picture']) && !empty($_SESSION['profile_picture'])): ?>
                                             <img src="<?php echo SITE_URL . htmlspecialchars($_SESSION['profile_picture']); ?>"
                                                 alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
@@ -155,7 +151,7 @@
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" aria-labelledby="navbarDropdown">
-                                    <li class="px-3 py-2 border-bottom bg-app-alt">
+                                    <li class="px-3 py-2 border-bottom bg-light">
                                         <span class="text-secondary small fw-bold text-uppercase">My Account</span>
                                     </li>
                                     <li><a class="dropdown-item py-2" href="<?php echo SITE_URL; ?>core/profile.php"><i class="fas fa-user-circle me-2 text-primary"></i>View Profile</a></li>
@@ -230,41 +226,6 @@
                     // Poll every 60 seconds for new notifications
                     setInterval(checkNewNotifications, 60000);
 
-                    // Theme Toggle Logic
-                    const themeToggle = document.getElementById('theme-toggle');
-                    const themeIcon = document.getElementById('theme-icon');
-
-                    function updateThemeIcon(theme) {
-                        if (theme === 'dark') {
-                            themeIcon.classList.remove('fa-moon');
-                            themeIcon.classList.add('fa-sun');
-                        } else {
-                            themeIcon.classList.remove('fa-sun');
-                            themeIcon.classList.add('fa-moon');
-                        }
-                    }
-
-                    // Initial icon state
-                    updateThemeIcon(localStorage.getItem('theme') || 'light');
-
-                    themeToggle.addEventListener('click', () => {
-                        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-                        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-                        document.documentElement.setAttribute('data-theme', newTheme);
-                        localStorage.setItem('theme', newTheme);
-                        updateThemeIcon(newTheme);
-
-                        // Global update for third-party components (like charts)
-                        window.dispatchEvent(new CustomEvent('themeChanged', {
-                            detail: {
-                                theme: newTheme
-                            }
-                        }));
-
-                        // Also sync to server via session (optional but good for consistency)
-                        fetch('<?php echo SITE_URL; ?>api/update_theme.php?theme=' + newTheme);
-                    });
                 });
             </script>
 
