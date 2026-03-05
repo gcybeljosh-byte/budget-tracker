@@ -169,6 +169,51 @@ include '../includes/header.php';
                 <!-- Achievement and Streak widgets removed -->
 
 
+                <!-- 50/30/20 Budget Rule Widget -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-uppercase small text-secondary">50/30/20 Budget Rule</h6>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 extra-small">This Month</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="budgetRuleWidget">
+                            <!-- Needs -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="small fw-bold text-secondary">Needs (50%)</span>
+                                    <span class="small fw-bold" id="needsPercent">0%</span>
+                                </div>
+                                <div class="progress rounded-pill bg-light" style="height: 8px;">
+                                    <div id="needsBar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="extra-small text-muted mt-1" id="needsAmount">$0.00</div>
+                            </div>
+                            <!-- Wants -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="small fw-bold text-secondary">Wants (30%)</span>
+                                    <span class="small fw-bold" id="wantsPercent">0%</span>
+                                </div>
+                                <div class="progress rounded-pill bg-light" style="height: 8px;">
+                                    <div id="wantsBar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="extra-small text-muted mt-1" id="wantsAmount">$0.00</div>
+                            </div>
+                            <!-- Savings -->
+                            <div class="mb-0">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="small fw-bold text-secondary">Savings (20%)</span>
+                                    <span class="small fw-bold" id="savingsPercent">0%</span>
+                                </div>
+                                <div class="progress rounded-pill bg-light" style="height: 8px;">
+                                    <div id="savingsBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="extra-small text-muted mt-1" id="savingsAmount">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Upcoming Bills Widget -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden border-start border-primary border-4">
                     <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
@@ -349,6 +394,7 @@ include '../includes/header.php';
 
             renderDashboardChart(data.category_spending);
             renderRecentTransactions(data.recent_transactions);
+            updateBudgetRuleUI(data.budget_rule, data.total_allowance);
 
             // --- Balance Forwarding Prompt ---
             if (data.needs_forwarding) {
@@ -487,6 +533,37 @@ include '../includes/header.php';
             });
         }
 
+
+        function updateBudgetRuleUI(rules, totalAllowance) {
+            if (!rules || !totalAllowance) return;
+
+            const updateItem = (type, targetPercent) => {
+                const amount = rules[type] || 0;
+                const percent = (amount / totalAllowance) * 100;
+                const bar = document.getElementById(`${type.toLowerCase()}Bar`);
+                const percentEl = document.getElementById(`${type.toLowerCase()}Percent`);
+                const amountEl = document.getElementById(`${type.toLowerCase()}Amount`);
+
+                if (bar) bar.style.width = Math.min(100, percent) + '%';
+                if (percentEl) percentEl.textContent = percent.toFixed(1) + '%';
+                if (amountEl) amountEl.textContent = formatCurrency(amount);
+
+                // Change color if over the limit
+                if (percent > targetPercent) {
+                    if (bar) bar.classList.replace('bg-primary', 'bg-danger');
+                    if (bar) bar.classList.replace('bg-info', 'bg-danger');
+                    if (percentEl) percentEl.classList.add('text-danger');
+                } else {
+                    if (bar) bar.classList.replace('bg-danger', 'bg-primary');
+                    if (bar) bar.classList.replace('bg-danger', 'bg-info');
+                    if (percentEl) percentEl.classList.remove('text-danger');
+                }
+            };
+
+            updateItem('Needs', 50);
+            updateItem('Wants', 30);
+            updateItem('Savings', 20);
+        }
 
         function renderUpcomingBillsSide(bills) {
             const list = document.getElementById('dashUpcomingBillsList');

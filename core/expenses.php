@@ -141,6 +141,11 @@ include '../includes/header.php';
                             </select>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Receipt (Optional)</label>
+                        <input type="file" class="form-control rounded-3" id="expenseReceipt" accept="image/*">
+                        <div class="form-text mt-1" style="font-size: 0.7rem;">Attach an image of your receipt for future reference.</div>
+                    </div>
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-danger rounded-pill py-2 fw-bold shadow-sm">Save Expense</button>
                     </div>
@@ -435,6 +440,20 @@ include '../includes/header.php';
         });
     }
 
+    function viewReceipt(url) {
+        Swal.fire({
+            title: 'Receipt Image',
+            imageUrl: url,
+            imageAlt: 'Receipt',
+            width: 'auto',
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                image: 'img-fluid rounded shadow-sm'
+            }
+        });
+    }
+
     function renderTable(expenses, restorePage = 0) {
         if (!expenseTableBody) return;
 
@@ -449,6 +468,11 @@ include '../includes/header.php';
             const sourceBadge = isElectronic ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary';
 
             const row = document.createElement('tr');
+            const receiptBtn = item.receipt_path ?
+                `<button class="btn btn-sm btn-light text-success me-1 rounded-circle" onclick="viewReceipt('<?php echo SITE_URL; ?>${item.receipt_path}')">
+                    <i class="fas fa-file-image"></i>
+                </button>` : '';
+
             row.innerHTML = `
                 <td class="fw-medium text-dark" data-label="Date">${item.date}</td>
                 <td data-label="Category"><span class="badge bg-secondary-subtle text-secondary rounded-pill text-uppercase small">${item.category}</span></td>
@@ -457,6 +481,7 @@ include '../includes/header.php';
                 <td class="text-center" data-label="Method"><span class="badge ${sourceBadge} rounded-pill small">${item.source_type}</span></td>
                 <td class="text-center" data-label="Source"><span class="badge ${item.expense_source === 'Savings' ? 'bg-success-subtle text-success' : item.expense_source === 'Allowance' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.expense_source}</span></td>
                 <td class="text-end" data-label="Actions">
+                    ${receiptBtn}
                     <button class="btn btn-sm btn-light text-primary me-1 rounded-circle" onclick="editExpense(${item.id})">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -795,6 +820,45 @@ include '../includes/header.php';
 
         // --- Form Submissions ---
 
+        // --- AI Auto-Categorization ---
+        let predictionTimeout;
+        const descriptionInput = document.getElementById('expenseDesc');
+        const categorySelect = document.getElementById('expenseCategory');
+
+        if (descriptionInput) {
+            descriptionInput.addEventListener('input', function() {
+                clearTimeout(predictionTimeout);
+                const desc = this.value.trim();
+                if (desc.length < 3) return;
+
+                predictionTimeout = setTimeout(() => {
+                    fetch('<?php echo SITE_URL; ?>api/predict_category.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                description: desc
+                            })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success && data.category) {
+                                // Find the option and select it
+                                const options = Array.from(categorySelect.options);
+                                const match = options.find(opt => opt.value === data.category);
+                                if (match) {
+                                    categorySelect.value = data.category;
+                                    // Subtle visual feedback
+                                    categorySelect.classList.add('is-valid');
+                                    setTimeout(() => categorySelect.classList.remove('is-valid'), 2000);
+                                }
+                            }
+                        });
+                }, 800); // 800ms debounce
+            });
+        }
+
         // Add Expense
         expenseForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -819,6 +883,12 @@ include '../includes/header.php';
             formData.append('amount', document.getElementById('expenseAmount').value);
             formData.append('source_type', document.getElementById('expenseSourceType').value);
             formData.append('expense_source', document.getElementById('expenseSource').value);
+
+            const receiptInput = document.getElementById('expenseReceipt');
+            if (receiptInput && receiptInput.files.length > 0) {
+                formData.append('receipt', receiptInput.files[0]);
+            }
+
             if (activeGroupId) {
                 formData.append('group_id', activeGroupId);
             }
@@ -833,7 +903,8 @@ include '../includes/header.php';
                         showAlert(result.message, 'success');
                         expenseForm.reset();
                         document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
-                        bootstrap.Modal.getOrCreateInstance(document.getElementById('addExpenseModal')).hide();
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
+                        if (modal) modal.hide();
                         fetchExpenses();
                         fetchDashboardStats();
                     } else {

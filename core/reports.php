@@ -50,6 +50,11 @@ include '../includes/header.php';
                             <i class="fas fa-file-export me-2"></i>Export PDF
                         </button>
                     </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary w-100 rounded-pill fw-bold shadow-sm" id="generateStatementBtn">
+                            <i class="fas fa-file-invoice me-2"></i>Statement
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,6 +185,14 @@ include '../includes/header.php';
 
         if (generateBtn) generateBtn.addEventListener('click', fetchReportData);
         if (downloadBtn) downloadBtn.addEventListener('click', downloadPDF);
+
+        const statementBtn = document.getElementById('generateStatementBtn');
+        if (statementBtn) {
+            statementBtn.addEventListener('click', function() {
+                const month = reportDateInput.value || new Date().toISOString().slice(0, 7);
+                window.open(`<?php echo SITE_URL; ?>api/generate_statement.php?month=${month}&print=1`, '_blank');
+            });
+        }
 
         function fetchReportData() {
             const type = reportTypeSelect.value;

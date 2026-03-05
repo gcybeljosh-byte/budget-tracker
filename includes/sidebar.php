@@ -59,6 +59,9 @@
                     <a href="<?php echo SITE_URL; ?>core/bills.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'bills.php') ? 'active' : ''; ?>">
                         <i class="fas fa-file-invoice-dollar me-2" style="width: 20px;"></i> Bills &amp; Subscriptions
                     </a>
+                    <a href="<?php echo SITE_URL; ?>core/bill_calendar.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'bill_calendar.php') ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-alt me-2" style="width: 20px;"></i> Bill Calendar
+                    </a>
 
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Journaling</div>
                     <a href="<?php echo SITE_URL; ?>core/journal.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'journal.php') ? 'active' : ''; ?>">

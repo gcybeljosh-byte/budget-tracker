@@ -229,4 +229,49 @@ class BalanceHelper
 
         return $newGoal;
     }
+
+    public function getBudgetRuleBreakdown($user_id)
+    {
+        $mapping = [
+            'Needs' => ['Rent & Utilities', 'Transportation', 'Healthcare', 'Insurance', 'Groceries', 'Housing'],
+            'Wants' => ['Food & Dining', 'Entertainment', 'Shopping', 'Hobbies', 'Lifestyle'],
+            'Savings' => ['Savings', 'Education', 'Debt Repayment']
+        ];
+
+        $breakdown = [
+            'Needs' => 0,
+            'Wants' => 0,
+            'Savings' => 0,
+            'Other' => 0
+        ];
+
+        $stmt = $this->conn->prepare("SELECT category, COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND deleted_at IS NULL AND expense_source = 'Allowance' AND date >= DATE_FORMAT(NOW(), '%Y-%m-01') GROUP BY category");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $found = false;
+            foreach ($mapping as $type => $categories) {
+                if (in_array($row['category'], $categories)) {
+                    $breakdown[$type] += (float)$row['total'];
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $breakdown['Other'] += (float)$row['total'];
+            }
+        }
+        $stmt->close();
+
+        // Add actual savings deposits
+        $stmt = $this->conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND deleted_at IS NULL AND date >= DATE_FORMAT(NOW(), '%Y-%m-01')");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $breakdown['Savings'] += (float)$stmt->get_result()->fetch_row()[0];
+        $stmt->close();
+
+        return $breakdown;
+    }
 }

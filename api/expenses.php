@@ -16,6 +16,9 @@ $response = ['success' => false, 'message' => 'Invalid request'];
 // Auto-migrate: Ensure soft-delete column exists
 ensureColumnExists($conn, 'expenses', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
 
+// Auto-migrate: Ensure receipt_path column exists
+ensureColumnExists($conn, 'expenses', 'receipt_path', 'VARCHAR(255) DEFAULT NULL');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $balanceHelper = new BalanceHelper($conn);
@@ -28,6 +31,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amount = $_POST['amount'] ?? 0;
             $source_type = $_POST['source_type'] ?? 'Cash';
             $expense_source = $_POST['expense_source'] ?? 'Allowance';
+            $receipt_path = null;
+
+            // Handle Receipt Upload
+            if (isset($_FILES['receipt']) && $_FILES['receipt']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = '../assets/uploads/receipts/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                $fileTmpPath = $_FILES['receipt']['tmp_name'];
+                $fileName = time() . '_' . $_FILES['receipt']['name'];
+                $destPath = $uploadDir . $fileName;
+
+                if (move_uploaded_file($fileTmpPath, $destPath)) {
+                    $receipt_path = 'assets/uploads/receipts/' . $fileName;
+                }
+            }
 
             if ($amount > 0) {
                 // Balance Validation
@@ -38,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
 
-                $stmt = $conn->prepare("INSERT INTO expenses (user_id, date, category, description, amount, source_type, expense_source) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("isssdss", $user_id, $date, $category, $description, $amount, $source_type, $expense_source);
+                $stmt = $conn->prepare("INSERT INTO expenses (user_id, date, category, description, amount, source_type, expense_source, receipt_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("isssisss", $user_id, $date, $category, $description, $amount, $source_type, $expense_source, $receipt_path);
 
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense added successfully'];

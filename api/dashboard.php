@@ -247,7 +247,10 @@ if ($stmt) {
 }
 $response['journal_summary'] = $journal_summary;
 
-// 10. Reports Count (This Month)
+// 10. 50/30/20 Rule Breakdown
+$response['budget_rule'] = $balanceHelper->getBudgetRuleBreakdown($user_id);
+
+// 11. Reports Count (This Month)
 $reports_count = 0;
 // Check if reports table exists before querying
 $check = $conn->query("SHOW TABLES LIKE 'reports'");

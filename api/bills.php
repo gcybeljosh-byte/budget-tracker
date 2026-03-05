@@ -54,6 +54,27 @@ if ($method === 'GET') {
         } else {
             echo json_encode(['success' => false, 'message' => 'Bill not found']);
         }
+    } elseif ($action === 'fetch_events') {
+        $stmt = $conn->prepare("SELECT id, title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL AND is_active = 1");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = [
+                'id' => $row['id'],
+                'title' => $row['title'] . ' (' . $row['amount'] . ')',
+                'start' => $row['due_date'],
+                'allDay' => true,
+                'extendedProps' => [
+                    'amount' => $row['amount'],
+                    'category' => $row['category']
+                ],
+                'backgroundColor' => '#6366f1',
+                'borderColor' => '#6366f1'
+            ];
+        }
+        echo json_encode(['success' => true, 'events' => $events]);
     }
 } elseif ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
