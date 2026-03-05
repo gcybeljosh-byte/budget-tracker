@@ -110,14 +110,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stats = ['total' => $balanceHelper->getTotalSavings($user_id)];
 
         // Monthly
-        $stmt = $conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND DATE_FORMAT(date, '%Y-%m') = ?) as total");
+        $stmt = $conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND DATE_FORMAT(date, '%Y-%m') = ? AND deleted_at IS NULL) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND DATE_FORMAT(date, '%Y-%m') = ? AND deleted_at IS NULL) as total");
         $stmt->bind_param("isis", $user_id, $thisMonth, $user_id, $thisMonth);
         $stmt->execute();
         $stats['monthly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
         $stmt->close();
 
         // Yearly
-        $stmt = $conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ?) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND YEAR(date) = ?) as total");
+        $stmt = $conn->prepare("SELECT (SELECT COALESCE(SUM(amount), 0) FROM savings WHERE user_id = ? AND YEAR(date) = ? AND deleted_at IS NULL) - (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND expense_source = 'Savings' AND YEAR(date) = ? AND deleted_at IS NULL) as total");
         $stmt->bind_param("iiii", $user_id, $thisYear, $user_id, $thisYear);
         $stmt->execute();
         $stats['yearly'] = (float)$stmt->get_result()->fetch_assoc()['total'];
