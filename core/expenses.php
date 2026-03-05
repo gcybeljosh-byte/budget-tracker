@@ -950,12 +950,49 @@ include '../includes/header.php';
         const descriptionInput = document.getElementById('expenseDesc');
         const categorySelect = document.getElementById('expenseCategory');
 
+        // Inject AI badge container after category select
+        const categoryWrapper = categorySelect ? categorySelect.closest('.mb-3') || categorySelect.parentElement : null;
+        if (categoryWrapper) {
+            const aiBadgeContainer = document.createElement('div');
+            aiBadgeContainer.id = 'aiCategoryBadge';
+            aiBadgeContainer.style.cssText = 'margin-top: 5px; min-height: 22px; transition: all 0.2s ease;';
+            categoryWrapper.appendChild(aiBadgeContainer);
+        }
+
+        function showAiLoading() {
+            const badge = document.getElementById('aiCategoryBadge');
+            if (!badge) return;
+            badge.innerHTML = `<span class="badge" style="background:rgba(99,102,241,0.1); color:#6366f1; font-size:0.72rem; padding:4px 8px; border-radius:20px;">
+                <span class="spinner-border spinner-border-sm me-1" style="width:0.6rem;height:0.6rem;border-width:1px;"></span>
+                AI is thinking...
+            </span>`;
+        }
+
+        function showAiSuggestion(categoryName) {
+            const badge = document.getElementById('aiCategoryBadge');
+            if (!badge) return;
+            badge.innerHTML = `<span class="badge d-inline-flex align-items-center gap-1" style="background:rgba(99,102,241,0.12); color:#6366f1; font-size:0.72rem; padding:4px 8px; border-radius:20px; border:1px solid rgba(99,102,241,0.25);">
+                <i class="fas fa-magic" style="font-size:0.65rem;"></i>
+                <span>AI suggested: <strong>${categoryName}</strong></span>
+                <span onclick="clearAiBadge()" style="cursor:pointer; opacity:0.6; margin-left:3px;" title="Dismiss">✕</span>
+            </span>`;
+        }
+
+        window.clearAiBadge = function() {
+            const badge = document.getElementById('aiCategoryBadge');
+            if (badge) badge.innerHTML = '';
+        };
+
         if (descriptionInput) {
             descriptionInput.addEventListener('input', function() {
                 clearTimeout(predictionTimeout);
                 const desc = this.value.trim();
-                if (desc.length < 3) return;
+                if (desc.length < 3) {
+                    clearAiBadge();
+                    return;
+                }
 
+                showAiLoading();
                 predictionTimeout = setTimeout(() => {
                     fetch('<?php echo SITE_URL; ?>api/predict_category.php', {
                             method: 'POST',
@@ -969,19 +1006,28 @@ include '../includes/header.php';
                         .then(r => r.json())
                         .then(data => {
                             if (data.success && data.category) {
-                                // Find the option and select it
                                 const options = Array.from(categorySelect.options);
                                 const match = options.find(opt => opt.value === data.category);
                                 if (match) {
                                     categorySelect.value = data.category;
-                                    // Subtle visual feedback
                                     categorySelect.classList.add('is-valid');
                                     setTimeout(() => categorySelect.classList.remove('is-valid'), 2000);
+                                    showAiSuggestion(data.category);
+                                } else {
+                                    clearAiBadge();
                                 }
+                            } else {
+                                clearAiBadge();
                             }
-                        });
-                }, 800); // 800ms debounce
+                        })
+                        .catch(() => clearAiBadge());
+                }, 800);
             });
+
+            // Clear badge when user manually picks a category
+            if (categorySelect) {
+                categorySelect.addEventListener('change', clearAiBadge);
+            }
         }
 
         // Add Expense
