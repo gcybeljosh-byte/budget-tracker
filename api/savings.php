@@ -42,9 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param("isdss", $user_id, $date, $amount, $description, $source_type);
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Savings added successfully'];
-                    if ($balanceHelper->getTotalSavings($user_id) >= 1000) {
-                        $achievementHelper->unlockBySlug($user_id, 'savings_starter');
-                    }
+                    // Trigger achievement: Penny Pincher (on first savings entry)
+                    $achievementHelper->unlockBySlug($user_id, 'savings_starter');
                     logActivity($conn, $user_id, 'savings_add', "Added savings: $description - $amount");
                 } else {
                     $response = ['success' => false, 'message' => 'Database error adding savings'];

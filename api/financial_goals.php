@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $checkGoal->close();
 
                     if ($goalData && $goalData['saved_amount'] >= $goalData['target_amount']) {
-                        $achievementHelper->unlockBySlug($user_id, 'goal_getter');
+                        $achievementHelper->unlockBySlug($user_id, 'goal_reacher');
                     }
 
                     $response = ['success' => true, 'message' => 'Contribution added!'];

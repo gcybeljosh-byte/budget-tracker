@@ -8,6 +8,67 @@ class AchievementHelper
     public function __construct($db_connection)
     {
         $this->conn = $db_connection;
+        $this->ensureTablesExist();
+    }
+
+    private function ensureTablesExist()
+    {
+        if (!$this->conn) return;
+
+        // 1. Achievements Master Table
+        $this->conn->query("CREATE TABLE IF NOT EXISTS achievements (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            slug VARCHAR(50) UNIQUE NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            description TEXT,
+            icon VARCHAR(50) DEFAULT 'fas fa-trophy',
+            badge_color VARCHAR(20) DEFAULT '#6366f1',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+
+        // 2. User Achievements (Pivot)
+        $this->conn->query("CREATE TABLE IF NOT EXISTS user_achievements (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            achievement_id INT NOT NULL,
+            unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_notified TINYINT(1) DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE,
+            UNIQUE KEY user_ach (user_id, achievement_id)
+        )");
+
+        // 3. User Streaks Table
+        $this->conn->query("CREATE TABLE IF NOT EXISTS user_streaks (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            streak_type VARCHAR(50) NOT NULL,
+            current_count INT DEFAULT 0,
+            max_count INT DEFAULT 0,
+            last_triggered_date DATE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE KEY user_streak_type (user_id, streak_type)
+        )");
+
+        // 4. Seed Achievements if empty
+        $check = $this->conn->query("SELECT COUNT(*) FROM achievements");
+        if ($check && $check->fetch_row()[0] == 0) {
+            $default_achievements = [
+                ['first_expense', 'First Step', 'You logged your first expense!', 'fas fa-shoe-prints', '#10b981'],
+                ['savings_starter', 'Penny Pincher', 'You added your first savings entry.', 'fas fa-piggy-bank', '#f59e0b'],
+                ['streak_3', 'Consistency King', 'You maintained a 3-day no-spending streak.', 'fas fa-fire', '#f43f5e'],
+                ['streak_7', 'Unstoppable', 'You maintained a 7-day no-spending streak!', 'fas fa-bolt', '#6366f1'],
+                ['goal_reacher', 'Goal Getter', 'You successfully completed a financial goal.', 'fas fa-bullseye', '#8b5cf6'],
+                ['power_user', 'System Master', 'You customized your preferences and currency.', 'fas fa-gears', '#64748b']
+            ];
+
+            $stmt = $this->conn->prepare("INSERT IGNORE INTO achievements (slug, name, description, icon, badge_color) VALUES (?, ?, ?, ?, ?)");
+            foreach ($default_achievements as $ach) {
+                $stmt->bind_param("sssss", $ach[0], $ach[1], $ach[2], $ach[3], $ach[4]);
+                $stmt->execute();
+            }
+            $stmt->close();
+        }
     }
 
     public function updateNoSpendStreak($user_id)

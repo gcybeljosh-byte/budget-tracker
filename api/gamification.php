@@ -23,6 +23,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'mark_notified' && isset($_GET
 // Update streak on every fetch (throttled inside the helper)
 $helper->updateNoSpendStreak($user_id);
 
+// Trigger achievement: System Master (if onboarding completed)
+$stmt = $conn->prepare("SELECT onboarding_completed FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+if ($stmt->execute()) {
+    $row = $stmt->get_result()->fetch_assoc();
+    if ($row && $row['onboarding_completed']) {
+        $helper->unlockBySlug($user_id, 'power_user');
+    }
+}
+$stmt->close();
+
 $achievements = $helper->getUserAchievements($user_id);
 $unnotified = $helper->getUnnotifiedAchievements($user_id);
 $streaks = $helper->getStreakStats($user_id);

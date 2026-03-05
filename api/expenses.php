@@ -45,7 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $response = ['success' => true, 'message' => 'Expense added successfully'];
                     logActivity($conn, $user_id, 'expense_add', "Added $category expense: $amount");
 
-                    // Trigger budget limit check logic (optional)
+                    // Trigger achievement: First Step
+                    require_once '../includes/AchievementHelper.php';
+                    $achievementHelper = new AchievementHelper($conn);
+                    $achievementHelper->unlockBySlug($user_id, 'first_expense');
                 } else {
                     $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
                 }
