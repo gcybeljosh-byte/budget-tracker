@@ -11,26 +11,19 @@ if (!isset($_SESSION['id'])) {
 }
 
 $user_id = $_SESSION['id'];
-$helper = new AchievementHelper($conn);
 
-// Handle marking as notified if requested
-if (isset($_GET['action']) && $_GET['action'] === 'mark_notified' && isset($_GET['id'])) {
-    $success = $helper->markAsNotified($user_id, (int)$_GET['id']);
-    echo json_encode(['success' => $success]);
-    exit;
-}
+// Achievement feature and helper removed
 
-// Update streak and check retroactive achievements on every fetch (throttled/guarded inside helper)
-$helper->updateNoSpendStreak($user_id);
-$helper->checkRetroactiveAchievements($user_id);
+// Update streak on every fetch (throttled inside the helper)
+// Skip achievement checks as requested
 
-$achievements = $helper->getUserAchievements($user_id);
-$unnotified = $helper->getUnnotifiedAchievements($user_id);
-$streaks = $helper->getStreakStats($user_id);
+$achievements = []; // Achievement feature removed
+$unnotified = [];
+$streaks = []; // Can be kept or removed; assuming strict removal of "features" includes streaks if they rely on AchievementHelper
 
 echo json_encode([
     'success' => true,
-    'achievements' => $achievements,
-    'unnotified' => $unnotified,
-    'streaks' => $streaks
+    'achievements' => [],
+    'unnotified' => [],
+    'streaks' => []
 ]);

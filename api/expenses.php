@@ -44,11 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Expense added successfully'];
                     logActivity($conn, $user_id, 'expense_add', "Added $category expense: $amount");
-
-                    // Trigger achievement: First Step
-                    require_once '../includes/AchievementHelper.php';
-                    $achievementHelper = new AchievementHelper($conn);
-                    $achievementHelper->unlockBySlug($user_id, 'first_expense');
                 } else {
                     $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
                 }

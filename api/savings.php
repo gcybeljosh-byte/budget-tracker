@@ -3,9 +3,7 @@ session_start();
 header("Content-Type: application/json");
 require_once '../includes/db.php';
 require_once '../includes/BalanceHelper.php';
-require_once '../includes/AchievementHelper.php';
-
-$achievementHelper = new AchievementHelper($conn);
+require_once '../includes/BalanceHelper.php';
 $balanceHelper = new BalanceHelper($conn);
 
 if (!isset($_SESSION['id'])) {
@@ -42,8 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param("isdss", $user_id, $date, $amount, $description, $source_type);
                 if ($stmt->execute()) {
                     $response = ['success' => true, 'message' => 'Savings added successfully'];
-                    // Trigger achievement: Penny Pincher (on first savings entry)
-                    $achievementHelper->unlockBySlug($user_id, 'savings_starter');
                     logActivity($conn, $user_id, 'savings_add', "Added savings: $description - $amount");
                 } else {
                     $response = ['success' => false, 'message' => 'Database error adding savings'];

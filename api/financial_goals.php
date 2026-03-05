@@ -2,8 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 require_once '../includes/db.php';
-require_once '../includes/AchievementHelper.php';
-$achievementHelper = new AchievementHelper($conn);
+require_once '../includes/db.php';
 
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
@@ -78,16 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $savingsStmt->execute();
                     $savingsStmt->close();
 
-                    // Achievement Check: Goal Getter
-                    $checkGoal = $conn->prepare("SELECT saved_amount, target_amount FROM financial_goals WHERE id = ?");
-                    $checkGoal->bind_param("i", $id);
-                    $checkGoal->execute();
-                    $goalData = $checkGoal->get_result()->fetch_assoc();
-                    $checkGoal->close();
-
-                    if ($goalData && $goalData['saved_amount'] >= $goalData['target_amount']) {
-                        $achievementHelper->unlockBySlug($user_id, 'goal_reacher');
-                    }
+                    // Achievement check removed
 
                     $response = ['success' => true, 'message' => 'Contribution added!'];
                     logActivity($conn, $user_id, 'goal_contribute', "Contributed $amount to goal '$goalTitle' from $source_type");
