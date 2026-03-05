@@ -206,6 +206,7 @@ include '../includes/header.php';
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let table;
+        let savingsDataMap = {}; // Store row data by ID for reliable access
 
         // URL Context
         const urlParams = new URLSearchParams(window.location.search);
@@ -231,6 +232,66 @@ include '../includes/header.php';
 
             document.getElementById('savingsSearch').addEventListener('keyup', function() {
                 table.search(this.value).draw();
+            });
+
+            // Attach click handlers AFTER DataTable initializes (event delegation on static tbody)
+            attachSavingsEvents();
+        }
+
+        function attachSavingsEvents() {
+            // Use jQuery delegation on #savingsList for DataTables compatibility
+            $('#savingsList').off('click', '.edit-savings').on('click', '.edit-savings', function() {
+                const id = $(this).data('id');
+                const row = savingsDataMap[id];
+                if (!row) return;
+                document.getElementById('editSavingsId').value = row.id;
+                document.getElementById('editSavingsDate').value = row.date;
+                document.getElementById('editSavingsAmount').value = row.amount;
+                document.getElementById('editSavingsDesc').value = row.description;
+                document.getElementById('editSavingsSource').value = row.source_type || 'Cash';
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editSavingsModal')).show();
+            });
+
+            $('#savingsList').off('click', '.delete-savings').on('click', '.delete-savings', function() {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: 'Delete this record?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#6366f1',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const formData = new FormData();
+                        formData.append('action', 'delete');
+                        formData.append('id', id);
+
+                        fetch('<?php echo SITE_URL; ?>api/savings.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Deleted',
+                                        timer: 1000,
+                                        showConfirmButton: false
+                                    });
+                                    fetchStats();
+                                    fetchSavings();
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Delete Failed',
+                                        text: result.message || 'Unknown error occurred'
+                                    });
+                                }
+                            });
+                    }
+                });
             });
         }
 
@@ -261,6 +322,9 @@ include '../includes/header.php';
                         const list = document.getElementById('savingsList');
                         list.innerHTML = '';
                         result.data.forEach(item => {
+                            if (!item.type || item.type === 'deposit') {
+                                savingsDataMap[item.id] = item; // Store for edit/delete
+                            }
                             const isWithdrawal = item.type === 'withdrawal';
                             const amountClass = isWithdrawal ? 'text-danger' : 'text-success';
                             const amountSign = isWithdrawal ? '-' : '+';
@@ -373,65 +437,6 @@ include '../includes/header.php';
                         });
                     }
                 });
-        });
-
-        // Button Listeners (Delegated)
-        document.addEventListener('click', function(e) {
-            // Edit Button
-            const editBtn = e.target.closest('.edit-savings');
-            if (editBtn) {
-                const data = editBtn.dataset;
-                document.getElementById('editSavingsId').value = data.id;
-                document.getElementById('editSavingsDate').value = data.date;
-                document.getElementById('editSavingsAmount').value = data.amount;
-                document.getElementById('editSavingsDesc').value = data.desc;
-                document.getElementById('editSavingsSource').value = data.source;
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('editSavingsModal')).show();
-            }
-
-            // Delete Button
-            const delBtn = e.target.closest('.delete-savings');
-            if (delBtn) {
-                const id = delBtn.dataset.id;
-                Swal.fire({
-                    title: 'Delete this record?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#6366f1',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const formData = new FormData();
-                        formData.append('action', 'delete');
-                        formData.append('id', id);
-
-                        fetch('<?php echo SITE_URL; ?>api/savings.php', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (result.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Deleted',
-                                        timer: 1000,
-                                        showConfirmButton: false
-                                    });
-                                    fetchStats();
-                                    fetchSavings();
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Delete Failed',
-                                        text: result.message || 'Unknown error occurred'
-                                    });
-                                }
-                            });
-                    }
-                });
-            }
         });
 
         fetchStats();
