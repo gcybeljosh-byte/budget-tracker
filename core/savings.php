@@ -8,6 +8,13 @@ if (!isset($_SESSION['id'])) {
 $pageTitle = "Savings Management";
 $pageHeader = "Savings Tracking";
 include '../includes/header.php';
+
+// RBAC Check
+if (isset($_SESSION['permissions']) && is_array($_SESSION['permissions']) && isset($_SESSION['permissions']['manage_savings']) && $_SESSION['permissions']['manage_savings'] === false && $_SESSION['role'] !== 'superadmin') {
+    header("Location: " . SITE_URL . "core/dashboard.php");
+    exit;
+}
+
 ?>
 
 <?php include '../includes/sidebar.php'; ?>

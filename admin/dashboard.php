@@ -304,6 +304,14 @@ $stmt->close();
                                             data-role="<?php echo $user['role']; ?>">
                                             <i class="fas fa-user-edit me-2"></i>Edit
                                         </button>
+                                        <?php if ($_SESSION['role'] === 'superadmin'): ?>
+                                            <button class="btn btn-warning btn-sm px-4 rounded-pill manage-access-btn"
+                                                style="color: #664d03; background-color: #ffc107; border-color: #ffc107;"
+                                                data-id="<?php echo $user['id']; ?>"
+                                                data-name="<?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>">
+                                                <i class="fas fa-key me-2"></i>Manage Access
+                                            </button>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <div class="d-flex align-items-center">
                                             <span class="text-muted small" style="font-size: 0.72rem; letter-spacing: 0.3px;">
@@ -387,6 +395,33 @@ $stmt->close();
                                 <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">Save Changes</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Access Modal -->
+        <div class="modal fade" id="manageAccessModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 shadow-lg">
+                    <div class="modal-header border-bottom p-4">
+                        <div>
+                            <h5 class="modal-title fw-bold">Manage Access Features</h5>
+                            <small class="text-muted" id="accessModalUserName">Loading...</small>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 bg-app-alt bg-opacity-10">
+                        <div id="accessTogglesContainer" class="d-flex flex-column gap-3">
+                            <div class="text-center py-4"><i class="fas fa-spinner fa-spin text-primary fs-3"></i></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top p-3 justify-content-between">
+                        <button type="button" class="btn btn-light rounded-pill px-4" id="selectAllAccessBtn">Select All</button>
+                        <div>
+                            <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" id="saveAccessBtn">Save Permissions</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -642,4 +677,144 @@ $stmt->close();
                     btn.innerHTML = originalIcon;
                 }, 2000);
             }
+
+            // --- Manage Access / RBAC Logic ---
+            let currentAccessUserId = null;
+            const availableFeatures = [{
+                    id: 'view_dashboard',
+                    name: 'Dashboard Access',
+                    desc: 'Allow user to view their main dashboard'
+                },
+                {
+                    id: 'manage_expenses',
+                    name: 'Manage Expenses',
+                    desc: 'Allow tracking and editing of expenses'
+                },
+                {
+                    id: 'manage_income',
+                    name: 'Manage Allowances',
+                    desc: 'Allow adding and editing of allowances'
+                },
+                {
+                    id: 'manage_savings',
+                    name: 'Manage Savings',
+                    desc: 'Allow adding and editing of savings'
+                },
+                {
+                    id: 'view_analytics',
+                    name: 'Analytics & Trends',
+                    desc: 'Allow access to spending heatmap and AI forecasts'
+                },
+                {
+                    id: 'view_reports',
+                    name: 'Generate Reports',
+                    desc: 'Allow exporting PDF reports and statements'
+                },
+                {
+                    id: 'use_ai_assistant',
+                    name: 'AI Help Desk',
+                    desc: 'Allow user to chat with the AI assistant'
+                },
+                {
+                    id: 'manage_bills',
+                    name: 'Bill Calendar',
+                    desc: 'Allow user to track and manage upcoming bills'
+                },
+                {
+                    id: 'view_activity_log',
+                    name: 'Activity Log',
+                    desc: 'Allow user to view their own action history'
+                }
+            ];
+
+            $('#usersTable').on('click', '.manage-access-btn', function() {
+                const btn = $(this);
+                currentAccessUserId = btn.data('id');
+                const userName = btn.data('name');
+
+                $('#accessModalUserName').text(userName);
+                $('#accessTogglesContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-primary fs-3"></i></div>');
+
+                const modal = new bootstrap.Modal(document.getElementById('manageAccessModal'));
+                modal.show();
+
+                // Fetch current permissions
+                $.getJSON(`<?php echo SITE_URL; ?>admin/api/user_permissions.php?action=get&user_id=${currentAccessUserId}`, function(response) {
+                    if (response.success) {
+                        const userPerms = response.permissions || {};
+                        let html = '';
+
+                        availableFeatures.forEach(feature => {
+                            // If userPerms is empty, we assume they have access to core features by default for backwards compatibility
+                            // but let's default everything allowed unless explicitly denied if they haven't been configured yet.
+                            const hasPerm = typeof userPerms[feature.id] !== 'undefined' ? userPerms[feature.id] : true;
+
+                            html += `
+                                <div class="d-flex align-items-center justify-content-between p-3 bg-card rounded-3 shadow-sm border border-theme">
+                                    <div>
+                                        <div class="fw-bold text-main" style="font-size: 0.95rem;">${feature.name}</div>
+                                        <div class="small text-muted" style="font-size: 0.8rem;">${feature.desc}</div>
+                                    </div>
+                                    <div class="form-check form-switch p-0 m-0">
+                                        <input class="form-check-input ms-0 feature-toggle" type="checkbox" data-feature="${feature.id}" ${hasPerm ? 'checked' : ''} style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        $('#accessTogglesContainer').html(html);
+                    } else {
+                        $('#accessTogglesContainer').html(`<div class="alert alert-danger">${response.message}</div>`);
+                    }
+                }).fail(function() {
+                    $('#accessTogglesContainer').html('<div class="alert alert-danger">Failed to fetch permissions.</div>');
+                });
+            });
+
+            $('#selectAllAccessBtn').click(function() {
+                const toggles = $('.feature-toggle');
+                const allChecked = toggles.length === toggles.filter(':checked').length;
+                toggles.prop('checked', !allChecked);
+                $(this).text(allChecked ? 'Select All' : 'Deselect All');
+            });
+
+            $('#saveAccessBtn').click(function() {
+                if (!currentAccessUserId) return;
+
+                const btn = $(this);
+                const originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...').prop('disabled', true);
+
+                const newPermissions = {};
+                $('.feature-toggle').each(function() {
+                    newPermissions[$(this).data('feature')] = $(this).is(':checked');
+                });
+
+                $.post('<?php echo SITE_URL; ?>admin/api/user_permissions.php', {
+                    action: 'update',
+                    user_id: currentAccessUserId,
+                    permissions: JSON.stringify(newPermissions)
+                }, function(response) {
+                    btn.html(originalText).prop('disabled', false);
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Saved!',
+                            text: 'User permissions have been updated.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        bootstrap.Modal.getInstance(document.getElementById('manageAccessModal')).hide();
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                }, 'json').fail(function() {
+                    btn.html(originalText).prop('disabled', false);
+                    Swal.fire('Error', 'Server connection failed.', 'error');
+                });
+            });
         </script>
+    </div>
+    </body>
+
+    </html>

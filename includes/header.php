@@ -29,14 +29,15 @@ if (isMaintenanceMode($conn)) {
 }
 
 $user_id = $_SESSION['id'];
-$stmt = $conn->prepare("SELECT onboarding_completed, page_tutorials_json FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT onboarding_completed, page_tutorials_json, permissions FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stmt->bind_result($onboarding_completed, $page_tutorials_json);
+$stmt->bind_result($onboarding_completed, $page_tutorials_json, $permissions_json);
 $stmt->fetch();
 $stmt->close();
 
 $seen_tutorials = json_decode($page_tutorials_json, true) ?: [];
+$_SESSION['permissions'] = json_decode($permissions_json, true) ?: [];
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 $role = strtolower(trim($_SESSION['role'] ?? 'user'));
@@ -119,8 +120,16 @@ if (isset($_SESSION['id'])) {
 </head>
 
 <body class="bg-body-tertiary">
-    <!-- Help Desk FAB -->
-    <button onclick="toggleChatWidget()" class="ai-fab shadow-lg" title="Help Desk">
-        <i class="fas fa-robot"></i>
-    </button>
+    <?php
+    $hasAiPerm = true;
+    if (isset($_SESSION['role']) && $_SESSION['role'] !== 'superadmin' && isset($_SESSION['permissions']) && is_array($_SESSION['permissions'])) {
+        $hasAiPerm = !isset($_SESSION['permissions']['use_ai_assistant']) || $_SESSION['permissions']['use_ai_assistant'] === true;
+    }
+    if ($hasAiPerm):
+    ?>
+        <!-- Help Desk FAB -->
+        <button onclick="toggleChatWidget()" class="ai-fab shadow-lg" title="Help Desk">
+            <i class="fas fa-robot"></i>
+        </button>
+    <?php endif; ?>
     <div class="d-flex" id="wrapper">

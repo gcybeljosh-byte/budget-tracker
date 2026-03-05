@@ -2,6 +2,12 @@
 $pageTitle = 'Reports';
 $pageHeader = 'Financial Reports';
 include '../includes/header.php';
+
+// RBAC Check
+if (isset($_SESSION['permissions']) && is_array($_SESSION['permissions']) && isset($_SESSION['permissions']['view_reports']) && $_SESSION['permissions']['view_reports'] === false) {
+    header("Location: " . SITE_URL . "core/dashboard.php");
+    exit;
+}
 ?>
 
 <?php include '../includes/sidebar.php'; ?>

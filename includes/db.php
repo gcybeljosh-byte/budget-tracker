@@ -71,3 +71,6 @@ if (!function_exists('ensureColumnExists')) {
         }
     }
 }
+
+// Auto-migrate permissions column for RBAC
+ensureColumnExists($conn, 'users', 'permissions', 'JSON NULL DEFAULT NULL');

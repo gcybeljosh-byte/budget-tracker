@@ -8,6 +8,12 @@ if ($_SESSION['role'] === 'superadmin') {
     header("Location: " . SITE_URL . "admin/dashboard.php");
     exit;
 }
+
+// RBAC Check
+if (isset($_SESSION['permissions']) && is_array($_SESSION['permissions']) && isset($_SESSION['permissions']['view_analytics']) && $_SESSION['permissions']['view_analytics'] === false) {
+    header("Location: " . SITE_URL . "core/dashboard.php");
+    exit;
+}
 ?>
 <?php include '../includes/sidebar.php'; ?>
 

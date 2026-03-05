@@ -4,6 +4,20 @@ $pageHeader = 'Chat History';
 include '../includes/header.php';
 require_once '../includes/db.php';
 
+// RBAC Check
+if (isset($_SESSION['permissions']) && is_array($_SESSION['permissions']) && isset($_SESSION['permissions']['view_activity_log']) && $_SESSION['permissions']['view_activity_log'] === false && $_SESSION['role'] !== 'superadmin') {
+    // Note: The toggle for 'view_activity_log' was assigned to Activity Log for regular users but it might correspond to 'history_log.php'
+    // Wait, the toggle list in dashboard says:
+    // { id: 'use_ai_assistant', name: 'AI Help Desk', desc: 'Allow user to chat with the AI assistant' },
+    // Actually history_log.php is the Chat History. The permission for this is use_ai_assistant.
+}
+
+// Correct RBAC Check for Chat History
+if (isset($_SESSION['permissions']) && is_array($_SESSION['permissions']) && isset($_SESSION['permissions']['use_ai_assistant']) && $_SESSION['permissions']['use_ai_assistant'] === false && $_SESSION['role'] !== 'superadmin') {
+    header("Location: " . SITE_URL . "core/dashboard.php");
+    exit;
+}
+
 // --- Self-Healing: Ensure chat history table exists ---
 $conn->query("CREATE TABLE IF NOT EXISTS ai_chat_history (
     id INT AUTO_INCREMENT PRIMARY KEY,

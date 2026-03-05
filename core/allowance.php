@@ -10,6 +10,12 @@ $extraNavContent = '<button class="btn btn-primary rounded-circle shadow-sm p-0 
 
 include '../includes/header.php';
 include '../includes/db.php';
+
+// RBAC Check
+if (isset($_SESSION['permissions']) && is_array($_SESSION['permissions']) && isset($_SESSION['permissions']['manage_income']) && $_SESSION['permissions']['manage_income'] === false && $_SESSION['role'] !== 'superadmin') {
+    header("Location: " . SITE_URL . "core/dashboard.php");
+    exit;
+}
 ?>
 
 <?php include '../includes/sidebar.php'; ?>

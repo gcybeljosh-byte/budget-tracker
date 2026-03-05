@@ -20,16 +20,28 @@
                 <?php
                 $currentPage = basename($_SERVER['PHP_SELF']);
                 $currentDir = basename(dirname($_SERVER['PHP_SELF']));
+
+                // Helper function to check permissions. Default is TRUE if the key is missing (for backwards compatibility)
+                $hasPerm = function ($featureKey) {
+                    // Superadmins bypass all feature restrictions
+                    if (isset($_SESSION['role']) && $_SESSION['role'] === 'superadmin') return true;
+                    if (!isset($_SESSION['permissions']) || !is_array($_SESSION['permissions'])) return true;
+                    return !isset($_SESSION['permissions'][$featureKey]) || $_SESSION['permissions'][$featureKey] === true;
+                };
                 ?>
                 <?php if ($roleStr !== 'superadmin'): ?>
                     <!-- General Section -->
                     <div class="px-4 py-2 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">General</div>
-                    <a href="<?php echo SITE_URL; ?>core/dashboard.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'dashboard.php' && $currentDir == 'core') ? 'active' : ''; ?>">
-                        <i class="fas fa-tachometer-alt me-2" style="width: 20px;"></i> Dashboard
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/bill_calendar.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'bill_calendar.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-calendar-alt me-2" style="width: 20px;"></i> Bill Calendar
-                    </a>
+                    <?php if ($hasPerm('view_dashboard')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/dashboard.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'dashboard.php' && $currentDir == 'core') ? 'active' : ''; ?>">
+                            <i class="fas fa-tachometer-alt me-2" style="width: 20px;"></i> Dashboard
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($hasPerm('manage_bills')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/bill_calendar.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'bill_calendar.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-calendar-alt me-2" style="width: 20px;"></i> Bill Calendar
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php if ($roleStr === 'superadmin' || $roleStr === 'admin'): ?>
@@ -39,9 +51,11 @@
                         <i class="fas fa-user-shield me-2"></i> Admin Dashboard
                     </a>
                     <?php if ($roleStr === 'superadmin'): ?>
-                        <a href="<?php echo SITE_URL; ?>admin/logs.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'logs.php') ? 'active' : ''; ?>">
-                            <i class="fas fa-history me-2"></i> Activity Logs
-                        </a>
+                        <?php if ($hasPerm('view_activity_log')): ?>
+                            <a href="<?php echo SITE_URL; ?>admin/logs.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'logs.php') ? 'active' : ''; ?>">
+                                <i class="fas fa-history me-2"></i> Activity Logs
+                            </a>
+                        <?php endif; ?>
                         <a href="<?php echo SITE_URL; ?>admin/recycle_bin.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'recycle_bin.php') ? 'active' : ''; ?>">
                             <i class="fas fa-trash-restore me-2"></i> Recycle Bin
                         </a>
@@ -50,18 +64,26 @@
 
                 <?php if ($roleStr !== 'superadmin'): ?>
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Finance</div>
-                    <a href="<?php echo SITE_URL; ?>core/allowance.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'allowance.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-hand-holding-dollar me-2" style="width: 20px;"></i> Allowance
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/expenses.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'expenses.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-receipt me-2" style="width: 20px;"></i> Expenses
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/savings.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'savings.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-piggy-bank me-2" style="width: 20px;"></i> Savings
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/bills.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'bills.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-file-invoice-dollar me-2" style="width: 20px;"></i> Bills &amp; Subscriptions
-                    </a>
+                    <?php if ($hasPerm('manage_income')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/allowance.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'allowance.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-hand-holding-dollar me-2" style="width: 20px;"></i> Allowance
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($hasPerm('manage_expenses')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/expenses.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'expenses.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-receipt me-2" style="width: 20px;"></i> Expenses
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($hasPerm('manage_savings')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/savings.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'savings.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-piggy-bank me-2" style="width: 20px;"></i> Savings
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($hasPerm('manage_bills')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/bills.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'bills.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-file-invoice-dollar me-2" style="width: 20px;"></i> Bills &amp; Subscriptions
+                        </a>
+                    <?php endif; ?>
 
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Journaling</div>
                     <a href="<?php echo SITE_URL; ?>core/journal.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'journal.php') ? 'active' : ''; ?>">
@@ -71,17 +93,22 @@
                         <i class="fas fa-bullseye me-2" style="width: 20px;"></i> Goals
                     </a>
 
-
                     <div class="px-4 py-2 mt-3 small fw-bold text-secondary text-uppercase opacity-50" style="letter-spacing: 1px; font-size: 0.65rem;">Analysis</div>
-                    <a href="<?php echo SITE_URL; ?>core/reports.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'reports.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-chart-line me-2" style="width: 20px;"></i> Reports
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/analytics.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'analytics.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-chart-bar me-2" style="width: 20px;"></i> Analytics
-                    </a>
-                    <a href="<?php echo SITE_URL; ?>core/history_log.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
-                        <i class="fas fa-history me-2" style="width: 20px;"></i> Chat History
-                    </a>
+                    <?php if ($hasPerm('view_reports')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/reports.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'reports.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-chart-line me-2" style="width: 20px;"></i> Reports
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($hasPerm('view_analytics')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/analytics.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'analytics.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-chart-bar me-2" style="width: 20px;"></i> Analytics
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($hasPerm('use_ai_assistant')): ?>
+                        <a href="<?php echo SITE_URL; ?>core/history_log.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'history_log.php') ? 'active' : ''; ?>">
+                            <i class="fas fa-history me-2" style="width: 20px;"></i> Chat History
+                        </a>
+                    <?php endif; ?>
                     <a href="<?php echo SITE_URL; ?>core/recycle_bin.php" class="list-group-item list-group-item-action <?php echo ($currentPage == 'recycle_bin.php') ? 'active' : ''; ?>">
                         <i class="fas fa-trash-restore me-2" style="width: 20px;"></i> Recycle Bin
                     </a>
