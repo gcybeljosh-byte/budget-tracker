@@ -47,9 +47,6 @@ include '../includes/header.php';
                         <button class="btn btn-success rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" id="downloadPdfBtn" style="width: 42px; height: 42px;" title="Export PDF" data-bs-toggle="tooltip">
                             <i class="fas fa-file-export"></i>
                         </button>
-                        <button class="btn btn-outline-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" id="generateStatementBtn" style="width: 42px; height: 42px;" title="Statement" data-bs-toggle="tooltip">
-                            <i class="fas fa-file-invoice"></i>
-                        </button>
                     </div>
                 </div>
             </div>
