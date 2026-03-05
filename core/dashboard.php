@@ -162,6 +162,17 @@ include '../includes/header.php';
                     </div>
                 </div>
 
+                <!-- Mini Bill Calendar Widget (Moved here) -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-uppercase small text-secondary letter-spacing-1">Bill Schedule</h6>
+                        <a href="bill_calendar.php" class="text-primary small fw-bold text-decoration-none">Full View</a>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="miniCalendar" style="min-height: 300px;"></div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Sidebar column -->
@@ -211,17 +222,6 @@ include '../includes/header.php';
                                 <div class="extra-small text-muted mt-1" id="savingsAmount">$0.00</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Mini Bill Calendar Widget -->
-                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
-                    <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold text-uppercase small text-secondary">Bill Schedule</h6>
-                        <a href="bill_calendar.php" class="text-primary small fw-bold text-decoration-none">Full View</a>
-                    </div>
-                    <div class="card-body p-3">
-                        <div id="miniCalendar" style="font-size: 0.8rem;"></div>
                     </div>
                 </div>
 
