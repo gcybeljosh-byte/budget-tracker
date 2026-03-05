@@ -136,7 +136,7 @@ if ($action === 'trends') {
         'spent_so_far'      => $spent,
         'projected_spend_remaining' => round($pSpendRemaining, 2),
         'total_projected_spend' => round($totalProjectedSpend, 2),
-        'projected_balance' => round(max(0, $projectedEndOfMonthBalance), 2),
+        'total_savings'     => $balanceHelper->getTotalSavings($user_id),
         'budget_variance'   => round($budgetVariance, 2),
         'runway_days'       => $dailyAvg > 0 ? (int)($currentBalance / $dailyAvg) : null,
         'last_month_total'  => $lastMonthTotal,

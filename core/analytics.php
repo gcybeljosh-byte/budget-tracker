@@ -201,10 +201,10 @@ if ($_SESSION['role'] === 'superadmin') {
             </div>
             <div class="col-md-3">
                 <div class="forecast-card text-center">
-                    <div class="text-muted small mb-1">Projected Cash at EOM</div>
-                    <div class="fs-4 fw-bold text-primary">${sym}${d.projected_balance.toLocaleString(locale, {minimumFractionDigits:2})}</div>
+                    <div class="text-muted small mb-1">Total Emergency Fund</div>
+                    <div class="fs-4 fw-bold text-success">${sym}${d.total_savings.toLocaleString(locale, {minimumFractionDigits:2})}</div>
                     <div class="extra-small text-muted mt-2">
-                        <i class="fas fa-info-circle me-1"></i>Wallet estimate
+                        <i class="fas fa-piggy-bank me-1"></i>Saved in all sources
                     </div>
                 </div>
             </div>
