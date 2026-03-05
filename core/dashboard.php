@@ -804,25 +804,63 @@ include '../includes/header.php';
 
             setTimeout(startTutorial, 1500);
         <?php endif; ?>
-        // --- Mini Calendar Initialization ---
-        const miniCalendarEl = document.getElementById('miniCalendar');
-        if (miniCalendarEl) {
-            const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev',
-                    center: 'title',
-                    right: 'next'
-                },
-                height: 'auto',
-                themeSystem: 'bootstrap5',
-                events: '<?php echo SITE_URL; ?>api/bills.php?action=fetch_events',
-                eventDisplay: 'dot',
-                dayMaxEvents: true,
-                contentHeight: 300
-            });
-            miniCalendar.render();
+        // --- Bill Schedule Summary Logic ---
+        function updateBillScheduleSummary() {
+            const container = document.getElementById('miniCalendar');
+            if (!container) return;
+
+            fetch('<?php echo SITE_URL; ?>api/bills.php?action=list&t=' + new Date().getTime())
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const tomorrowDate = new Date();
+                        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                        const tomorrow = tomorrowDate.toISOString().split('T')[0];
+
+                        const bills = data.data.filter(bill => {
+                            const d = bill.due_date;
+                            return d === today || d === tomorrow;
+                        });
+
+                        container.innerHTML = '';
+                        if (bills.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-calendar-check fa-2x mb-3 opacity-25"></i>
+                                    <p class="small mb-0">No bills due today or tomorrow.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        const list = document.createElement('div');
+                        list.className = 'list-group list-group-flush';
+                        bills.forEach(bill => {
+                            const isToday = bill.due_date === today;
+                            const badge = isToday ? '<span class="badge bg-danger rounded-pill extra-small">Today</span>' : '<span class="badge bg-warning text-dark rounded-pill extra-small">Tomorrow</span>';
+
+                            const item = document.createElement('div');
+                            item.className = 'list-group-item px-0 border-0 border-bottom py-3 d-flex justify-content-between align-items-center';
+                            item.innerHTML = `
+                                <div>
+                                    <div class="fw-bold small">${bill.title} ${badge}</div>
+                                    <div class="extra-small text-muted">${bill.category} ${bill.description ? '• ' + bill.description : ''}</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary small">${formatCurrency(bill.amount)}</div>
+                                </div>
+                            `;
+                            list.appendChild(item);
+                        });
+                        container.appendChild(list);
+                    }
+                });
         }
+
+        updateBillScheduleSummary();
+        // Update on AI action too
+        window.addEventListener('aiActionCompleted', updateBillScheduleSummary);
     });
 </script>
 

@@ -29,8 +29,9 @@ $conn->query("CREATE TABLE IF NOT EXISTS recurring_payments (
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? 'list';
 
-// Auto-migrate: Ensure soft-delete column exists
+// Auto-migrate: Ensure soft-delete and description columns exist
 ensureColumnExists($conn, 'recurring_payments', 'deleted_at', 'TIMESTAMP NULL DEFAULT NULL');
+ensureColumnExists($conn, 'recurring_payments', 'description', 'TEXT DEFAULT NULL');
 
 if ($method === 'GET') {
     if ($action === 'list') {
@@ -55,7 +56,7 @@ if ($method === 'GET') {
             echo json_encode(['success' => false, 'message' => 'Bill not found']);
         }
     } elseif ($action === 'fetch_events') {
-        $stmt = $conn->prepare("SELECT id, title, amount, due_date, category FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL AND is_active = 1");
+        $stmt = $conn->prepare("SELECT id, title, amount, due_date, category, description FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL AND is_active = 1");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -68,8 +69,10 @@ if ($method === 'GET') {
                 'allDay' => true,
                 'extendedProps' => [
                     'amount' => $row['amount'],
-                    'category' => $row['category']
+                    'category' => $row['category'],
+                    'description' => $row['description']
                 ],
+                'description' => $row['description'], // Also put at top level for convenience
                 'backgroundColor' => '#6366f1',
                 'borderColor' => '#6366f1'
             ];
@@ -81,6 +84,7 @@ if ($method === 'GET') {
 
     if ($action === 'add') {
         $title = $data['title'] ?? '';
+        $description = $data['description'] ?? '';
         $amount = (float)($data['amount'] ?? 0);
         $category = $data['category'] ?? 'Utilities';
         $due_date = $data['due_date'] ?? '';
@@ -92,8 +96,8 @@ if ($method === 'GET') {
             exit;
         }
 
-        $stmt = $conn->prepare("INSERT INTO recurring_payments (user_id, title, amount, category, due_date, frequency, source_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("isdssss", $user_id, $title, $amount, $category, $due_date, $frequency, $source);
+        $stmt = $conn->prepare("INSERT INTO recurring_payments (user_id, title, description, amount, category, due_date, frequency, source_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("issdssss", $user_id, $title, $description, $amount, $category, $due_date, $frequency, $source);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Bill added successfully']);
@@ -103,6 +107,7 @@ if ($method === 'GET') {
     } elseif ($action === 'edit') {
         $id = (int)($data['id'] ?? 0);
         $title = $data['title'] ?? '';
+        $description = $data['description'] ?? '';
         $amount = (float)($data['amount'] ?? 0);
         $category = $data['category'] ?? 'Utilities';
         $due_date = $data['due_date'] ?? '';
@@ -114,8 +119,8 @@ if ($method === 'GET') {
             exit;
         }
 
-        $stmt = $conn->prepare("UPDATE recurring_payments SET title = ?, amount = ?, category = ?, due_date = ?, frequency = ?, source_type = ? WHERE id = ? AND user_id = ?");
-        $stmt->bind_param("sdssssii", $title, $amount, $category, $due_date, $frequency, $source, $id, $user_id);
+        $stmt = $conn->prepare("UPDATE recurring_payments SET title = ?, description = ?, amount = ?, category = ?, due_date = ?, frequency = ?, source_type = ? WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("sssdssssii", $title, $description, $amount, $category, $due_date, $frequency, $source, $id, $user_id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Bill updated successfully']);

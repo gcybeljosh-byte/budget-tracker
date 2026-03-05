@@ -152,7 +152,7 @@ if ($stmt) {
     if ($stmt->execute()) {
         $res = $stmt->get_result();
         while ($row = $res->fetch_assoc()) {
-            if (count($upcoming_bills) < 5) $upcoming_bills[] = $row;
+            if (count($upcoming_bills) < 3) $upcoming_bills[] = $row;
         }
     }
     $stmt->close();

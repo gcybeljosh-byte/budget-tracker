@@ -38,6 +38,19 @@ include '../includes/sidebar.php';
             },
             themeSystem: 'bootstrap5',
             events: '<?php echo SITE_URL; ?>api/bills.php?action=fetch_events',
+            eventContent: function(arg) {
+                let amount = arg.event.extendedProps.amount;
+                let description = arg.event.extendedProps.description;
+                let html = `<div class="fc-content">
+                                <div class="fc-title fw-bold text-truncate">${arg.event.title}</div>`;
+                if (description) {
+                    html += `<div class="fc-description extra-small opacity-75 text-truncate" style="font-size: 0.65rem;">${description}</div>`;
+                }
+                html += `</div>`;
+                return {
+                    html: html
+                };
+            },
             eventClick: function(info) {
                 Swal.fire({
                     title: info.event.title,
@@ -45,6 +58,7 @@ include '../includes/sidebar.php';
                     <div class="text-start">
                         <p><strong>Category:</strong> ${info.event.extendedProps.category}</p>
                         <p><strong>Due Date:</strong> ${info.event.start.toLocaleDateString()}</p>
+                        ${info.event.extendedProps.description ? `<p><strong>Description:</strong> ${info.event.extendedProps.description}</p>` : ''}
                     </div>
                 `,
                     icon: 'info',

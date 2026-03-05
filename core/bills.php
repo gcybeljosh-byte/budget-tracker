@@ -112,6 +112,11 @@ include '../includes/header.php';
                     <span class="fw-bold" id="billDetailCategory">-</span>
                 </div>
 
+                <div class="mt-3 p-3 bg-app-alt rounded-3">
+                    <small class="text-muted d-block mb-1">Description</small>
+                    <span class="small text-secondary" id="billDetailDescription">-</span>
+                </div>
+
                 <hr class="my-4 opacity-10">
 
                 <div class="d-grid gap-2">
@@ -187,6 +192,10 @@ include '../includes/header.php';
                             </select>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Description</label>
+                        <textarea class="form-control rounded-3" id="editBillDescription" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">Update Bill Tracker</button>
                     </div>
@@ -253,6 +262,10 @@ include '../includes/header.php';
                                 <option value="Bank">Bank</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Description</label>
+                        <textarea class="form-control rounded-3" id="billDescription" rows="2" placeholder="Account no, specific notes..."></textarea>
                     </div>
                     <div class="d-grid mt-3">
                         <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
@@ -434,6 +447,7 @@ include '../includes/header.php';
             document.getElementById('billDetailSource').textContent = bill.source_type;
             document.getElementById('billDetailDueDate').textContent = bill.due_date;
             document.getElementById('billDetailCategory').textContent = bill.category;
+            document.getElementById('billDetailDescription').textContent = bill.description || 'No description provided';
 
             const editBtn = document.querySelector('.edit-bill-from-detail');
             editBtn.onclick = () => {
@@ -461,6 +475,7 @@ include '../includes/header.php';
             document.getElementById('editBillFrequency').value = bill.frequency;
             document.getElementById('editBillCategory').value = bill.category;
             document.getElementById('editBillSourceType').value = bill.source_type;
+            document.getElementById('editBillDescription').value = bill.description || '';
 
             new bootstrap.Modal(document.getElementById('editBillModal')).show();
         }
@@ -474,7 +489,8 @@ include '../includes/header.php';
                 due_date: document.getElementById('editBillDueDate').value,
                 frequency: document.getElementById('editBillFrequency').value,
                 category: document.getElementById('editBillCategory').value,
-                source_type: document.getElementById('editBillSourceType').value
+                source_type: document.getElementById('editBillSourceType').value,
+                description: document.getElementById('editBillDescription').value
             };
 
             fetch('<?php echo SITE_URL; ?>api/bills.php?action=edit', {
@@ -533,7 +549,8 @@ include '../includes/header.php';
                 due_date: document.getElementById('billDueDate').value,
                 frequency: document.getElementById('billFrequency').value,
                 category: document.getElementById('billCategory').value,
-                source_type: document.getElementById('billSourceType').value
+                source_type: document.getElementById('billSourceType').value,
+                description: document.getElementById('billDescription').value
             };
 
             fetch('<?php echo SITE_URL; ?>api/bills.php?action=add', {
