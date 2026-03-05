@@ -356,7 +356,7 @@ include '../includes/header.php';
             updateElement('dashTotalExpenses', formatCurrency(data.total_expenses));
             updateElement('dashBalance', formatCurrency(data.balance));
 
-            // Empty State Check
+            // Welcome Banner for New Users (No Data)
             const alertContainer = document.getElementById('alertContainer');
             if (data.total_allowance === 0 && data.total_expenses === 0 && data.lifetime_allowance === 0) {
                 alertContainer.innerHTML = `
@@ -366,11 +366,8 @@ include '../includes/header.php';
                         </div>
                         <div class="flex-grow-1">
                             <h6 class="fw-bold mb-1">Welcome to your new Budget Tracker!</h6>
-                            <p class="small mb-0 opacity-75">It looks like you haven't added any financial data yet. To see the dashboard in action, you can <b>add your first allowance</b> or use the <b>Seed Data tool</b> in Settings.</p>
+                            <p class="small mb-0 opacity-75">It looks like you haven't added any financial data yet. To see the dashboard in action, you can <b>add your first allowance</b>, log your daily expenses, or set up your financial goals. Your journey to better financial habits starts here!</p>
                         </div>
-                        <button class="btn btn-primary rounded-pill px-4 fw-bold ms-3" onclick="location.href='settings.php?section=system'">
-                            Go to Settings
-                        </button>
                     </div>
                 `;
             } else {
