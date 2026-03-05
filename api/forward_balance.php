@@ -39,10 +39,13 @@ try {
         $sources = $bh->getBalancesByAllSources($user_id);
 
         foreach ($sources as $s) {
-            if ($s['balance'] > 0) {
+            // Calculate previous month's balance for this source
+            $prev_bal = $s['allowance_sum'] - $s['monthly_allowance'] - ($s['expense_sum'] - $s['monthly_expense']);
+
+            if ($prev_bal > 0) {
                 $stmt = $conn->prepare("INSERT INTO savings (user_id, date, amount, description, source_type) VALUES (?, ?, ?, ?, ?)");
                 $desc = "Forwarded from $prev_month_name";
-                $stmt->bind_param("isdss", $user_id, $date, $s['balance'], $desc, $s['source']);
+                $stmt->bind_param("isdss", $user_id, $date, $prev_bal, $desc, $s['source']);
                 $stmt->execute();
                 $stmt->close();
             }
@@ -52,21 +55,24 @@ try {
         $bh = new BalanceHelper($conn);
         $sources = $bh->getBalancesByAllSources($user_id);
         foreach ($sources as $s) {
-            if ($s['balance'] > 0) {
+            // Calculate previous month's balance for this source
+            $prev_bal = $s['allowance_sum'] - $s['monthly_allowance'] - ($s['expense_sum'] - $s['monthly_expense']);
+
+            if ($prev_bal > 0) {
                 // 1. "Consume" the old balance from previous month to maintain lifetime consistency
                 $stmt = $conn->prepare("INSERT INTO expenses (user_id, date, amount, description, category, source_type, expense_source) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $prev_last_day = date('Y-m-t', strtotime('-1 month'));
                 $desc = "Balance Carryover to $current_month";
                 $cat = 'Adjustment';
                 $exp_src = 'Allowance';
-                $stmt->bind_param("isdssss", $user_id, $prev_last_day, $s['balance'], $desc, $cat, $s['source'], $exp_src);
+                $stmt->bind_param("isdssss", $user_id, $prev_last_day, $prev_bal, $desc, $cat, $s['source'], $exp_src);
                 $stmt->execute();
                 $stmt->close();
 
                 // 2. Add as new allowance in current month
                 $stmt = $conn->prepare("INSERT INTO allowances (user_id, date, amount, description, source_type) VALUES (?, ?, ?, ?, ?)");
                 $new_desc = "Carried over from $prev_month_name";
-                $stmt->bind_param("isdss", $user_id, $date, $s['balance'], $new_desc, $s['source']);
+                $stmt->bind_param("isdss", $user_id, $date, $prev_bal, $new_desc, $s['source']);
                 $stmt->execute();
                 $stmt->close();
             }

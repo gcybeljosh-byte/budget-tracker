@@ -421,7 +421,7 @@ include '../includes/header.php';
 
             // --- Balance Forwarding Prompt ---
             if (data.needs_forwarding) {
-                showForwardingPrompt(data.balance, data.prev_month_name);
+                showForwardingPrompt(data.forward_amount, data.prev_month_name);
             }
         }
 
@@ -485,14 +485,14 @@ include '../includes/header.php';
             container.appendChild(savingsCol);
         }
 
-        function showForwardingPrompt(balance, prevMonth) {
+        function showForwardingPrompt(amount, prevMonth) {
             // Prevent multiple prompts if polling is fast
             if (window.forwardingPromptShown) return;
             window.forwardingPromptShown = true;
 
             Swal.fire({
                 title: '📅 New Month! Forward Balance?',
-                html: `You have <b>${formatCurrency(balance)}</b> leftover from <b>${prevMonth}</b>.<br><br>What would you like to do with it?`,
+                html: `You have <b>${formatCurrency(amount)}</b> leftover from <b>${prevMonth}</b>.<br><br>What would you like to do with it?`,
                 icon: 'question',
                 showDenyButton: true,
                 showCancelButton: true,

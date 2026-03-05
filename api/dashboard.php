@@ -284,9 +284,16 @@ $response['analytics']['top_category'] = $top_category;
 $current_month = date('Y-m');
 $is_first_day = (date('j') == 1);
 $response['needs_forwarding'] = false;
+$response['forward_amount'] = 0;
 $response['prev_month_name'] = date('F', strtotime('-1 month'));
 
-if ($last_forwarded_month !== $current_month && $response['balance'] > 0) {
+// Calculate balance from previous months only
+$prev_month_allowance = $lifetime_allowance - $response['total_allowance'];
+$prev_month_expenses = $lifetime_expenses - $response['total_expenses'];
+$forward_amount = max(0, $prev_month_allowance - $prev_month_expenses);
+$response['forward_amount'] = $forward_amount;
+
+if ($last_forwarded_month !== $current_month && $forward_amount > 0) {
     if ($is_first_day || (date('j') <= 5)) {
         $response['needs_forwarding'] = true;
     }
