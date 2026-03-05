@@ -27,7 +27,7 @@ include '../includes/header.php';
                             <option value="savings">Savings Only</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Timeframe</label>
                         <select class="form-select rounded-3" id="reportType">
                             <option value="weekly">Weekly</option>
@@ -36,11 +36,11 @@ include '../includes/header.php';
                             <option value="specific">Specific Date</option>
                         </select>
                     </div>
-                    <div class="col-md-3" id="dateInputCol">
+                    <div class="col-md-4" id="dateInputCol">
                         <label class="form-label small fw-bold text-secondary text-uppercase">Select Date/Month/Year</label>
                         <input type="month" class="form-control rounded-3" id="reportDateFilter">
                     </div>
-                    <div class="col-md-4 d-flex align-items-end gap-2">
+                    <div class="col-md-2 d-flex align-items-end gap-2">
                         <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" id="generateReportBtn" style="width: 42px; height: 42px;" title="Generate Report" data-bs-toggle="tooltip">
                             <i class="fas fa-sync-alt"></i>
                         </button>
