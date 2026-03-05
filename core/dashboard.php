@@ -168,8 +168,8 @@ include '../includes/header.php';
                         <h6 class="mb-0 fw-bold text-uppercase small text-secondary letter-spacing-1">Bill Schedule</h6>
                         <a href="bill_calendar.php" class="text-primary small fw-bold text-decoration-none">Full View</a>
                     </div>
-                    <div class="card-body p-4">
-                        <div id="miniCalendar" style="min-height: 300px;"></div>
+                    <div class="card-body px-4 py-2">
+                        <div id="miniCalendar"></div>
                     </div>
                 </div>
 
@@ -826,8 +826,8 @@ include '../includes/header.php';
                         container.innerHTML = '';
                         if (bills.length === 0) {
                             container.innerHTML = `
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-calendar-check fa-2x mb-3 opacity-25"></i>
+                                <div class="text-center py-3 text-muted">
+                                    <i class="fas fa-calendar-check fa-2x mb-2 opacity-25"></i>
                                     <p class="small mb-0">No bills due today or tomorrow.</p>
                                 </div>
                             `;

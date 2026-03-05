@@ -39,14 +39,40 @@ include '../includes/sidebar.php';
             themeSystem: 'bootstrap5',
             events: '<?php echo SITE_URL; ?>api/bills.php?action=fetch_events',
             eventContent: function(arg) {
-                let amount = arg.event.extendedProps.amount;
+                let amount = parseFloat(arg.event.extendedProps.amount);
                 let description = arg.event.extendedProps.description;
-                let html = `<div class="fc-content">
-                                <div class="fc-title fw-bold text-truncate">${arg.event.title}</div>`;
-                if (description) {
-                    html += `<div class="fc-description extra-small opacity-75 text-truncate" style="font-size: 0.65rem;">${description}</div>`;
-                }
-                html += `</div>`;
+                let category = arg.event.extendedProps.category;
+                let source = arg.event.extendedProps.source_type;
+
+                const icons = {
+                    'Utilities': 'fas fa-lightbulb',
+                    'Entertainment': 'fas fa-play-circle',
+                    'Food': 'fas fa-utensils',
+                    'Transport': 'fas fa-car',
+                    'Healthcare': 'fas fa-heartbeat',
+                    'Housing': 'fas fa-home',
+                    'Other': 'fas fa-tag'
+                };
+                let iconClass = icons[category] || 'fas fa-file-invoice-dollar';
+
+                let formattedAmount = new Intl.NumberFormat('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP'
+                }).format(amount);
+
+                let html = `
+                    <div class="bill-event-card p-1 w-100">
+                        <div class="d-flex align-items-center gap-1 mb-1">
+                            <i class="${iconClass} opacity-75" style="font-size:0.65rem;"></i>
+                            <span class="fw-bold text-truncate" style="font-size: 0.72rem; line-height:1.2;">${arg.event.title}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center" style="font-size: 0.65rem;">
+                            <span class="fw-semibold" style="color:#6366f1;">${formattedAmount}</span>
+                            <span class="badge px-1" style="font-size:0.55rem;background:rgba(99,102,241,0.1);color:#6366f1;">${source}</span>
+                        </div>
+                        ${description ? `<div style="font-size:0.58rem;margin-top:2px;opacity:0.6;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${description}</div>` : ''}
+                    </div>
+                `;
                 return {
                     html: html
                 };
@@ -105,9 +131,31 @@ include '../includes/sidebar.php';
 
     .fc-event {
         cursor: pointer;
-        padding: 2px 5px;
+        padding: 0 !important;
         font-size: 0.85rem;
-        border-radius: 6px;
+        border-radius: 8px;
+        background-color: white !important;
+        color: #1e293b !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: transform 0.1s ease;
+        margin: 1px 2px !important;
+    }
+
+    .fc-event:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-color: #6366f1 !important;
+    }
+
+    .fc-daygrid-event-harness {
+        margin-bottom: 2px;
+    }
+
+    .fc-theme-bootstrap5 .fc-daygrid-day-number {
+        font-weight: 700;
+        color: #64748b;
+        padding: 8px;
     }
 </style>
 

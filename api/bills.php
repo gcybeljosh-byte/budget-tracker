@@ -56,7 +56,7 @@ if ($method === 'GET') {
             echo json_encode(['success' => false, 'message' => 'Bill not found']);
         }
     } elseif ($action === 'fetch_events') {
-        $stmt = $conn->prepare("SELECT id, title, amount, due_date, category, description FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL AND is_active = 1");
+        $stmt = $conn->prepare("SELECT id, title, amount, due_date, category, description, source_type FROM recurring_payments WHERE user_id = ? AND deleted_at IS NULL AND is_active = 1");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -64,13 +64,14 @@ if ($method === 'GET') {
         while ($row = $result->fetch_assoc()) {
             $events[] = [
                 'id' => $row['id'],
-                'title' => $row['title'] . ' (' . $row['amount'] . ')',
+                'title' => $row['title'],
                 'start' => $row['due_date'],
                 'allDay' => true,
                 'extendedProps' => [
                     'amount' => $row['amount'],
                     'category' => $row['category'],
-                    'description' => $row['description']
+                    'description' => $row['description'],
+                    'source_type' => $row['source_type']
                 ],
                 'description' => $row['description'], // Also put at top level for convenience
                 'backgroundColor' => '#6366f1',
