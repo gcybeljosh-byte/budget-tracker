@@ -166,32 +166,8 @@ include '../includes/header.php';
 
             <!-- Sidebar column -->
             <div class="col-lg-4">
-                <!-- Financial Streaks Card -->
-                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden transition-all hover-lift border-start border-danger border-4 mb-4" id="streakCard">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="rounded-circle bg-danger-subtle p-2 me-2 text-danger">
-                                <i class="fas fa-fire-alt small streak-pulse"></i>
-                            </div>
-                            <h6 class="text-secondary small fw-bold text-uppercase mb-0">No-Spend Streak</h6>
-                        </div>
-                        <h2 class="fw-bold mb-0 text-dark"><span id="dashStreakCount">0</span> Days</h2>
-                        <div class="extra-small text-muted mt-1" id="dashStreakMax">Best: 0 days</div>
-                    </div>
-                </div>
+                <!-- Achievement and Streak widgets removed -->
 
-                <!-- Achievements Widget -->
-                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
-                    <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 fw-bold text-uppercase small text-secondary">Achievements</h6>
-                        <span class="badge bg-warning-subtle text-warning rounded-pill px-2 py-1 extra-small" id="achievementCount">0/6</span>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="achievement-grid d-flex flex-wrap gap-2" id="dashAchievementList">
-                            <!-- Achievements will be injected here -->
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Upcoming Bills Widget -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden border-start border-primary border-4">
@@ -277,42 +253,6 @@ include '../includes/header.php';
             70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        @keyframes fire-pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 0px #f43f5e); }
-            50% { transform: scale(1.2); filter: drop-shadow(0 0 8px #f43f5e); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 0px #f43f5e); }
-        }
-        .achievement-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .achievement-icon.locked {
-            opacity: 0.3;
-            filter: grayscale(1);
-        }
-        .achievement-icon:hover {
-            transform: scale(1.1) rotate(5deg);
-            z-index: 10;
-        }
-        .achievement-badge-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin: 0 auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
     `;
         document.head.appendChild(style);
@@ -409,15 +349,6 @@ include '../includes/header.php';
 
             renderDashboardChart(data.category_spending);
             renderRecentTransactions(data.recent_transactions);
-
-            // --- Gamification Logic ---
-            fetch('<?php echo SITE_URL; ?>api/gamification.php')
-                .then(res => res.json())
-                .then(gamData => {
-                    if (gamData.success) {
-                        updateGamificationUI(gamData);
-                    }
-                });
 
             // --- Balance Forwarding Prompt ---
             if (data.needs_forwarding) {
@@ -556,71 +487,6 @@ include '../includes/header.php';
             });
         }
 
-        function updateGamificationUI(data) {
-            // Update Streak
-            const streak = data.streaks.find(s => s.streak_type === 'no_spend');
-            if (streak) {
-                document.getElementById('dashStreakCount').textContent = streak.current_count;
-                document.getElementById('dashStreakMax').textContent = `Best: ${streak.max_count} days`;
-
-                // Pulse effect if streak is active
-                const icon = document.querySelector('.streak-pulse');
-                if (streak.current_count > 0) {
-                    icon.style.animation = 'fire-pulse 1.5s infinite';
-                } else {
-                    icon.style.animation = 'none';
-                }
-            }
-
-            // Update Achievements Grid
-            const list = document.getElementById('dashAchievementList');
-            const countBadge = document.getElementById('achievementCount');
-            list.innerHTML = '';
-
-            let unlockedCount = 0;
-            data.achievements.forEach(ach => {
-                if (ach.is_unlocked) unlockedCount++;
-
-                const item = document.createElement('div');
-                item.className = `achievement-icon ${ach.is_unlocked ? '' : 'locked'}`;
-                item.title = `${ach.name}: ${ach.description}`;
-                item.style.backgroundColor = ach.is_unlocked ? ach.badge_color : '#e2e8f0';
-                item.innerHTML = `<i class="${ach.icon}"></i>`;
-                list.appendChild(item);
-            });
-            countBadge.textContent = `${unlockedCount}/${data.achievements.length}`;
-
-            // --- New Backend-Driven Alerts ---
-            if (data.unnotified && data.unnotified.length > 0) {
-                // Show alerts sequentially for all unnotified achievements
-                let promise = Promise.resolve();
-                data.unnotified.forEach(ach => {
-                    promise = promise.then(() => showAchievementCelebration(ach));
-                });
-            }
-        }
-
-        function showAchievementCelebration(ach) {
-            return Swal.fire({
-                title: '🏆 Achievement Unlocked!',
-                html: `
-                    <div class="text-center mb-0">
-                        <div class="achievement-badge-large mb-3" style="background: ${ach.badge_color}">
-                            <i class="${ach.icon} fa-2x"></i>
-                        </div>
-                    </div>
-                    <div class="h5 fw-bold mb-1">${ach.name}</div>
-                    <div class="text-muted small">${ach.description}</div>
-                `,
-                showConfirmButton: true,
-                confirmButtonText: 'Awesome!',
-                confirmButtonColor: '#6366f1',
-                backdrop: `rgba(99, 102, 241, 0.2)`
-            }).then(() => {
-                // Mark as notified on the backend after the user dismisses the alert
-                return fetch(`<?php echo SITE_URL; ?>api/gamification.php?action=mark_notified&id=${ach.id || ach.achievement_id}`);
-            });
-        }
 
         function renderUpcomingBillsSide(bills) {
             const list = document.getElementById('dashUpcomingBillsList');

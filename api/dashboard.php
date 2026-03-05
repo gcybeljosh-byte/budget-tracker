@@ -2,9 +2,8 @@
 session_start();
 require_once '../includes/db.php';
 require_once '../includes/BalanceHelper.php';
-require_once '../includes/AchievementHelper.php';
+require_once '../includes/BalanceHelper.php';
 $balanceHelper = new BalanceHelper($conn);
-$achievementHelper = new AchievementHelper($conn);
 
 if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
@@ -13,8 +12,7 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id'];
 
-// --- Gamification: Update Streaks ---
-$achievementHelper->updateNoSpendStreak($user_id);
+// Achievement feature and helper removed
 
 // Fetch User Info (Name and Forwarding Status)
 $user_name = 'User';
