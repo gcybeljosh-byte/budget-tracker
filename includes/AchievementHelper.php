@@ -223,4 +223,46 @@ class AchievementHelper
         }
         return [];
     }
+
+    public function checkRetroactiveAchievements($user_id)
+    {
+        if (!$this->conn) return;
+
+        // 1. First Expense
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM expenses WHERE user_id = ? AND deleted_at IS NULL");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        if ($stmt->get_result()->fetch_row()[0] > 0) {
+            $this->unlockBySlug($user_id, 'first_expense');
+        }
+        $stmt->close();
+
+        // 2. Savings Starter
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM savings WHERE user_id = ? AND deleted_at IS NULL");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        if ($stmt->get_result()->fetch_row()[0] > 0) {
+            $this->unlockBySlug($user_id, 'savings_starter');
+        }
+        $stmt->close();
+
+        // 3. Goal Reacher
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM financial_goals WHERE user_id = ? AND status = 'completed'");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        if ($stmt->get_result()->fetch_row()[0] > 0) {
+            $this->unlockBySlug($user_id, 'goal_reacher');
+        }
+        $stmt->close();
+
+        // 4. Power User
+        $stmt = $this->conn->prepare("SELECT onboarding_completed FROM users WHERE id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if ($row && $row['onboarding_completed']) {
+            $this->unlockBySlug($user_id, 'power_user');
+        }
+        $stmt->close();
+    }
 }
