@@ -39,10 +39,11 @@ include '../includes/sidebar.php';
             themeSystem: 'bootstrap5',
             events: '<?php echo SITE_URL; ?>api/bills.php?action=fetch_events',
             eventContent: function(arg) {
-                let amount = parseFloat(arg.event.extendedProps.amount);
-                let description = arg.event.extendedProps.description;
-                let category = arg.event.extendedProps.category;
-                let source = arg.event.extendedProps.source_type;
+                let amount = parseFloat(arg.event.extendedProps.amount || 0);
+                let description = arg.event.extendedProps.description || '';
+                let category = arg.event.extendedProps.category || '';
+                let source = arg.event.extendedProps.source_type || '';
+                let title = arg.event.title || '';
 
                 const icons = {
                     'Utilities': 'fas fa-lightbulb',
@@ -55,28 +56,31 @@ include '../includes/sidebar.php';
                 };
                 let iconClass = icons[category] || 'fas fa-file-invoice-dollar';
 
-                let formattedAmount = new Intl.NumberFormat('en-PH', {
+                let currencyLocale = (window.userCurrency && window.userCurrency.locale) ? window.userCurrency.locale : 'en-PH';
+                let currencyCode = (window.userCurrency && window.userCurrency.code) ? window.userCurrency.code : 'PHP';
+                let formattedAmount = new Intl.NumberFormat(currencyLocale, {
                     style: 'currency',
-                    currency: 'PHP'
+                    currency: currencyCode
                 }).format(amount);
 
-                let html = `
-                    <div class="bill-event-card p-1 w-100">
-                        <div class="d-flex align-items-center gap-1 mb-1">
-                            <i class="${iconClass} opacity-75" style="font-size:0.65rem;"></i>
-                            <span class="fw-bold text-truncate" style="font-size: 0.72rem; line-height:1.2;">${arg.event.title}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center" style="font-size: 0.65rem;">
-                            <span class="fw-semibold" style="color:#6366f1;">${formattedAmount}</span>
-                            <span class="badge px-1" style="font-size:0.55rem;background:rgba(99,102,241,0.1);color:#6366f1;">${source}</span>
-                        </div>
-                        ${description ? `<div style="font-size:0.58rem;margin-top:2px;opacity:0.6;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${description}</div>` : ''}
+                let wrapper = document.createElement('div');
+                wrapper.style.cssText = 'padding: 3px 4px; width: 100%; box-sizing: border-box; overflow: hidden;';
+                wrapper.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:3px; margin-bottom:2px;">
+                        <i class="${iconClass}" style="font-size:0.6rem; opacity:0.7; flex-shrink:0;"></i>
+                        <span style="font-weight:700; font-size:0.72rem; line-height:1.2; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${title}</span>
                     </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.65rem;">
+                        <span style="font-weight:600; color:#6366f1;">${formattedAmount}</span>
+                        ${source ? `<span style="font-size:0.55rem; background:rgba(99,102,241,0.12); color:#6366f1; border-radius:4px; padding:0 3px;">${source}</span>` : ''}
+                    </div>
+                    ${description ? `<div style="font-size:0.58rem; margin-top:2px; opacity:0.55; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; border-top:1px solid rgba(0,0,0,0.06); padding-top:1px;">${description}</div>` : ''}
                 `;
                 return {
-                    html: html
+                    domNodes: [wrapper]
                 };
             },
+
             eventClick: function(info) {
                 Swal.fire({
                     title: info.event.title,
