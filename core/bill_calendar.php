@@ -1,5 +1,6 @@
 <?php
 $pageTitle = 'Bill Calendar';
+$pageHeader = 'Bill Calendar Header';
 include '../includes/header.php';
 include '../includes/sidebar.php';
 ?>

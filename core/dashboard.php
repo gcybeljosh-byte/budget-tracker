@@ -214,6 +214,17 @@ include '../includes/header.php';
                     </div>
                 </div>
 
+                <!-- Mini Bill Calendar Widget -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-uppercase small text-secondary">Bill Schedule</h6>
+                        <a href="bill_calendar.php" class="text-primary small fw-bold text-decoration-none">Full View</a>
+                    </div>
+                    <div class="card-body p-3">
+                        <div id="miniCalendar" style="font-size: 0.8rem;"></div>
+                    </div>
+                </div>
+
                 <!-- Upcoming Bills Widget -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden border-start border-primary border-4">
                     <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
@@ -793,6 +804,25 @@ include '../includes/header.php';
 
             setTimeout(startTutorial, 1500);
         <?php endif; ?>
+        // --- Mini Calendar Initialization ---
+        const miniCalendarEl = document.getElementById('miniCalendar');
+        if (miniCalendarEl) {
+            const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                },
+                height: 'auto',
+                themeSystem: 'bootstrap5',
+                events: '<?php echo SITE_URL; ?>api/bills.php?action=fetch_events',
+                eventDisplay: 'dot',
+                dayMaxEvents: true,
+                contentHeight: 300
+            });
+            miniCalendar.render();
+        }
     });
 </script>
 
