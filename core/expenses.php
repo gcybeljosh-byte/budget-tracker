@@ -209,10 +209,79 @@ include '../includes/header.php';
                             </select>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Receipt (Optional)</label>
+                        <input type="file" class="form-control rounded-3" id="editExpenseReceipt" accept="image/*">
+                        <div id="currentReceiptContainer" class="mt-2 d-none">
+                            <span class="small text-muted">Current Receipt:</span>
+                            <div class="d-flex align-items-center mt-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" id="viewCurrentReceiptBtn">
+                                    <i class="fas fa-image me-1"></i> View Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">Update Expense</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Expense Detail Modal -->
+<div class="modal fade" id="viewExpenseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header border-bottom-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">Expense Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-4">
+                <div class="text-center mb-4">
+                    <div class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 mb-2" id="viewExpCategory">CATEGORY</div>
+                    <h2 class="fw-bold mb-0" id="viewExpAmount">$0.00</h2>
+                    <p class="text-muted small mb-0" id="viewExpDate">January 01, 2024</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="bg-light rounded-3 p-3">
+                            <label class="extra-small text-uppercase fw-bold text-secondary mb-1">Description</label>
+                            <div class="fw-bold text-dark" id="viewExpDesc">Description here...</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-light rounded-3 p-3 h-100">
+                            <label class="extra-small text-uppercase fw-bold text-secondary mb-1">Method</label>
+                            <div class="fw-bold text-dark" id="viewExpMethod">Cash</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-light rounded-3 p-3 h-100">
+                            <label class="extra-small text-uppercase fw-bold text-secondary mb-1">Source</label>
+                            <div class="fw-bold text-dark" id="viewExpSource">Allowance</div>
+                        </div>
+                    </div>
+                    <div id="viewExpReceiptContainer" class="col-12 d-none">
+                        <div class="bg-light rounded-3 p-3">
+                            <label class="extra-small text-uppercase fw-bold text-secondary mb-1 d-block mb-2">Receipt Attachment</label>
+                            <button type="button" class="btn btn-sm btn-outline-success w-100 rounded-pill py-2 fw-bold" id="viewExpReceiptBtn">
+                                <i class="fas fa-file-image me-2"></i> View Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4 pt-2 border-top">
+                    <button type="button" class="btn btn-light rounded-pill flex-grow-1 fw-bold text-primary" id="viewExpEditBtn">
+                        <i class="fas fa-edit me-2"></i> Edit
+                    </button>
+                    <button type="button" class="btn btn-light rounded-pill flex-grow-1 fw-bold text-danger" id="viewExpDeleteBtn">
+                        <i class="fas fa-trash me-2"></i> Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -473,6 +542,7 @@ include '../includes/header.php';
                     <i class="fas fa-file-image"></i>
                 </button>` : '';
 
+            row.style.cursor = 'pointer';
             row.innerHTML = `
                 <td class="fw-medium text-dark" data-label="Date">${item.date}</td>
                 <td data-label="Category"><span class="badge bg-secondary-subtle text-secondary rounded-pill text-uppercase small">${item.category}</span></td>
@@ -482,14 +552,26 @@ include '../includes/header.php';
                 <td class="text-center" data-label="Source"><span class="badge ${item.expense_source === 'Savings' ? 'bg-success-subtle text-success' : item.expense_source === 'Allowance' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'} rounded-pill small">${item.expense_source}</span></td>
                 <td class="text-end" data-label="Actions">
                     ${receiptBtn}
-                    <button class="btn btn-sm btn-light text-primary me-1 rounded-circle" onclick="editExpense(${item.id})">
+                    <button class="btn btn-sm btn-light text-primary me-1 rounded-circle edit-btn" data-id="${item.id}">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-light text-danger rounded-circle" onclick="deleteExpense(${item.id})">
+                    <button class="btn btn-sm btn-light text-danger rounded-circle delete-btn" data-id="${item.id}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
             `;
+
+            // Row click listener (detail view)
+            row.addEventListener('click', function(e) {
+                // If clicked on buttons or actions cell, don't open detail modal
+                if (e.target.closest('.edit-btn') || e.target.closest('.delete-btn') || e.target.closest('button')) return;
+                showExpenseDetails(item.id);
+            });
+
+            // Action button listeners
+            row.querySelector('.edit-btn').addEventListener('click', () => editExpense(item.id));
+            row.querySelector('.delete-btn').addEventListener('click', () => deleteExpense(item.id));
+
             expenseTableBody.appendChild(row);
         });
 
@@ -517,6 +599,39 @@ include '../includes/header.php';
         }
     }
 
+    function showExpenseDetails(id) {
+        const item = window.currentExpenses.find(e => e.id == id);
+        if (!item) return;
+
+        document.getElementById('viewExpCategory').textContent = item.category;
+        document.getElementById('viewExpAmount').textContent = formatCurrency(item.amount);
+        document.getElementById('viewExpDate').textContent = item.date;
+        document.getElementById('viewExpDesc').textContent = item.description;
+        document.getElementById('viewExpMethod').textContent = item.source_type || 'Cash';
+        document.getElementById('viewExpSource').textContent = item.expense_source || 'Allowance';
+
+        const receiptContainer = document.getElementById('viewExpReceiptContainer');
+        const receiptBtn = document.getElementById('viewExpReceiptBtn');
+        if (item.receipt_path) {
+            receiptContainer.classList.remove('d-none');
+            receiptBtn.onclick = () => viewReceipt('<?php echo SITE_URL; ?>' + item.receipt_path);
+        } else {
+            receiptContainer.classList.add('d-none');
+        }
+
+        document.getElementById('viewExpEditBtn').onclick = () => {
+            bootstrap.Modal.getInstance(document.getElementById('viewExpenseModal')).hide();
+            editExpense(id);
+        };
+        document.getElementById('viewExpDeleteBtn').onclick = () => {
+            bootstrap.Modal.getInstance(document.getElementById('viewExpenseModal')).hide();
+            deleteExpense(id);
+        };
+
+        const modal = new bootstrap.Modal(document.getElementById('viewExpenseModal'));
+        modal.show();
+    }
+
     function editExpense(id) {
         const item = window.currentExpenses.find(e => e.id == id);
         if (!item) return;
@@ -528,6 +643,16 @@ include '../includes/header.php';
         document.getElementById('editExpenseAmount').value = item.amount;
         document.getElementById('editExpenseSourceType').value = item.source_type || 'Cash';
         document.getElementById('editExpenseSource').value = item.expense_source || 'Allowance';
+
+        // Receipt logic in edit modal
+        const receiptContainer = document.getElementById('currentReceiptContainer');
+        const viewBtn = document.getElementById('viewCurrentReceiptBtn');
+        if (item.receipt_path) {
+            receiptContainer.classList.remove('d-none');
+            viewBtn.onclick = () => viewReceipt('<?php echo SITE_URL; ?>' + item.receipt_path);
+        } else {
+            receiptContainer.classList.add('d-none');
+        }
 
         const modal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
         modal.show();
@@ -989,6 +1114,11 @@ include '../includes/header.php';
             formData.append('source_type', document.getElementById('editExpenseSourceType').value);
             formData.append('expense_source', document.getElementById('editExpenseSource').value);
 
+            const receiptInput = document.getElementById('editExpenseReceipt');
+            if (receiptInput && receiptInput.files.length > 0) {
+                formData.append('receipt', receiptInput.files[0]);
+            }
+
             fetch('<?php echo SITE_URL; ?>api/expenses.php', {
                     method: 'POST',
                     body: formData
@@ -997,9 +1127,12 @@ include '../includes/header.php';
                 .then(result => {
                     if (result.success) {
                         showAlert(result.message, 'success');
-                        bootstrap.Modal.getOrCreateInstance(document.getElementById('editExpenseModal')).hide();
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editExpenseModal'));
+                        if (modal) modal.hide();
                         fetchExpenses();
                         fetchDashboardStats();
+                        // Clear file input
+                        if (receiptInput) receiptInput.value = '';
                     } else {
                         showAlert(result.message, 'danger');
                     }

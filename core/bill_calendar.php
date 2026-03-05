@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Bill Calendar';
-$pageHeader = 'Bill Calendar Header';
+$pageHeader = 'Bill Calendar';
 include '../includes/header.php';
 include '../includes/sidebar.php';
 ?>
@@ -11,7 +11,6 @@ include '../includes/sidebar.php';
     <div class="container-fluid px-4 py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h4 class="fw-bold mb-0">Bill Calendar</h4>
                 <p class="text-muted small mb-0">Visualize your upcoming recurring payments</p>
             </div>
             <a href="bills.php" class="btn btn-primary rounded-pill px-4">

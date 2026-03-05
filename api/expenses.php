@@ -81,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $expense_source = $_POST['expense_source'] ?? 'Allowance';
 
             if ($id > 0 && $amount > 0) {
-                // Fetch old data for balance reversal check
-                $oldStmt = $conn->prepare("SELECT amount, source_type, expense_source FROM expenses WHERE id = ? AND user_id = ?");
+                // Fetch old data for balance reversal check and receipt path
+                $oldStmt = $conn->prepare("SELECT amount, source_type, expense_source, receipt_path FROM expenses WHERE id = ? AND user_id = ?");
                 $oldStmt->bind_param("ii", $id, $user_id);
                 $oldStmt->execute();
                 $oldData = $oldStmt->get_result()->fetch_assoc();
@@ -104,18 +104,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             exit;
                         }
                     }
-                }
 
-                $stmt = $conn->prepare("UPDATE expenses SET date = ?, category = ?, description = ?, amount = ?, source_type = ?, expense_source = ? WHERE id = ? AND user_id = ?");
-                $stmt->bind_param("sssdssii", $date, $category, $description, $amount, $source_type, $expense_source, $id, $user_id);
+                    $receipt_path = $oldData['receipt_path'];
+                    // Handle New Receipt Upload
+                    if (isset($_FILES['receipt']) && $_FILES['receipt']['error'] === UPLOAD_ERR_OK) {
+                        $uploadDir = '../assets/uploads/receipts/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
-                if ($stmt->execute()) {
-                    $response = ['success' => true, 'message' => 'Expense updated successfully'];
-                    logActivity($conn, $user_id, 'expense_edit', "Edited expense ID $id");
+                        $fileTmpPath = $_FILES['receipt']['tmp_name'];
+                        $fileName = time() . '_' . $_FILES['receipt']['name'];
+                        $destPath = $uploadDir . $fileName;
+
+                        if (move_uploaded_file($fileTmpPath, $destPath)) {
+                            $receipt_path = 'assets/uploads/receipts/' . $fileName;
+                        }
+                    }
+
+                    $stmt = $conn->prepare("UPDATE expenses SET date = ?, category = ?, description = ?, amount = ?, source_type = ?, expense_source = ?, receipt_path = ? WHERE id = ? AND user_id = ?");
+                    $stmt->bind_param("sssdsssii", $date, $category, $description, $amount, $source_type, $expense_source, $receipt_path, $id, $user_id);
+
+                    if ($stmt->execute()) {
+                        $response = ['success' => true, 'message' => 'Expense updated successfully'];
+                        logActivity($conn, $user_id, 'expense_edit', "Edited expense ID $id");
+                    } else {
+                        $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
+                    }
+                    $stmt->close();
                 } else {
-                    $response = ['success' => false, 'message' => 'Database error: ' . $conn->error];
+                    $response = ['success' => false, 'message' => 'Expense not found'];
                 }
-                $stmt->close();
             } else {
                 $response = ['success' => false, 'message' => 'Invalid data'];
             }
