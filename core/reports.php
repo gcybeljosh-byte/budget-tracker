@@ -40,19 +40,15 @@ include '../includes/header.php';
                         <label class="form-label small fw-bold text-secondary text-uppercase">Select Date/Month/Year</label>
                         <input type="month" class="form-control rounded-3" id="reportDateFilter">
                     </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm" id="generateReportBtn">
-                            <i class="fas fa-sync-alt me-2"></i>Generate
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" id="generateReportBtn" style="width: 42px; height: 42px;" title="Generate Report" data-bs-toggle="tooltip">
+                            <i class="fas fa-sync-alt"></i>
                         </button>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-success w-100 rounded-pill fw-bold shadow-sm" id="downloadPdfBtn">
-                            <i class="fas fa-file-export me-2"></i>Export PDF
+                        <button class="btn btn-success rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" id="downloadPdfBtn" style="width: 42px; height: 42px;" title="Export PDF" data-bs-toggle="tooltip">
+                            <i class="fas fa-file-export"></i>
                         </button>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-primary w-100 rounded-pill fw-bold shadow-sm" id="generateStatementBtn">
-                            <i class="fas fa-file-invoice me-2"></i>Statement
+                        <button class="btn btn-outline-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" id="generateStatementBtn" style="width: 42px; height: 42px;" title="Statement" data-bs-toggle="tooltip">
+                            <i class="fas fa-file-invoice"></i>
                         </button>
                     </div>
                 </div>
