@@ -19,27 +19,45 @@ if (empty($description)) {
     exit;
 }
 
-// Fetch user's categories for context
+// Use categories sent from frontend (actual dropdown options) + any from DB
 $categories = [];
-$res = $conn->query("SELECT name FROM categories WHERE user_id = $user_id");
-while ($row = $res->fetch_assoc()) $categories[] = $row['name'];
+
+// From request (the actual dropdown values — most reliable)
+if (!empty($data['categories']) && is_array($data['categories'])) {
+    $categories = array_values(array_filter($data['categories']));
+}
+
+// Supplement with DB categories if needed
+if (empty($categories)) {
+    $res = $conn->query("SELECT name FROM categories WHERE user_id = $user_id");
+    while ($row = $res->fetch_assoc()) $categories[] = $row['name'];
+}
+
+if (empty($categories)) {
+    echo json_encode(['success' => false, 'message' => 'No categories available']);
+    exit;
+}
 
 $aiHelper = new AiHelper($conn, $user_id);
 $prompt = "Based on the transaction description: '$description', and these available categories: " . implode(', ', $categories) . ". 
-Predict the most likely category. Return ONLY the category name and nothing else. If none fit well, return 'Other'.";
+Predict the most likely category. Return ONLY the exact category name from the list, nothing else. If none fit, return the closest match.";
 
 $prediction = $aiHelper->getResponse($prompt);
-$predictedCategory = trim(is_array($prediction) ? ($prediction['message'] ?? 'Other') : (string)$prediction);
+$predictedCategory = trim(is_array($prediction) ? ($prediction['message'] ?? '') : (string)$prediction);
 
-// Clean up prediction (sometimes AI adds extra text)
+// Match against known categories (case-insensitive)
+$matched = '';
 foreach ($categories as $cat) {
-    if (stripos($predictedCategory, $cat) !== false) {
-        $predictedCategory = $cat;
+    if (strcasecmp($predictedCategory, $cat) === 0 || stripos($predictedCategory, $cat) !== false) {
+        $matched = $cat;
         break;
     }
 }
 
+// If no match, just return what AI said (frontend will do its own matching)
+if (empty($matched)) $matched = $predictedCategory;
+
 echo json_encode([
     'success' => true,
-    'category' => $predictedCategory
+    'category' => $matched
 ]);

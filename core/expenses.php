@@ -992,6 +992,11 @@ include '../includes/header.php';
                     return;
                 }
 
+                // Grab actual dropdown options to send to API so it picks from the right list
+                const availableCategories = Array.from(categorySelect.options)
+                    .filter(opt => opt.value && opt.value !== 'ADD_NEW')
+                    .map(opt => opt.value);
+
                 showAiLoading();
                 predictionTimeout = setTimeout(() => {
                     fetch('<?php echo SITE_URL; ?>api/predict_category.php', {
@@ -1000,19 +1005,24 @@ include '../includes/header.php';
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                description: desc
+                                description: desc,
+                                categories: availableCategories
                             })
                         })
                         .then(r => r.json())
                         .then(data => {
                             if (data.success && data.category) {
                                 const options = Array.from(categorySelect.options);
-                                const match = options.find(opt => opt.value === data.category);
+                                // Case-insensitive match
+                                const match = options.find(opt =>
+                                    opt.value.toLowerCase() === data.category.toLowerCase() ||
+                                    opt.text.toLowerCase() === data.category.toLowerCase()
+                                );
                                 if (match) {
-                                    categorySelect.value = data.category;
+                                    categorySelect.value = match.value;
                                     categorySelect.classList.add('is-valid');
                                     setTimeout(() => categorySelect.classList.remove('is-valid'), 2000);
-                                    showAiSuggestion(data.category);
+                                    showAiSuggestion(match.value);
                                 } else {
                                     clearAiBadge();
                                 }
